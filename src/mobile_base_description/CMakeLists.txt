@@ -14,6 +14,7 @@ find_package(ament_cmake REQUIRED)
 install(DIRECTORY
   meshes
   urdf
+  config
   #controllers
   launch
   DESTINATION share/${PROJECT_NAME}
