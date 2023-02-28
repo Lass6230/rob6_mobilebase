@@ -39,6 +39,7 @@ def generate_launch_description():
         )
     )
     robot_description = {"robot_description": robot_description_config.toxml()}
+    
     robot_state_publisher_node = launch_ros.actions.Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',

@@ -16,6 +16,7 @@ install(DIRECTORY
   urdf
   config
   #controllers
+  world
   launch
   DESTINATION share/${PROJECT_NAME}
 )
