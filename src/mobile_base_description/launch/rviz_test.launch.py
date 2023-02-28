@@ -35,7 +35,7 @@ def generate_launch_description():
         os.path.join(
             get_package_share_directory("mobile_base_description"),
             "urdf",
-            "mobile_base.urdf.xacro",
+            "mobile_base.xacro",
         )
     )
     robot_description = {"robot_description": robot_description_config.toxml()}
@@ -67,7 +67,14 @@ def generate_launch_description():
         parameters=[robot_description,],
         arguments=['-d', LaunchConfiguration('rvizconfig')],
     )
-
+    robot_localization_node = launch_ros.actions.Node(
+       package='robot_localization',
+       executable='ekf_node',
+       name='ekf_filter_node',
+       output='screen',
+       parameters=[os.path.join(pkg_share, 'config/ekf.yaml'), {'use_sim_time': LaunchConfiguration('use_sim_time')}]
+)
+    
     return launch.LaunchDescription([
         launch.actions.DeclareLaunchArgument(name='gui', default_value='True',
                                             description='Flag to enable joint_state_publisher_gui'),
@@ -75,8 +82,16 @@ def generate_launch_description():
          #                                   description='Absolute path to robot urdf file'),
         launch.actions.DeclareLaunchArgument(name='rvizconfig', default_value=default_rviz_config_path,
                                             description='Absolute path to rviz config file'),
+        launch.actions.DeclareLaunchArgument(name='use_sim_time', default_value='False',
+                                            description='Flag to enable use_sim_time'),
         joint_state_publisher_node,
         joint_state_publisher_gui_node,
         robot_state_publisher_node,
-        rviz_node
+        rviz_node,
+        robot_localization_node
     ])
+
+
+
+# ros2 launch nav2_bringup navigation_launch.py params_file:=/home/lass6230/github/rob6_mobilebase/src/mobile_base_description/config/nav2_params.yaml
+# ros2 launch slam_toolbox online_async_launch.py use_sim_time:=false params_file:=/home/lass6230/github/rob6_mobilebase/src/mobile_base_description/config/config/slam_mapping.yaml
