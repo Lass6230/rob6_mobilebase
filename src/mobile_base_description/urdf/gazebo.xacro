@@ -3,7 +3,7 @@
 
   <gazebo>
     <plugin name='diff_drive' filename='libgazebo_ros_diff_drive.so'>
-      
+      <!--namspce can be used-->
 
       <!-- wheels -->
       <left_joint>left_wheel_joint</left_joint>
@@ -25,5 +25,10 @@
       <odometry_frame>odom</odometry_frame>
       <robot_base_frame>base_link</robot_base_frame>
     </plugin>
+  </gazebo>
+
+  <gazebo reference="base_link">
+        <mu1 value="0.001"/>
+        <mu2 value="0.001"/>
   </gazebo>
 </robot>
