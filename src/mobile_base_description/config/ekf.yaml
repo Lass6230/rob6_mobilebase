@@ -16,7 +16,7 @@ ekf_filter_node:
         publish_acceleration: true
 
 # Whether to broadcast the transformation over the /tf topic. Defaultsto true if unspecified.
-        publish_tf: true
+        publish_tf: true # husk at det kan fucke hvis dette bliver ogsp publish af den der afsender odometry msgs :)
 
 # 1. Set the map_frame, odom_frame, and base_link frames to the appropriate frame names for your system.
 #     1a. If your system does not have a map_frame, just remove it, and make sure "world_frame" is set to the value of odom_frame.
@@ -32,16 +32,16 @@ ekf_filter_node:
         base_link_frame: base_link  # Defaults to "base_link" ifunspecified
         world_frame: odom           # Defaults to the value ofodom_frame if unspecified
 
-        odom0: demo/odom
+        odom0: odom
         odom0_config: [true,  true,  true,
                        false, false, false,
                        false, false, false,
                        false, false, true,
                        false, false, false]
 
-        imu0: demo/imu
-        imu0_config: [false, false, false,
-                      true,  true,  true,
-                      false, false, false,
-                      false, false, false,
-                      false, false, false]
+        #imu0: demo/imu
+       # imu0_config: [false, false, false,
+         #             true,  true,  true,
+          #            false, false, false,
+           #           false, false, false,
+            #          false, false, false]
