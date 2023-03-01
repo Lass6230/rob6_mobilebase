@@ -3,7 +3,10 @@ from launch.substitutions import Command, LaunchConfiguration
 import launch_ros
 import os
 from ament_index_python.packages import get_package_share_directory
+from launch.actions import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 import xacro
+from launch_ros.actions import Node
 import yaml
 def load_file(package_name, file_path):
     package_path = get_package_share_directory(package_name)
@@ -30,6 +33,7 @@ def load_yaml(package_name, file_path):
 
 
 def generate_launch_description():
+    package_name='mobile_base_description' 
     pkg_share = launch_ros.substitutions.FindPackageShare(package='mobile_base_description').find('mobile_base_description')
     #default_model_path = os.path.join(pkg_share, 'urdf/mobile_base.urdf.xacro')
     default_rviz_config_path = os.path.join(pkg_share, 'config/urdf_config.rviz')
@@ -42,9 +46,11 @@ def generate_launch_description():
     )
     robot_description = {"robot_description": robot_description_config.toxml()}
     world_path=os.path.join(pkg_share, 'world/my_world.sdf')
+    
     robot_state_publisher_node = launch_ros.actions.Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
+        output='screen',
         parameters=[robot_description],
         #parameters=[{'robot_description': Command(['xacro ', LaunchConfiguration('model')])}]
     )
@@ -67,6 +73,17 @@ def generate_launch_description():
         arguments=['-entity', 'mobile_base', '-topic', 'robot_description'],
         output='screen'
     )
+    diff_drive_spawner = Node(
+        package="controller_manager",
+        executable="spawner.py",
+        arguments=["diff_cont"],
+    )
+
+    joint_broad_spawner = Node(
+        package="controller_manager",
+        executable="spawner.py",
+        arguments=["joint_broad"],
+    )
     robot_localization_node = launch_ros.actions.Node(
          package='robot_localization',
          executable='ekf_node',
@@ -74,6 +91,7 @@ def generate_launch_description():
          output='screen',
          parameters=[os.path.join(pkg_share, 'config/ekf.yaml'), {'use_sim_time': LaunchConfiguration('use_sim_time')}]
     )
+    
 
     return launch.LaunchDescription([
         launch.actions.DeclareLaunchArgument(name='gui', default_value='True',
@@ -85,10 +103,13 @@ def generate_launch_description():
         launch.actions.DeclareLaunchArgument(name='use_sim_time', default_value='True',
                                             description='Flag to enable use_sim_time'),
         
+        
         joint_state_publisher_node,
         robot_state_publisher_node,
         spawn_entity,
         robot_localization_node,
         rviz_node,
-        launch.actions.ExecuteProcess(cmd=['gazebo', '--verbose', '-s', 'libgazebo_ros_init.so', '-s', 'libgazebo_ros_factory.so', world_path], output='screen')
+        launch.actions.ExecuteProcess(cmd=['gazebo', '--verbose', '-s', 'libgazebo_ros_init.so', '-s', 'libgazebo_ros_factory.so', world_path], output='screen'),
+        joint_broad_spawner,
+        diff_drive_spawner
     ])

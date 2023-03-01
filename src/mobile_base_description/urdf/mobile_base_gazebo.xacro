@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="mobile_base">
-    <xacro:arg name="initial_positions_file" default="initial_positions.yaml" />
-
+    
     <!-- Import panda urdf file -->
     <xacro:include filename="$(find mobile_base_description)/urdf/mobile_base.urdf.xacro" />
 
      <!-- Import panda urdf file -->
     <xacro:include filename="$(find mobile_base_description)/urdf/base_footprint.xacro" />
 
-    
+    <xacro:include filename="$(find mobile_base_description)/urdf/ros2_control.xacro" />
     <xacro:include filename="$(find mobile_base_description)/urdf/gazebo.xacro" />
+    
     
 </robot>
