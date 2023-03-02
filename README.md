@@ -14,3 +14,5 @@ optional
 ```
 sudo apt install ros-galactic-turtlebot3*
 ```
+
+You will need this hardware interface for dynamixel motors https://github.com/dynamixel-community/dynamixel_hardware/tree/galactic
