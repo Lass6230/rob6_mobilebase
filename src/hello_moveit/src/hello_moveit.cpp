@@ -28,7 +28,7 @@ int main(int argc, char * argv[])
   using moveit::planning_interface::MoveGroupInterface;
   auto move_group_interface = MoveGroupInterface(node, "manipulator");
 
-  geometry_msgs::msg::PoseStamped current_pos = move_group_interface.getPoseTarget();
+  geometry_msgs::msg::PoseStamped current_pos = move_group_interface.getPoseTarget("link_4");
   //RCLCPP_ERROR(logger, current_pos);
   RCLCPP_INFO(logger, "Planning frame: %s", move_group_interface.getPlanningFrame().c_str());
   RCLCPP_INFO(logger, "End effector link: %s", move_group_interface.getEndEffectorLink().c_str());
@@ -36,8 +36,7 @@ int main(int argc, char * argv[])
   std::copy(move_group_interface.getJointModelGroupNames().begin(), move_group_interface.getJointModelGroupNames().end(),
           std::ostream_iterator<std::string>(std::cout, ", "));
   
-  const moveit::core::JointModelGroup* joint_model_group =
-      move_group_interface.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+  
 
   auto const target_pose = []{
     geometry_msgs::msg::Pose msg;
