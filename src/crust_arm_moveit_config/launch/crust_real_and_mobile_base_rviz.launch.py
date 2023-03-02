@@ -50,7 +50,7 @@ def generate_launch_description():
         os.path.join(
             get_package_share_directory("crust_arm_moveit_config"),
             "config",
-            "crust_arm_mobile_base_fake.xacro",
+            "crust_arm_mobile_base_real.xacro",
         )
     )
     robot_description = {"robot_description": robot_description_config.toxml()}
