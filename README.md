@@ -14,8 +14,6 @@ remember to change the ip address for the lidar and pc in the launch file
 
 '''
 sudo apt install ros-galactic-navigation2 ros-galactic-nav2-bringup ros-galactic-ros2-control ros-galactic-ros2-controllers ros-galactic-gazebo-ros2-control ros-galactic-gazebo-ros-pkgs ros-galactic-xacro ros-galactic-joint-state-publisher-gui
-
-
 '''
 
 
