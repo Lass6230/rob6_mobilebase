@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot name="crust_arm">
+    <link name="base_link">
+        <inertial>
+            <origin xyz="-0.00077543 -0.0011371 0.04167" rpy="0 0 0" />
+            <mass value="0.70106" />
+            <inertia ixx="0.0011971" ixy="-5.5315E-08" ixz="9.596E-08" iyy="0.0013838" iyz="-1.7418E-06" izz="0.0025267" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://crust_arm_description/meshes/base_link.STL" />
+            </geometry>
+            <material name="">
+                <color rgba="0.89804 0.91765 0.92941 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://crust_arm_description/meshes/base_link.STL" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="link_1">
+        <inertial>
+            <origin xyz="0.00034362 2.7088E-06 0.032412" rpy="0 0 0" />
+            <mass value="0.1159" />
+            <inertia ixx="5.2378E-05" ixy="2.3112E-09" ixz="-1.0628E-06" iyy="6.1382E-05" iyz="-1.6418E-09" izz="6.273E-05" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://crust_arm_description/meshes/link_1.STL" />
+            </geometry>
+            <material name="">
+                <color rgba="0.89804 0.91765 0.92941 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://crust_arm_description/meshes/link_1.STL" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="joint_1" type="revolute">
+        <origin xyz="0 0 0.059" rpy="0 0 0" />
+        <parent link="base_link" />
+        <child link="link_1" />
+        <axis xyz="0 0 1" />
+        <limit lower="-1.57" upper="1.57" effort="200" velocity="3" />
+    </joint>
+    <link name="link_2">
+        <inertial>
+            <origin xyz="-0.00096315 -0.16138 -0.00028433" rpy="0 0 0" />
+            <mass value="0.11516" />
+            <inertia ixx="8.1961E-05" ixy="-1.5264E-08" ixz="4.1398E-13" iyy="2.8324E-05" iyz="-8.8059E-07" izz="7.0335E-05" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://crust_arm_description/meshes/link_2.STL" />
+            </geometry>
+            <material name="">
+                <color rgba="0.89804 0.91765 0.92941 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://crust_arm_description/meshes/link_2.STL" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="joint_2" type="revolute">
+        <origin xyz="0.00315 0 0.0576" rpy="-1.5708 0 1.5708" />
+        <parent link="link_1" />
+        <child link="link_2" />
+        <axis xyz="0 0 1" />
+        <limit lower="-1.57" upper="1.8" effort="200" velocity="3" />
+    </joint>
+    <link name="link_3">
+        <inertial>
+            <origin xyz="-0.066271 -0.15219 1.5585E-05" rpy="0 0 0" />
+            <mass value="0.08822" />
+            <inertia ixx="6.3639E-05" ixy="-1.5265E-08" ixz="-4.1546E-12" iyy="1.8316E-05" iyz="-1.8274E-07" izz="5.5824E-05" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://crust_arm_description/meshes/link_3.STL" />
+            </geometry>
+            <material name="">
+                <color rgba="0.89804 0.91765 0.92941 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://crust_arm_description/meshes/link_3.STL" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="joint_3" type="revolute">
+        <origin xyz="0.067567 -0.20916 -0.003" rpy="0 0 0" />
+        <parent link="link_2" />
+        <child link="link_3" />
+        <axis xyz="0 0 1" />
+        <limit lower="-1.57" upper="1.57" effort="200" velocity="3" />
+    </joint>
+    <link name="link_4">
+        <inertial>
+            <origin xyz="1.1893E-14 -0.016617 4.5797E-16" rpy="0 0 0" />
+            <mass value="0.012313" />
+            <inertia ixx="4.0917E-06" ixy="-2.2315E-21" ixz="-5.2494E-22" iyy="3.3133E-06" iyz="-9.3524E-21" izz="2.0111E-06" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://crust_arm_description/meshes/link_4.STL" />
+            </geometry>
+            <material name="">
+                <color rgba="0.89804 0.91765 0.92941 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://crust_arm_description/meshes/link_4.STL" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="joint_4" type="revolute">
+        <origin xyz="-0.062567 -0.22194 -0.001675" rpy="0 0 0" />
+        <parent link="link_3" />
+        <child link="link_4" />
+        <axis xyz="0 0 1" />
+        <limit lower="-1.57" upper="1.57" effort="200" velocity="3" />
+    </joint>
+    <link name="tool_link">
+        <inertial>
+            <origin xyz="-6.9776E-09 -0.063948 -0.01183" rpy="0 0 0" />
+            <mass value="0.025052" />
+            <inertia ixx="9.7274E-06" ixy="3.2366E-12" ixz="1.409E-13" iyy="9.3307E-06" iyz="-2.7968E-06" izz="1.2097E-05" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://crust_arm_description/meshes/tool_link.STL" />
+            </geometry>
+            <material name="">
+                <color rgba="0.79216 0.81961 0.93333 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://crust_arm_description/meshes/tool_link.STL" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="joint_tool" type="fixed">
+        <origin xyz="0.040898 -0.1244 0" rpy="2.3562 1.5708 0" />
+        <parent link="link_4" />
+        <child link="tool_link" />
+        <axis xyz="0 0 0" />
+    </joint>
+    <transmission name="trans_joint_1">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="joint_1">
+            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="joint_1_motor">
+            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+    </transmission>
+    <transmission name="trans_joint_2">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="joint_2">
+            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="joint_2_motor">
+            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+    </transmission>
+    <transmission name="trans_joint_3">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="joint_3">
+            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="joint_3_motor">
+            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+    </transmission>
+    <transmission name="trans_joint_4">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="joint_4">
+            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="joint_4_motor">
+            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+    </transmission>
+    <gazebo>
+        <plugin name="gazebo_ros_control">
+            <robotNamespace>/</robotNamespace>
+        </plugin>
+    </gazebo>
+</robot>
+
