@@ -8,7 +8,8 @@ from launch_ros.actions import Node
 from launch.actions import ExecuteProcess
 from ament_index_python.packages import get_package_share_directory
 import xacro
-
+import launch_ros
+import launch
 
 def load_file(package_name, file_path):
     package_path = get_package_share_directory(package_name)
@@ -33,7 +34,8 @@ def load_yaml(package_name, file_path):
 
 
 def generate_launch_description():
-
+    pkg_share = launch_ros.substitutions.FindPackageShare(package='mobile_base_description').find('mobile_base_description')
+    
     # Command-line arguments
     tutorial_arg = DeclareLaunchArgument(
         "rviz_tutorial", default_value="False", description="Tutorial flag"
@@ -48,13 +50,13 @@ def generate_launch_description():
         os.path.join(
             get_package_share_directory("crust_arm_moveit_config"),
             "config",
-            "crust_fake.urdf.xacro",
+            "crust_arm_mobile_base_real.xacro",
         )
     )
     robot_description = {"robot_description": robot_description_config.toxml()}
 
     robot_description_semantic_config = load_file(
-        "crust_arm_moveit_config", "config/crust_arm.srdf"
+        "crust_arm_moveit_config", "config/crust_arm_mobile.srdf"
     )
     robot_description_semantic = {
         "robot_description_semantic": robot_description_semantic_config
@@ -103,9 +105,9 @@ def generate_launch_description():
         
     }
     # Load  ExecuteTaskSolutionCapability so we can execute found solutions in simulation
-    move_group_capabilities = {
-        "capabilities": "move_group/ExecuteTaskSolutionCapability"
-    }
+   # move_group_capabilities = {
+    #    "capabilities": "move_group/ExecuteTaskSolutionCapability"
+    #}
 
     # Start the actual move_group node/action server
     run_move_group_node = Node(
@@ -120,8 +122,7 @@ def generate_launch_description():
             trajectory_execution,
             moveit_controllers,
             planning_scene_monitor_parameters,
-            
-            move_group_capabilities,
+            #move_group_capabilities,
         ],
     )
 
@@ -160,13 +161,13 @@ def generate_launch_description():
     )
 
     # Static TF
-    static_tf = Node(
-        package="tf2_ros",
-        executable="static_transform_publisher",
-        name="static_transform_publisher",
-        output="log",
-        arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "base_link"],
-    )
+    #static_tf = Node(
+    #    package="tf2_ros",
+    #    executable="static_transform_publisher",
+    #    name="static_transform_publisher",
+    #    output="log",
+    #    arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "base_link"],
+    #)
 
     # Publish TF
     robot_state_publisher = Node(
@@ -217,18 +218,37 @@ def generate_launch_description():
         output="screen",
         condition=IfCondition(db_config)
     )
+    robot_localization_node = launch_ros.actions.Node(
+       package='robot_localization',
+       executable='ekf_node',
+       name='ekf_filter_node',
+       output='screen',
+       parameters=[os.path.join(pkg_share, 'config/ekf.yaml'), {'use_sim_time': LaunchConfiguration('use_sim_time')}]
+    )
+    joint_state_publisher_node = launch_ros.actions.Node(
+        package='joint_state_publisher',
+        executable='joint_state_publisher',
+        name='joint_state_publisher',
+        #condition=launch.conditions.UnlessCondition(LaunchConfiguration('gui'))
+    )
+    
 
     return LaunchDescription(
         [
+            launch.actions.DeclareLaunchArgument(name='use_sim_time', default_value='False',
+                                            description='Flag to enable use_sim_time'),
             tutorial_arg,
             db_arg,
-            rviz_node,
-            rviz_node_tutorial,
-            static_tf,
+            #rviz_node,
+            #rviz_node_tutorial,
+            #static_tf,
+            joint_state_publisher_node,
             robot_state_publisher,
             run_move_group_node,
             ros2_control_node,
             mongodb_server_node,
-        ]
+            robot_localization_node,
+            
+        ]   
         + load_controllers
     )

@@ -11,17 +11,24 @@ find_package(moveit_ros_planning_interface REQUIRED)
 find_package(rclcpp REQUIRED)
 
 add_executable(hello_moveit src/hello_moveit.cpp)
+add_executable(hello2 src/hello2.cpp)
 target_include_directories(hello_moveit PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 target_compile_features(hello_moveit PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+target_compile_features(hello2 PUBLIC c_std_99 cxx_std_17)
 ament_target_dependencies(
   hello_moveit
   "moveit_ros_planning_interface"
   "rclcpp"
 )
+ament_target_dependencies(
+  hello2
+  "moveit_ros_planning_interface"
+  "rclcpp"
+)
 
-install(TARGETS hello_moveit
+install(TARGETS hello_moveit hello2
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
