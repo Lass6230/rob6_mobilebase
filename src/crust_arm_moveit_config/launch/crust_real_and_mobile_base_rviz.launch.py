@@ -161,13 +161,13 @@ def generate_launch_description():
     )
 
     # Static TF
-    static_tf = Node(
-        package="tf2_ros",
-        executable="static_transform_publisher",
-        name="static_transform_publisher",
-        output="log",
-        arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "base_link"],
-    )
+    #static_tf = Node(
+    #    package="tf2_ros",
+    #    executable="static_transform_publisher",
+    #    name="static_transform_publisher",
+    #    output="log",
+    #    arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "base_link"],
+    #)
 
     # Publish TF
     robot_state_publisher = Node(
@@ -225,7 +225,12 @@ def generate_launch_description():
        output='screen',
        parameters=[os.path.join(pkg_share, 'config/ekf.yaml'), {'use_sim_time': LaunchConfiguration('use_sim_time')}]
     )
-
+    joint_state_publisher_node = launch_ros.actions.Node(
+        package='joint_state_publisher',
+        executable='joint_state_publisher',
+        name='joint_state_publisher',
+        #condition=launch.conditions.UnlessCondition(LaunchConfiguration('gui'))
+    )
     
 
     return LaunchDescription(
@@ -236,7 +241,8 @@ def generate_launch_description():
             db_arg,
             rviz_node,
             rviz_node_tutorial,
-            static_tf,
+            #static_tf,
+            joint_state_publisher_node,
             robot_state_publisher,
             run_move_group_node,
             ros2_control_node,
