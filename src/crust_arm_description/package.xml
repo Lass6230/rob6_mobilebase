@@ -26,7 +26,8 @@
   <depend>gazebo_ros2_control</depend>
   <export>
     <build_type>ament_cmake</build_type>
-      <gazebo_ros gazebo_model_path = "/home/lass6230/github/rob6_crust/install/crust_arm_description/share/"/>
+      <gazebo_ros gazebo_model_path = "$(find install/crust_arm_description/share/)"/>
+      <!--<gazebo_ros gazebo_model_path = "/home/lass6230/github/rob6_crust/install/crust_arm_description/share/"/>-->
   
   </export>
 </package>

@@ -22,6 +22,7 @@
   <export>
     <build_type>ament_cmake</build_type>
     <!--$(find mobile_base_description)-->
-    <gazebo_ros gazebo_model_path = "/home/lass6230/github/rob6_mobile_base/install/mobile_base_description/share/"/>
+    <gazebo_ros gazebo_model_path = "$(find install/mobile_base_description/share/)"/>
+    <!--<gazebo_ros gazebo_model_path = "/home/lass6230/github/rob6_mobile_base/install/mobile_base_description/share/"/>-->
   </export>
 </package>
