@@ -204,7 +204,7 @@
       xyz="0 0 0" />
   </joint>
   <link
-    name="laser">
+    name="scan">
     <inertial>
       <origin
         xyz="-0.000537849970747406 3.24297391453357E-05 -0.0304099645492067"
@@ -244,7 +244,7 @@
     </collision>
   </link>
   <joint
-    name="laser_joint"
+    name="scan_joint"
     type="fixed">
     <origin
       xyz="-0.0024966 0.13302 -0.025212"
@@ -252,7 +252,7 @@
     <parent
       link="base_link" />
     <child
-      link="laser" />
+      link="scan" />
     <axis
       xyz="0 0 0" />
   </joint>
