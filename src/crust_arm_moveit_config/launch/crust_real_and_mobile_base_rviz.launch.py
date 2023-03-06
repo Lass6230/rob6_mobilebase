@@ -242,7 +242,7 @@ def generate_launch_description():
             rviz_node,
             rviz_node_tutorial,
             #static_tf,
-            joint_state_publisher_node,
+            #joint_state_publisher_node,
             robot_state_publisher,
             run_move_group_node,
             ros2_control_node,
