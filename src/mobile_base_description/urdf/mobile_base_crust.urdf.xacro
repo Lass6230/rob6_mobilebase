@@ -257,7 +257,7 @@
       xyz="0 0 0" />
   </joint>
   <link
-    name="crust_base_link">
+    name="crust_base_link1">
     <inertial>
       <origin
         xyz="0 0 0"
@@ -297,7 +297,7 @@
     </collision>
   </link>
   <joint
-    name="crust_base_joint"
+    name="crust_base_joint1"
     type="fixed">
     <origin
       xyz="0.12075 0.0025 0.066"
@@ -305,7 +305,7 @@
     <parent
       link="base_link" />
     <child
-      link="crust_base_link" />
+      link="crust_base_link1" />
     <axis
       xyz="0 0 0" />
   </joint>
