@@ -248,7 +248,7 @@ def generate_launch_description():
             run_move_group_node,
             ros2_control_node,
             mongodb_server_node,
-            robot_localization_node,
+            #robot_localization_node,
             
         ]   
         + load_controllers
