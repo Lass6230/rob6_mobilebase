@@ -218,13 +218,13 @@ def generate_launch_description():
         output="screen",
         condition=IfCondition(db_config)
     )
-    #robot_localization_node = launch_ros.actions.Node(
-    #   package='robot_localization',
-    #   executable='ekf_node',
-    #   name='ekf_filter_node',
-    #   output='screen',
-    #   parameters=[os.path.join(pkg_share, 'config/ekf.yaml'), {'use_sim_time': LaunchConfiguration('use_sim_time')}]
-    #)
+    robot_localization_node = launch_ros.actions.Node(
+       package='robot_localization',
+       executable='ekf_node',
+       name='ekf_filter_node',
+       output='screen',
+       parameters=[os.path.join(pkg_share, 'config/ekf.yaml'), {'use_sim_time': LaunchConfiguration('use_sim_time')}]
+    )
     joint_state_publisher_node = launch_ros.actions.Node(
         package='joint_state_publisher',
         executable='joint_state_publisher',
@@ -236,7 +236,7 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
-            launch.actions.DeclareLaunchArgument(name='use_sim_time', default_value='False',
+            launch.actions.DeclareLaunchArgument(name='use_sim_time', default_value='false',
                                             description='Flag to enable use_sim_time'),
             tutorial_arg,
             db_arg,
@@ -248,7 +248,7 @@ def generate_launch_description():
             run_move_group_node,
             ros2_control_node,
             mongodb_server_node,
-            #robot_localization_node,
+            robot_localization_node,
             
         ]   
         + load_controllers
