@@ -3,9 +3,9 @@
      Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
 <robot
-  name="Crust crawler version for urdf of crustcrawler new frame og reslsense">
+  name="crust_arm_mobile">
   <link
-    name="base_link">
+    name="crust_base_link">
     <inertial>
       <origin
         xyz="-0.0011371 0.00077543 0.04167"
@@ -26,7 +26,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://Crust crawler version for urdf of crustcrawler new frame og reslsense/meshes/base_link.STL" />
+          filename="file://$(find crust_arm_description)/meshes/base_link.STL" />
       </geometry>
       <material
         name="">
@@ -40,7 +40,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://Crust crawler version for urdf of crustcrawler new frame og reslsense/meshes/base_link.STL" />
+          filename="file://$(find crust_arm_description)/meshes/base_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -66,7 +66,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://Crust crawler version for urdf of crustcrawler new frame og reslsense/meshes/link_1.STL" />
+          filename="file://$(find crust_arm_description)/meshes/link_1.STL" />
       </geometry>
       <material
         name="">
@@ -80,7 +80,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://Crust crawler version for urdf of crustcrawler new frame og reslsense/meshes/link_1.STL" />
+          filename="file://$(find crust_arm_description)/meshes/link_1.STL" />
       </geometry>
     </collision>
   </link>
@@ -91,7 +91,7 @@
       xyz="0 0 0.059"
       rpy="0 0 0" />
     <parent
-      link="base_link" />
+      link="crust_base_link" />
     <child
       link="link_1" />
     <axis
@@ -124,7 +124,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://Crust crawler version for urdf of crustcrawler new frame og reslsense/meshes/link_2.STL" />
+          filename="file://$(find crust_arm_description)/meshes/link_2.STL" />
       </geometry>
       <material
         name="">
@@ -138,7 +138,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://Crust crawler version for urdf of crustcrawler new frame og reslsense/meshes/link_2.STL" />
+          filename="file://$(find crust_arm_description)/meshes/link_2.STL" />
       </geometry>
     </collision>
   </link>
@@ -182,7 +182,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://Crust crawler version for urdf of crustcrawler new frame og reslsense/meshes/link_3.STL" />
+          filename="file://$(find crust_arm_description)/meshes/link_3.STL" />
       </geometry>
       <material
         name="">
@@ -196,7 +196,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://Crust crawler version for urdf of crustcrawler new frame og reslsense/meshes/link_3.STL" />
+          filename="file://$(find crust_arm_description)/meshes/link_3.STL" />
       </geometry>
     </collision>
   </link>
@@ -240,7 +240,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://Crust crawler version for urdf of crustcrawler new frame og reslsense/meshes/link_4.STL" />
+          filename="file://$(find crust_arm_description)/meshes/link_4.STL" />
       </geometry>
       <material
         name="">
@@ -254,7 +254,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://Crust crawler version for urdf of crustcrawler new frame og reslsense/meshes/link_4.STL" />
+          filename="file://$(find crust_arm_description)/meshes/link_4.STL" />
       </geometry>
     </collision>
   </link>
@@ -298,7 +298,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://Crust crawler version for urdf of crustcrawler new frame og reslsense/meshes/tool_link.STL" />
+          filename="file://$(find crust_arm_description)/meshes/tool_link.STL" />
       </geometry>
       <material
         name="">
@@ -312,7 +312,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://Crust crawler version for urdf of crustcrawler new frame og reslsense/meshes/tool_link.STL" />
+          filename="file://$(find crust_arm_description)/meshes/tool_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -329,7 +329,7 @@
     <axis
       xyz="0 0 0" />
   </joint>
-  <link
+  <!--<link
     name="realsense_link">
     <inertial>
       <origin
@@ -351,7 +351,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://Crust crawler version for urdf of crustcrawler new frame og reslsense/meshes/realsense_link.STL" />
+          filename="file://$(find crust_arm_description)/meshes/realsense_link.STL" />
       </geometry>
       <material
         name="">
@@ -365,7 +365,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://Crust crawler version for urdf of crustcrawler new frame og reslsense/meshes/realsense_link.STL" />
+          filename="file://$(find crust_arm_description)/meshes/realsense_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -381,5 +381,5 @@
       link="realsense_link" />
     <axis
       xyz="0 0 0" />
-  </joint>
+  </joint>-->
 </robot>

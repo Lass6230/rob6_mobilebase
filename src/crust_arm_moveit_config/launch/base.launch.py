@@ -54,20 +54,24 @@ def generate_launch_description():
    
 
     # RViz
+    headless_mode = LaunchConfiguration("headless")
     rviz_base = os.path.join(get_package_share_directory("crust_arm_moveit_config"), "launch")
+    rviz_full_config = os.path.join(rviz_base, "moveit.rviz")
     rviz_empty_config = os.path.join(rviz_base, "moveit_empty.rviz")
     rviz_node = Node(
         package="rviz2",
         executable="rviz2",
         name="rviz2",
         output="log",
-        #arguments=["-d", rviz_empty_config],
+        arguments=["-d", rviz_empty_config],
         parameters=[
             robot_description,
             
         ],
         
+        condition=UnlessCondition(headless_mode),
     )
+    
     
 
     
@@ -99,8 +103,10 @@ def generate_launch_description():
     
 
     return LaunchDescription(
-        [
+        [   
+            
             headless,
+            #rviz_node_tutorial,
             rviz_node,
             
             #static_tf,

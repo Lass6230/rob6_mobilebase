@@ -4,19 +4,7 @@
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
 <robot
   name="crust_arm_mobile">
-  <joint
-    name="crust_base_joint"
-    type="fixed">
-    <origin
-      xyz="0 0 0"
-      rpy="0 0 0" />
-    <parent
-      link="crust_base_link1" />
-    <child
-      link="crust_base_link" />
-    <axis
-      xyz="0 0 0" />
-  </joint>
+  
 
   <link
     name="crust_base_link">
@@ -40,7 +28,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="file://$(find crust_arm_description)/meshes/base_link.STL" />
+          filename="file://$(find crust_arm_description)/meshes2/base_link.STL" />
       </geometry>
       <material
         name="">

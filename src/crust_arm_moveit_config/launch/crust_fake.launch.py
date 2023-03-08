@@ -35,9 +35,12 @@ def load_yaml(package_name, file_path):
 def generate_launch_description():
 
     # Command-line arguments
-    tutorial_arg = DeclareLaunchArgument(
-        "rviz_tutorial", default_value="False", description="Tutorial flag"
+    headless = DeclareLaunchArgument(
+        "headless", default_value="false", description="run headless: default false"
     )
+    headless_mode = LaunchConfiguration("headless")
+
+    
 
     db_arg = DeclareLaunchArgument(
         "db", default_value="False", description="Database flag"
@@ -48,13 +51,13 @@ def generate_launch_description():
         os.path.join(
             get_package_share_directory("crust_arm_moveit_config"),
             "config",
-            "crust_fake.urdf.xacro",
+            "crust_fake.xacro",
         )
     )
     robot_description = {"robot_description": robot_description_config.toxml()}
 
     robot_description_semantic_config = load_file(
-        "crust_arm_moveit_config", "config/crust_arm.srdf"
+        "crust_arm_moveit_config", "config/crust_arm_mobile.srdf"
     )
     robot_description_semantic = {
         "robot_description_semantic": robot_description_semantic_config
@@ -126,7 +129,7 @@ def generate_launch_description():
     )
 
     # RViz
-    tutorial_mode = LaunchConfiguration("rviz_tutorial")
+    
     rviz_base = os.path.join(get_package_share_directory("crust_arm_moveit_config"), "launch")
     rviz_full_config = os.path.join(rviz_base, "moveit.rviz")
     rviz_empty_config = os.path.join(rviz_base, "moveit_empty.rviz")
@@ -142,22 +145,9 @@ def generate_launch_description():
             ompl_planning_pipeline_config,
             kinematics_yaml,
         ],
-        condition=IfCondition(tutorial_mode),
+        condition=UnlessCondition(headless_mode),
     )
-    rviz_node = Node(
-        package="rviz2",
-        executable="rviz2",
-        name="rviz2",
-        output="log",
-        arguments=["-d", rviz_full_config],
-        parameters=[
-            robot_description,
-            robot_description_semantic,
-            ompl_planning_pipeline_config,
-            kinematics_yaml,
-        ],
-        condition=UnlessCondition(tutorial_mode),
-    )
+    
 
     # Static TF
     static_tf = Node(
@@ -165,7 +155,7 @@ def generate_launch_description():
         executable="static_transform_publisher",
         name="static_transform_publisher",
         output="log",
-        arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "base_link"],
+        arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "crust_base_link"],
     )
 
     # Publish TF
@@ -220,9 +210,9 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
-            tutorial_arg,
+            headless,
             db_arg,
-            rviz_node,
+            #rviz_node,
             rviz_node_tutorial,
             static_tf,
             robot_state_publisher,
