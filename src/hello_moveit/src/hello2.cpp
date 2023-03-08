@@ -15,6 +15,8 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
 
+#include <stdio.h>
+
 
 //#include <moveit_visual_tools/moveit_visual_tools.h>
 
@@ -42,6 +44,16 @@ int main(int argc, char * argv[])
     // We can get a list of all the groups in the robot:
     RCLCPP_INFO(LOGGER, "Available Planning Groups:");
     std::copy(move_group.getJointModelGroupNames().begin(), move_group.getJointModelGroupNames().end(),std::ostream_iterator<std::string>(std::cout, ", "));
+
+    //Here under we can set the tolerance for pose movement and joint movement
+    //move_group.setGoalOrientationTolerance();
+    //move_group.setGoalOrientationTolerance();
+    //move_group.setGoalPositionTolerance();
+
+   
+    RCLCPP_INFO(LOGGER,"planing frame: %s",move_group.getPlanningFrame().c_str());
+    move_group.setPoseReferenceFrame("crust_base_link");
+    RCLCPP_INFO(LOGGER,"new planing frame: %s",move_group.getPoseReferenceFrame().c_str());
 
     geometry_msgs::msg::Pose end_pose;
     end_pose = move_group.getCurrentPose().pose;
@@ -95,27 +107,55 @@ int main(int argc, char * argv[])
     }
 
     // test of  move realative
-    std::vector<double> robot_position;
-    geometry_msgs::msg::Pose target_pose3;
-    target_pose3 = move_group.getCurrentPose().pose;
-    target_pose3.position.x  += 0.05;
+    //current_state = move_group.getCurrentState(10);
+    //std::vector<double> robot_position;
+    //geometry_msgs::msg::Pose target_pose3;
+    //target_pose3 = move_group.getCurrentPose().pose;
+    //RCLCPP_INFO(LOGGER,"x: %f", target_pose3.position.x);
+    //RCLCPP_INFO(LOGGER,"y: %f", target_pose3.position.y);
+    //RCLCPP_INFO(LOGGER,"z: %f", target_pose3.position.z);
+    //target_pose3.position.x  += 0.05;
     //target_pose3.position.y -= 0.1;
-    move_group.setPoseTarget(target_pose3);
-    success = static_cast<bool>(move_group.plan(my_plan));
+    //move_group.setPoseTarget(target_pose3);
+    //success = static_cast<bool>(move_group.plan(my_plan));
     
-    RCLCPP_INFO(LOGGER, "Relative movement plan 1 (relative pose goal) %s", success ? "" : "FAILED");
+   // RCLCPP_INFO(LOGGER, "Relative movement plan 1 (relative pose goal) %s", success ? "" : "FAILED");
+    //if(success == true){
+    //    move_group.move();
+    //}
+
+    // move_group.setPoseTarget(end_pose);
+    // success = static_cast<bool>(move_group.plan(my_plan));
+    
+    // RCLCPP_INFO(LOGGER, "Relative movement plan 1 (end pose goal) %s", success ? "" : "FAILED");
+    // if(success == true){
+    //     move_group.move();
+    // }
+
+
+    //pack robot down
+    current_state = move_group.getCurrentState(10);
+    std::vector<double> joint_pos_pack_down_robot;
+    //current_state->copyJointGroupPositions(joint_model_group, joint_pos_pack_down_robot);
+    
+    joint_pos_pack_down_robot[0] = 0.0;
+    joint_pos_pack_down_robot[1] = -1.5;
+    joint_pos_pack_down_robot[2] = 0.1;
+    joint_pos_pack_down_robot[3] = 1.5;
+    move_group.setJointValueTarget(joint_pos_pack_down_robot);
+
+    move_group.setMaxVelocityScalingFactor(0.05);
+    move_group.setMaxAccelerationScalingFactor(0.05);
+    success = static_cast<bool>(move_group.plan(my_plan));
+
+    
+    RCLCPP_INFO(LOGGER, "Pack down robot %s", success ? "" : "FAILED");
+
     if(success == true){
         move_group.move();
     }
 
-    move_group.setPoseTarget(end_pose);
-    success = static_cast<bool>(move_group.plan(my_plan));
-    
-    RCLCPP_INFO(LOGGER, "Relative movement plan 1 (end pose goal) %s", success ? "" : "FAILED");
-    if(success == true){
-        move_group.move();
-    }
-
+    // end pack robot down
 
     rclcpp::shutdown();
     return 0;
