@@ -12,7 +12,7 @@ slam_toolbox:
     # ROS Parameters
     odom_frame: odom
     map_frame: map
-    base_frame: base_link # base_footprint
+    base_frame: base_footprint # base_footprint
     scan_topic: /scan
     mode: mapping #localization
 
@@ -26,8 +26,8 @@ slam_toolbox:
     debug_logging: false
     throttle_scans: 1
     transform_publish_period: 0.02 #if 0 never publishes odometry
-    map_update_interval: 5.0
-    resolution: 0.01 #0.05
+    map_update_interval: 3.0
+    resolution: 0.02 #0.05
     max_laser_range: 20.0 #for rastering images
     minimum_time_interval: 0.5
     transform_timeout: 0.2
