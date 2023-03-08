@@ -105,9 +105,9 @@ def generate_launch_description():
         
     }
     # Load  ExecuteTaskSolutionCapability so we can execute found solutions in simulation
-   # move_group_capabilities = {
-    #    "capabilities": "move_group/ExecuteTaskSolutionCapability"
-    #}
+    move_group_capabilities = {
+        "capabilities": "move_group/ExecuteTaskSolutionCapability"
+    }
 
     # Start the actual move_group node/action server
     run_move_group_node = Node(
@@ -122,7 +122,7 @@ def generate_launch_description():
             trajectory_execution,
             moveit_controllers,
             planning_scene_monitor_parameters,
-            #move_group_capabilities,
+            move_group_capabilities,
         ],
     )
 
