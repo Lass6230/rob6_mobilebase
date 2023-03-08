@@ -7,9 +7,31 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+#find_package(chrono REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(nav_msgs REQUIRED)
+
+
+
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
+
+add_executable(odom_rebroadcaster src/odomZOH.cpp)
+ament_target_dependencies(
+  odom_rebroadcaster
+  rclcpp
+  #chrono
+  tf2
+  tf2_ros
+  nav_msgs
+)
+
+install(TARGETS
+  odom_rebroadcaster
+  DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY
   meshes
