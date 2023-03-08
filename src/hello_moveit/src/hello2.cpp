@@ -55,8 +55,8 @@ int main(int argc, char * argv[])
     move_group.setPoseReferenceFrame("crust_base_link");
     RCLCPP_INFO(LOGGER,"new planing frame: %s",move_group.getPoseReferenceFrame().c_str());
 
-    geometry_msgs::msg::Pose end_pose;
-    end_pose = move_group.getCurrentPose().pose;
+    geometry_msgs::msg::PoseStamped end_pose;
+    end_pose = move_group.getCurrentPose();
 
     geometry_msgs::msg::Pose target_pose1;
     target_pose1.orientation.w = 1.0;
@@ -107,22 +107,22 @@ int main(int argc, char * argv[])
     }
 
     // test of  move realative
-    //current_state = move_group.getCurrentState(10);
-    //std::vector<double> robot_position;
-    //geometry_msgs::msg::Pose target_pose3;
-    //target_pose3 = move_group.getCurrentPose().pose;
-    //RCLCPP_INFO(LOGGER,"x: %f", target_pose3.position.x);
-    //RCLCPP_INFO(LOGGER,"y: %f", target_pose3.position.y);
-    //RCLCPP_INFO(LOGGER,"z: %f", target_pose3.position.z);
-    //target_pose3.position.x  += 0.05;
-    //target_pose3.position.y -= 0.1;
-    //move_group.setPoseTarget(target_pose3);
-    //success = static_cast<bool>(move_group.plan(my_plan));
     
-   // RCLCPP_INFO(LOGGER, "Relative movement plan 1 (relative pose goal) %s", success ? "" : "FAILED");
-    //if(success == true){
-    //    move_group.move();
-    //}
+    std::vector<double> robot_position;
+    geometry_msgs::msg::PoseStamped target_pose3;
+    target_pose3 = move_group.getCurrentPose();
+    RCLCPP_INFO(LOGGER,"x: %f", target_pose3.pose.position.x);
+    RCLCPP_INFO(LOGGER,"y: %f", target_pose3.pose.position.y);
+    RCLCPP_INFO(LOGGER,"z: %f", target_pose3.pose.position.z);
+    target_pose3.pose.position.x  += 0.05;
+    target_pose3.pose.position.y -= 0.1;
+    move_group.setPoseTarget(target_pose3);
+    success = static_cast<bool>(move_group.plan(my_plan));
+    
+   RCLCPP_INFO(LOGGER, "Relative movement plan 1 (relative pose goal) %s", success ? "" : "FAILED");
+    if(success == true){
+       move_group.move();
+    }
 
     // move_group.setPoseTarget(end_pose);
     // success = static_cast<bool>(move_group.plan(my_plan));
