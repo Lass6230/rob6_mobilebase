@@ -7,6 +7,8 @@
 class OdomToTfNode : public rclcpp::Node
 {
 public:
+
+  bool publishing_odometry = false;
   OdomToTfNode()
   : Node("odom_to_tf"), tf_broadcaster_(this)
   {
@@ -22,7 +24,8 @@ private:
   {
     // Store the latest odometry message
     odom_ = msg;
-    std::cout << "odom_callback\n";
+    std::cout << "new odom!\n";
+    publishing_odometry = false;
   }
 
   void tf_callback()
@@ -30,7 +33,12 @@ private:
     
     if (odom_)
     {
-      std::cout << "publishing odom\n";
+      if(!publishing_odometry)
+      {
+        std::cout << "publishing old odom\n";
+        publishing_odometry = true;
+      }
+      
       
       
       // Create a transform from the odometry message
