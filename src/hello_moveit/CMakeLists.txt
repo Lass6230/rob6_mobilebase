@@ -12,6 +12,7 @@ find_package(rclcpp REQUIRED)
 
 add_executable(hello_moveit src/hello_moveit.cpp)
 add_executable(hello2 src/hello2.cpp)
+add_executable(hello3 src/hello3.cpp)
 target_include_directories(hello_moveit PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
@@ -27,9 +28,16 @@ ament_target_dependencies(
   "moveit_ros_planning_interface"
   "rclcpp"
 )
+ament_target_dependencies(
+  hello3
+  "moveit_ros_planning_interface"
+  "rclcpp"
+)
 
-install(TARGETS hello_moveit hello2
+install(TARGETS hello_moveit hello2 hello3
   DESTINATION lib/${PROJECT_NAME})
+
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

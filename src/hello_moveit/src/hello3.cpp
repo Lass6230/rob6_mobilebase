@@ -30,7 +30,7 @@ int main(int argc, char * argv[])
     executor.add_node(move_group_node);
     std::thread([&executor]() { executor.spin(); }).detach();
     
-    static const std::string PLANNING_GROUP = "manipulator";
+    static const std::string PLANNING_GROUP = "arm_group";
     moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
     moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
     const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
@@ -52,40 +52,32 @@ int main(int argc, char * argv[])
 
    
     RCLCPP_INFO(LOGGER,"planing frame: %s",move_group.getPlanningFrame().c_str());
-    move_group.setPoseReferenceFrame("crust_base_link");
+    move_group.setPoseReferenceFrame("base_link");
     RCLCPP_INFO(LOGGER,"new planing frame: %s",move_group.getPoseReferenceFrame().c_str());
 
-    geometry_msgs::msg::PoseStamped end_pose;
-    end_pose = move_group.getCurrentPose();
-    RCLCPP_INFO(LOGGER,"x: %f", end_pose.pose.position.x);
-    RCLCPP_INFO(LOGGER,"y: %f", end_pose.pose.position.y);
-    RCLCPP_INFO(LOGGER,"z: %f", end_pose.pose.position.z);
-    RCLCPP_INFO(LOGGER,"rot x: %f", end_pose.pose.orientation.x);
-    RCLCPP_INFO(LOGGER,"rot y: %f", end_pose.pose.orientation.y);
-    RCLCPP_INFO(LOGGER,"rot z: %f", end_pose.pose.orientation.z);
-    RCLCPP_INFO(LOGGER,"rot w: %f", end_pose.pose.orientation.w);
-    RCLCPP_INFO(LOGGER,end_pose.header.frame_id.c_str());
+    // geometry_msgs::msg::PoseStamped end_pose;
+    // end_pose = move_group.getCurrentPose();
 
-    // geometry_msgs::msg::Pose target_pose1;
-    // target_pose1.orientation.w = 1.0;
-    // target_pose1.position.x = 0.1;
-    // target_pose1.position.y = -0.2;
-    // target_pose1.position.z = 0.5;
-    // move_group.setPoseTarget(target_pose1);
+    geometry_msgs::msg::Pose target_pose1;
+    target_pose1.orientation.w = 1.0;
+    target_pose1.position.x = 0.1;
+    target_pose1.position.y = -0.2;
+    target_pose1.position.z = 0.2;
+    move_group.setPoseTarget(target_pose1);
 
     // we hear the planner if the plan is possible?
     moveit::planning_interface::MoveGroupInterface::Plan my_plan;
     bool success;
     //moveit::core::MoveItErrorCode::SUCCESS suc;
     // bool success = (move_group.plan(my_plan) == suc);
-    // bool success = static_cast<bool>(move_group.plan(my_plan));
+    success = static_cast<bool>(move_group.plan(my_plan));
     
-    // RCLCPP_INFO(LOGGER, "Visualizing plan 1 (pose goal) %s", success ? "" : "FAILED");
-    // if(success == true){
-    //     //move_group.move();
-    //     move_group.execute(my_plan);
+    RCLCPP_INFO(LOGGER, "Visualizing plan 1 (pose goal) %s", success ? "" : "FAILED");
+    if(success == true){
+        //move_group.move();
+        move_group.execute(my_plan);
 
-    // }
+    }
 
     moveit::core::RobotStatePtr current_state = move_group.getCurrentState(10);
     //
@@ -117,7 +109,7 @@ int main(int argc, char * argv[])
         move_group.execute(my_plan);
         RCLCPP_INFO(LOGGER, "movement statement plan2 done");
     }
-    RCLCPP_INFO(LOGGER, "test1");
+
     // test of  move realative
     
 //     std::vector<double> robot_position;
@@ -135,45 +127,30 @@ int main(int argc, char * argv[])
 //     if(success == true){
 //        move_group.move();
 //     }
-    //move_group.setGoalOrientationTolerance(0.005);
-    //move_group.setGoalOrientationTolerance(0.005);
-    //end_pose.header.frame_id = "tool_link";
-    move_group.setStartState(*move_group.getCurrentState());
-    geometry_msgs::msg::Pose another_pose;
-  another_pose.orientation.w = 0;
-  another_pose.orientation.x = -1.0;
-  another_pose.position.x = 0.2;
-  another_pose.position.y = 0.0;
-  another_pose.position.z = 0.2;
-  move_group.setPoseTarget(another_pose);
-    //move_group.setPoseTarget(end_pose,"tool_link");
-    success = static_cast<bool>(move_group.plan(my_plan));
+
+    // move_group.setPoseTarget(end_pose);
+    // success = static_cast<bool>(move_group.plan(my_plan));
     
-    RCLCPP_INFO(LOGGER, " (end pose goal) %s", success ? "" : "FAILED");
-    if(success == true){
-        //move_group.move();
-        move_group.execute(my_plan);
-    }
-    RCLCPP_INFO(LOGGER, "test2");
+    // RCLCPP_INFO(LOGGER, "Relative movement plan 1 (end pose goal) %s", success ? "" : "FAILED");
+    // if(success == true){
+    //     move_group.move();
+    // }
+
 
     //pack robot down
-    //current_state = move_group.getCurrentState(10);
-    std::vector<double> joint_pos_pack_down_robot(4);
+    current_state = move_group.getCurrentState(10);
+    std::vector<double> joint_pos_pack_down_robot;
     //current_state->copyJointGroupPositions(joint_model_group, joint_pos_pack_down_robot);
-    RCLCPP_INFO(LOGGER, "test3");
+    
     joint_pos_pack_down_robot[0] = 0.0;
     joint_pos_pack_down_robot[1] = -1.5;
     joint_pos_pack_down_robot[2] = 0.1;
     joint_pos_pack_down_robot[3] = 1.5;
-    RCLCPP_INFO(LOGGER, "test4");
     move_group.setJointValueTarget(joint_pos_pack_down_robot);
-    RCLCPP_INFO(LOGGER, "test5");
+
     move_group.setMaxVelocityScalingFactor(0.05);
-    RCLCPP_INFO(LOGGER, "test6");
     move_group.setMaxAccelerationScalingFactor(0.05);
-    RCLCPP_INFO(LOGGER, "test7");
     success = static_cast<bool>(move_group.plan(my_plan));
-    RCLCPP_INFO(LOGGER, "test8");
 
     
     RCLCPP_INFO(LOGGER, "Pack down robot %s", success ? "" : "FAILED");
@@ -183,7 +160,6 @@ int main(int argc, char * argv[])
         RCLCPP_INFO(LOGGER, "movement statement plan3 done");
         //move_group.move();
     }
-    RCLCPP_INFO(LOGGER, "test9");
 
     // end pack robot down
 
