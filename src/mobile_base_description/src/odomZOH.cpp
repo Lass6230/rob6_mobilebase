@@ -16,7 +16,7 @@ public:
     odom_sub_ = create_subscription<nav_msgs::msg::Odometry>(
       "odom", 10, std::bind(&OdomToTfNode::odom_callback, this, std::placeholders::_1));
     // Create a timer to publish the transform at a fixed frequency
-    tf_timer_ = create_wall_timer(std::chrono::milliseconds(33), std::bind(&OdomToTfNode::tf_callback, this));
+    tf_timer_ = create_wall_timer(std::chrono::milliseconds(30), std::bind(&OdomToTfNode::tf_callback, this));
   }
 
 private:

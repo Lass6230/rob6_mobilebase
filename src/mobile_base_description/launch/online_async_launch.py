@@ -47,7 +47,15 @@ def generate_launch_description():
         package='slam_toolbox',
         executable='async_slam_toolbox_node',
         name='slam_toolbox',
-        output='screen')
+        output='screen'
+    )
+    
+    odomZOH = Node(
+        package='mobile_base_description',
+        executable='odom_rebroadcaster',
+        name='odom_rebroadcaster',
+        output='screen'
+    )
 
     ld = LaunchDescription()
 
@@ -55,5 +63,6 @@ def generate_launch_description():
     ld.add_action(declare_params_file_cmd)
     ld.add_action(log_param_change)
     ld.add_action(start_async_slam_toolbox_node)
+    ld.add_action(odomZOH)
 
     return ld
