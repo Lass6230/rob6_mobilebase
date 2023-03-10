@@ -7,7 +7,7 @@
 class OdomToTfNode : public rclcpp::Node
 {
 public:
-
+  u_int32_t publishes = 0;
   bool publishing_odometry = false;
   OdomToTfNode()
   : Node("odom_to_tf"), tf_broadcaster_(this)
@@ -24,8 +24,14 @@ private:
   {
     // Store the latest odometry message
     odom_ = msg;
-    std::cout << "new odom!\n";
+    //std::cout << "new odom!\n";
     publishing_odometry = false;
+    publishes +=1;
+
+    if (publishes >= 20400) {
+      std::cout << publishes << "\n";
+    }
+    
   }
 
   void tf_callback()
@@ -35,7 +41,7 @@ private:
     {
       if(!publishing_odometry)
       {
-        std::cout << "publishing old odom\n";
+        //std::cout << "publishing old odom\n";
         publishing_odometry = true;
       }
       
