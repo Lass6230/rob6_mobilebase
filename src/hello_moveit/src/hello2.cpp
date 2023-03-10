@@ -55,6 +55,10 @@ int main(int argc, char * argv[])
     move_group.setPoseReferenceFrame("crust_base_link");
     RCLCPP_INFO(LOGGER,"new planing frame: %s",move_group.getPoseReferenceFrame().c_str());
 
+
+    moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+
+
     geometry_msgs::msg::PoseStamped end_pose;
     end_pose = move_group.getCurrentPose();
     RCLCPP_INFO(LOGGER,"x: %f", end_pose.pose.position.x);
@@ -66,26 +70,33 @@ int main(int argc, char * argv[])
     RCLCPP_INFO(LOGGER,"rot w: %f", end_pose.pose.orientation.w);
     RCLCPP_INFO(LOGGER,end_pose.header.frame_id.c_str());
 
-    // geometry_msgs::msg::Pose target_pose1;
-    // target_pose1.orientation.w = 1.0;
-    // target_pose1.position.x = 0.1;
-    // target_pose1.position.y = -0.2;
-    // target_pose1.position.z = 0.5;
-    // move_group.setPoseTarget(target_pose1);
+    geometry_msgs::msg::Pose target_pose1;
+    target_pose1.orientation.w = 0.714155;
+    target_pose1.orientation.x = 2.33002e-05;
+    target_pose1.orientation.y = 0.699987;
+    target_pose1.orientation.z = -2.6343e-05;
+    target_pose1.position.x = 0.25772;
+    target_pose1.position.y = -0.00784852;
+    target_pose1.position.z = 0.197366;
+    move_group.setGoalOrientationTolerance(0.001);
+    move_group.setGoalOrientationTolerance(0.001);
+    //move_group.setRPYTarget(0.0, 1.57, 0.0);
+    move_group.setPositionTarget(target_pose1.position.x,target_pose1.position.y,target_pose1.position.z);
+    //move_group.setPoseTarget(target_pose1);
 
     // we hear the planner if the plan is possible?
-    moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+    
     bool success;
     //moveit::core::MoveItErrorCode::SUCCESS suc;
     // bool success = (move_group.plan(my_plan) == suc);
-    // bool success = static_cast<bool>(move_group.plan(my_plan));
+    success = static_cast<bool>(move_group.plan(my_plan));
     
-    // RCLCPP_INFO(LOGGER, "Visualizing plan 1 (pose goal) %s", success ? "" : "FAILED");
-    // if(success == true){
-    //     //move_group.move();
-    //     move_group.execute(my_plan);
+    RCLCPP_INFO(LOGGER, "Visualizing plan 1 (pose goal) %s", success ? "" : "FAILED");
+    if(success == true){
+        //move_group.move();
+        move_group.execute(my_plan);
 
-    // }
+    }
 
     moveit::core::RobotStatePtr current_state = move_group.getCurrentState(10);
     //
