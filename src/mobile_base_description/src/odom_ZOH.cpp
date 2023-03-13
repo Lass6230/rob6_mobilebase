@@ -28,7 +28,7 @@ private:
     publishing_odometry = false;
     publishes +=1;
 
-    if (publishes >= 20400) {
+    if (publishes%100 == 0) {
       std::cout << publishes << "\n";
     }
     
@@ -44,8 +44,6 @@ private:
         //std::cout << "publishing old odom\n";
         publishing_odometry = true;
       }
-      
-      
       
       // Create a transform from the odometry message
       geometry_msgs::msg::TransformStamped tf;

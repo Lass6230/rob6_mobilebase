@@ -98,6 +98,7 @@ def generate_launch_description():
         parameters=[robot_description],
     )
 
+    # Publish arbitrary joint angles
     joint_state_publisher_node = launch_ros.actions.Node(
         package='joint_state_publisher',
         executable='joint_state_publisher',
