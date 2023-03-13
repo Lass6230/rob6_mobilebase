@@ -52,7 +52,7 @@ int main(int argc, char * argv[])
 
    
     RCLCPP_INFO(LOGGER,"planing frame: %s",move_group.getPlanningFrame().c_str());
-    //move_group.setPoseReferenceFrame("crust_base_link");
+    move_group.setPoseReferenceFrame("crust_base_link");
     RCLCPP_INFO(LOGGER,"new planing frame: %s",move_group.getPoseReferenceFrame().c_str());
 
 
@@ -165,7 +165,8 @@ int main(int argc, char * argv[])
   another_pose.position.x = 0.2;
   another_pose.position.y = 0.0;
   another_pose.position.z = 0.2;
-  move_group.setPoseTarget(another_pose);
+  move_group.setStartStateToCurrentState();
+  move_group.setPoseTarget(end_pose);
     //move_group.setPoseTarget(end_pose,"tool_link");
     success = static_cast<bool>(move_group.plan(my_plan));
     
@@ -203,8 +204,24 @@ int main(int argc, char * argv[])
         RCLCPP_INFO(LOGGER, "movement statement plan3 done");
         //move_group.move();
     }
-    RCLCPP_INFO(LOGGER, "test9");
+    RCLCPP_INFO(LOGGER, "relative tool movement");
 
+
+    move_group.setPoseReferenceFrame("tool_link");
+    geometry_msgs::msg::Pose relative_tool;
+    
+    another_pose.position.x = 0.1;
+    
+    move_group.setStartStateToCurrentState();
+    move_group.setPoseTarget(end_pose);
+    //move_group.setPoseTarget(end_pose,"tool_link");
+    success = static_cast<bool>(move_group.plan(my_plan));
+    
+    RCLCPP_INFO(LOGGER, " (tool pose goal) %s", success ? "" : "FAILED");
+    if(success == true){
+        //move_group.move();
+        move_group.execute(my_plan);
+    }
     // end pack robot down
 
     rclcpp::shutdown();
