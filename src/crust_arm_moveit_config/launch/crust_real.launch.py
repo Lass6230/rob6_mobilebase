@@ -124,7 +124,7 @@ def generate_launch_description():
             moveit_controllers,
             planning_scene_monitor_parameters,
             
-            move_group_capabilities,
+            #move_group_capabilities,
         ],
     )
 

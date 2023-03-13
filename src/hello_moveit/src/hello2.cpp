@@ -52,9 +52,13 @@ int main(int argc, char * argv[])
 
    
     RCLCPP_INFO(LOGGER,"planing frame: %s",move_group.getPlanningFrame().c_str());
-    move_group.setPoseReferenceFrame("crust_base_link");
+    //move_group.setPoseReferenceFrame("crust_base_link");
     RCLCPP_INFO(LOGGER,"new planing frame: %s",move_group.getPoseReferenceFrame().c_str());
 
+
+    move_group.setNumPlanningAttempts(5);
+
+    move_group.setPlanningTime(10.0);
 
     moveit::planning_interface::MoveGroupInterface::Plan my_plan;
 
@@ -71,18 +75,21 @@ int main(int argc, char * argv[])
     RCLCPP_INFO(LOGGER,end_pose.header.frame_id.c_str());
 
     geometry_msgs::msg::Pose target_pose1;
-    target_pose1.orientation.w = 0.714155;
-    target_pose1.orientation.x = 2.33002e-05;
-    target_pose1.orientation.y = 0.699987;
-    target_pose1.orientation.z = -2.6343e-05;
-    target_pose1.position.x = 0.25772;
-    target_pose1.position.y = -0.00784852;
-    target_pose1.position.z = 0.197366;
-    move_group.setGoalOrientationTolerance(0.001);
-    move_group.setGoalOrientationTolerance(0.001);
+    
+    target_pose1.orientation.x = -1.2562e-05;
+    target_pose1.orientation.y = 0.22297;
+    target_pose1.orientation.z = 5.4102e-05;
+    target_pose1.orientation.w = 0.97482;
+    target_pose1.position.x = 0.39395;
+    target_pose1.position.y = -0.00778;
+    target_pose1.position.z = 0.29218;
+    move_group.setGoalOrientationTolerance(0.5);
+    move_group.setGoalOrientationTolerance(0.5);
     //move_group.setRPYTarget(0.0, 1.57, 0.0);
-    move_group.setPositionTarget(target_pose1.position.x,target_pose1.position.y,target_pose1.position.z);
-    //move_group.setPoseTarget(target_pose1);
+    move_group.setStartStateToCurrentState();
+    //move_group.setPoseTarget(target_pose1,"tool_link");
+   //move_group.setApproximateJointValueTarget(target_pose1, "tool_link");
+    move_group.setPoseTarget(target_pose1);
 
     // we hear the planner if the plan is possible?
     
@@ -93,8 +100,10 @@ int main(int argc, char * argv[])
     
     RCLCPP_INFO(LOGGER, "Visualizing plan 1 (pose goal) %s", success ? "" : "FAILED");
     if(success == true){
-        //move_group.move();
-        move_group.execute(my_plan);
+        move_group.move();
+        //move_group.execute(my_plan);
+        RCLCPP_INFO(LOGGER, "goal in cartisian space");
+        sleep(5.0);
 
     }
 
