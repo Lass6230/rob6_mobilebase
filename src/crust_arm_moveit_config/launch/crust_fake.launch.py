@@ -93,7 +93,7 @@ def generate_launch_description():
         "moveit_manage_controllers": True,
         "trajectory_execution.allowed_execution_duration_scaling": 1.2,
         "trajectory_execution.allowed_goal_duration_margin": 0.5,
-        "trajectory_execution.allowed_start_tolerance": 0.01,
+        "trajectory_execution.allowed_start_tolerance": 0.05,
     }
 
     planning_scene_monitor_parameters = {
@@ -107,7 +107,9 @@ def generate_launch_description():
     }
     # Load  ExecuteTaskSolutionCapability so we can execute found solutions in simulation
     move_group_capabilities = {
-        "capabilities": "move_group/ExecuteTaskSolutionCapability"
+        #"capabilities": "move_group/ExecuteTaskSolutionCapability",
+         "capabilities": "pilz_industrial_motion_planner/MoveGroupSequenceAction pilz_industrial_motion_planner/MoveGroupSequenceService"
+
     }
 
     # Start the actual move_group node/action server
@@ -124,7 +126,7 @@ def generate_launch_description():
             moveit_controllers,
             planning_scene_monitor_parameters,
             
-            move_group_capabilities,
+            #move_group_capabilities,
         ],
     )
 

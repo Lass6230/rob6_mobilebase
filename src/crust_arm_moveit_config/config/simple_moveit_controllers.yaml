@@ -12,6 +12,7 @@ controller_names:
 manipulator_position_controllers:
     action_ns: follow_joint_trajectory
     type: FollowJointTrajectory
+    
     default: True
     joints:
       - joint_1
