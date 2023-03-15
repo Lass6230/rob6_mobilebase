@@ -123,7 +123,7 @@ class RobotHandler : public rclcpp::Node
                 break;
               
               case 8:
-                  response->status = RobotHandler::jointMovement(request->pose[0],request->pose[1],request->pose[2],request->pose[3],request->pose[4]);
+                  response->status = RobotHandler::jointMovement(request->pose[0],request->pose[1],request->pose[2],request->pose[3]);
                 break;
               
               case 9:

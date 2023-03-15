@@ -13,28 +13,7 @@ private:
 
         // Read message content and assign it to
         // corresponding tf variables
-        t.header.stamp = this->get_clock()->now();
-        t.header.frame_id = "tool";
-        t.child_frame_id = "object";
-
-        // Turtle only exists in 2D, thus we get x and y translation
-        // coordinates from the message and set the z coordinate to 0
-        t.transform.translation.x = 0.05;
-        t.transform.translation.y = 0.0;
-        t.transform.translation.z = 0.0;
-
-        // For the same reason, turtle can only rotate around one axis
-        // and this why we set rotation in x and y to 0 and obtain
-        // rotation in z axis from the message
-        tf2::Quaternion q;
-        q.setRPY(0, 0, 0);
-        t.transform.rotation.x = q.x();
-        t.transform.rotation.y = q.y();
-        t.transform.rotation.z = q.z();
-        t.transform.rotation.w = q.w();
-
-        // Send the transformation
-        tf_broadcaster_->sendTransform(t);
+        
         // All transforms must be correctly timestamped
         pose_.header.stamp = this->get_clock()->now();
         pose_.header.frame_id = "tool_link";
