@@ -209,9 +209,23 @@ def generate_launch_description():
         output="screen",
         condition=IfCondition(db_config)
     )
+    move_group_demo = Node(
+        name="server",
+        package="crust_arm_moveit_config",
+        executable="server",
+        output="screen",
+        parameters=[
+           # moveit_config.robot_description,
+            #moveit_config.robot_description_semantic,
+            kinematics_yaml,
+            robot_description,
+            robot_description_semantic,
+        ],
+    )
 
     return LaunchDescription(
         [
+            move_group_demo,
             headless,
             db_arg,
             #rviz_node,
