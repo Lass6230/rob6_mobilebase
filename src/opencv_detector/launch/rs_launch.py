@@ -44,7 +44,7 @@ configurable_parameters = [{'name': 'camera_name',                  'default': '
                            {'name': 'colorizer.enable',             'default': 'false', 'description': "''"},
                            {'name': 'clip_distance',                'default': '3.', 'description': "'dont publish points beyond distance in meters'"},                           
                            {'name': 'linear_accel_cov',             'default': '0.01', 'description': "''"},                           
-                           {'name': 'initial_reset',                'default': 'false', 'description': "''"},                           
+                           {'name': 'initial_reset',                'default': 'true', 'description': "''"},                           
                            {'name': 'allow_no_texture_points',      'default': 'false', 'description': "''"},                           
                            {'name': 'pointcloud.ordered_pc',        'default': 'false', 'description': ''},
                            {'name': 'calib_odom_file',              'default': "''", 'description': "''"},
@@ -136,8 +136,16 @@ def generate_launch_description():
         name='aruco_publisher',
         output='screen'
     )
+    
+    golfball_detector = launch_ros.actions.Node(
+        package='opencv_detector',
+        executable='golfball_detector',
+        name='golfball_publisher',
+        output='screen'
+    )
+
     return LaunchDescription(declare_configurable_parameters(configurable_parameters) + [
         OpaqueFunction(function=launch_setup),
-        aruco_detector
-
+        aruco_detector,
+        golfball_detector
     ])

@@ -24,7 +24,6 @@ class ImageSubscriberNode(Node):
         self.tf_broadcaster = TransformBroadcaster(self)
    
         # Syncronize topics
-        #ts = message_filters.ApproximateTimeSynchronizer([self.image_sub, self.depth_sub], 1, 0.1)
         ts = message_filters.TimeSynchronizer([self.image_sub, self.depth_sub], 1)
         ts.registerCallback(self.image_callback)
   
@@ -46,8 +45,8 @@ class ImageSubscriberNode(Node):
         cv2.aruco.drawDetectedMarkers(cv_image, markerCorners, markerIds, (0, 255, 0))
         
         if len(markerCorners) > 0:
-            # print("numa huan x:" + str(markerCorners[0][0][0][0]) + "y: " + str(markerCorners[0][0][0][1]))
-            # print("2 x:" + str(markerCorners[0][0][1][0]) + "y: " + str(markerCorners[0][0][1][1]))
+            # print("1x:" + str(markerCorners[0][0][0][0]) + "y: " + str(markerCorners[0][0][0][1]))
+            # print("2x:" + str(markerCorners[0][0][1][0]) + "y: " + str(markerCorners[0][0][1][1]))
             # print("3x:" + str(markerCorners[0][0][2][0]) + "y: " + str(markerCorners[0][0][2][1]))
             # print("4x:" + str(markerCorners[0][0][3][0]) + "y: " + str(markerCorners[0][0][3][1]))
         
@@ -57,7 +56,7 @@ class ImageSubscriberNode(Node):
 
             cv2.circle(cv_image, (x,y), 5, (0,0,255))
             z = cv_depth[y,x]
-            
+
             center_x, center_y = cv_image.shape[1]/2, cv_image.shape[0]/2
 
             #calculate angle from center
@@ -71,6 +70,7 @@ class ImageSubscriberNode(Node):
             cartesian_z = np.cos(np.deg2rad(z_angle)) * z / 1000
 
             self.publish_transform(cartesian_x, cartesian_y, cartesian_z)
+
 
         # display the image with overlayed markers
         cv2.imshow("Image", cv_image)
