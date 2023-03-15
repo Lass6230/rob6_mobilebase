@@ -78,7 +78,7 @@ class RobotHandler : public rclcpp::Node
         5: search 
         6: absolute pose RPY crust_base_link  (Viker)
         7: absolute pose RPY baselink
-        8: stop
+        8: joint movement
         9: relative movement rpy
         10: relative movement rpy with camera offset
         11: move relative from base quad
@@ -123,7 +123,7 @@ class RobotHandler : public rclcpp::Node
                 break;
               
               case 8:
-
+                  response->status = RobotHandler::jointMovement(request->pose[0],request->pose[1],request->pose[2],request->pose[3],request->pose[4]);
                 break;
               
               case 9:
