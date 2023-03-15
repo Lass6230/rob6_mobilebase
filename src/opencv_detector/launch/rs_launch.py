@@ -127,7 +127,17 @@ def launch_setup(context, *args, **kwargs):
                 )
         ]
     
+    
+    
 def generate_launch_description():
+    aruco_detector = launch_ros.actions.Node(
+        package='opencv_detector',
+        executable='aruco_detector',
+        name='aruco_publisher',
+        output='screen'
+    )
     return LaunchDescription(declare_configurable_parameters(configurable_parameters) + [
-        OpaqueFunction(function=launch_setup)
+        OpaqueFunction(function=launch_setup),
+        aruco_detector
+
     ])
