@@ -1,23 +1,15 @@
 #include "rclcpp/rclcpp.hpp"
-<<<<<<< HEAD
-#include "std_msgs/msg/int64_multi_array.hpp"
-=======
 #include "std_msgs/msg/int32.hpp"
 #include "std_msgs/msg/int64.hpp"
->>>>>>> galactic
 #include "geometry_msgs/msg/twist.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <geometry_msgs/msg/pose.hpp>
-<<<<<<< HEAD
-#include "iostream"
-=======
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/time_synchronizer.h>
 #include <math.h>
->>>>>>> galactic
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -34,11 +26,6 @@ public:
     last_time_ = this->now();
 
     // Create a subscription to the encoder ticks topic
-<<<<<<< HEAD
-    encoder_sub_ = this->create_subscription<std_msgs::msg::Int64MultiArray>(
-      "/encoder1", 1,
-      std::bind(&OdometryCalculator::encoderCallback, this, std::placeholders::_1));
-=======
     
     sub1_.subscribe(this,"/encoder2");
     sub2_.subscribe(this,"/encoder1");
@@ -54,7 +41,6 @@ public:
     // encoder2_sub_ = this->create_subscription<std_msgs::msg::Int64>(
     //   "encoder2", 10,
     //   std::bind(&OdometryCalculator::encoderCallback, this, std::placeholders::_1));
->>>>>>> galactic
 
       
 
@@ -63,19 +49,11 @@ public:
   }
 
 private:
-<<<<<<< HEAD
-  void encoderCallback(const std_msgs::msg::Int64MultiArray::SharedPtr msg)
-  {
-    encoder_ticks_left_ = msg->data[0] >> 16;  
-    encoder_ticks_right_ = msg->data[1] & 0xFFFF;  
-    std::cout << encoder_ticks_left_ + "\n";
-=======
   void encoderCallback(const std_msgs::msg::Int64::ConstSharedPtr msg1, std_msgs::msg::Int64::ConstSharedPtr msg2)
   { 
     
     encoder_ticks_left_ = msg1->data >> 64;  
     encoder_ticks_right_ = msg2->data & 0xFFFFFFFFFFFFFFFF;  
->>>>>>> galactic
 
     // Calculate time since last callback and update last time
     rclcpp::Time current_time = this->now();
@@ -159,15 +137,11 @@ double constrainAngle(double x){
     return x;
 }
   // ROS 2 objects
-<<<<<<< HEAD
-  rclcpp::Subscription<std_msgs::msg::Int64MultiArray>::SharedPtr encoder_sub_;
-=======
   message_filters::Subscriber<std_msgs::msg::Int64> sub1_;
   message_filters::Subscriber<std_msgs::msg::Int64> sub2_;
   std::shared_ptr<message_filters::TimeSynchronizer<std_msgs::msg::Int64, std_msgs::msg::Int64>> sync_;
   rclcpp::Subscription<std_msgs::msg::Int64>::SharedPtr encoder1_sub_;
   rclcpp::Subscription<std_msgs::msg::Int64>::SharedPtr encoder2_sub_;
->>>>>>> galactic
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odometry_pub_;
 
   // Odometry state variables
