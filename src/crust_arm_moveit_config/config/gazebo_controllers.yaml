@@ -1,0 +1,18 @@
+# Publish joint_states
+#joint_state_controller:
+  #type: joint_state_controller/JointStateController
+  #publish_rate: 50
+
+controller_names:
+  - manipulator_position_controllers
+  - joint_state_broadcaster
+manipulator_position_controllers:
+  type: joint_trajectory_controller/JointTrajectoryController
+  joints: 
+    - joint_1  
+    - joint_2
+    - joint_3  
+    - joint_4  
+
+joint_state_broadcaster:
+  type: joint_state_broadcaster/JointStateBroadcaster

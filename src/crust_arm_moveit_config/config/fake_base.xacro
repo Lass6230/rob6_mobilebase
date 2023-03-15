@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="crust_arm_mobile">
+    <xacro:arg name="initial_positions_file" default="initial_positions.yaml" />
+
+    <!-- Import panda urdf file -->
+    <xacro:include filename="$(find crust_arm_description)/urdf/crust_arm_mobile_realsense.urdf.xacro" />
+
+    <!-- Import panda ros2_control description -->
+    <xacro:include filename="crust.ros2_fake_control.xacro" />
+    
+    <xacro:crust_ros2_fake_control name="CrustFakeSystem" initial_positions_file="$(arg initial_positions_file)"/>
+    
+    <xacro:include filename="crust_to_mobile_base.xacro" />
+
+    <xacro:include filename="$(find mobile_base_description)/urdf/mobile_base_realsense.urdf.xacro" />
+
+     <!-- Import panda urdf file -->
+    <xacro:include filename="$(find mobile_base_description)/urdf/base_footprint.xacro" />
+
+
+
+</robot>

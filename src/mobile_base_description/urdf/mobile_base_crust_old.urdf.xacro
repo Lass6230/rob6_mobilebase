@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="crust_arm_mobile">
+  
+
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="-0.00247544569007708 -0.188726144033008 -0.00331828982085053"
+        rpy="0 0 0" />
+      <mass
+        value="7.25669374827586" />
+      <inertia
+        ixx="0.0458578206362989"
+        ixy="2.77322922062737E-06"
+        ixz="3.27411439344348E-05"
+        iyy="0.0218763762344693"
+        iyz="0.000848533678871289"
+        izz="0.054377249546969" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find mobile_base_description)/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0 0 0 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find mobile_base_description)/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="left_wheel">
+    <inertial>
+      <origin
+        xyz="0 0 1.38777878078145E-17"
+        rpy="0 0 0" />
+      <mass
+        value="4.46342151734513" />
+      <inertia
+        ixx="0.0214375253295535"
+        ixy="-9.27083006375532E-19"
+        ixz="-7.97975622392489E-20"
+        iyy="0.0214375253295535"
+        iyz="-1.43995601033231E-20"
+        izz="0.0375707416693319" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find mobile_base_description)/meshes/left_wheel.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find mobile_base_description)/meshes/left_wheel.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="left_wheel_joint"
+    type="continuous">
+    <origin
+      xyz="-0.137 0 0"
+      rpy="1.5708 0 1.5708" />
+    <parent
+      link="base_link" />
+    <child
+      link="left_wheel" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="right_wheel">
+    <inertial>
+      <origin
+        xyz="-1.38777878078145E-17 -5.55111512312578E-17 2.77555756156289E-17"
+        rpy="0 0 0" />
+      <mass
+        value="4.46342151734513" />
+      <inertia
+        ixx="0.0214375253295535"
+        ixy="-2.9042607713123E-19"
+        ixz="-5.26009852170224E-19"
+        iyy="0.0214375253295535"
+        iyz="5.9105590148048E-20"
+        izz="0.0375707416693319" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find mobile_base_description)/meshes/right_wheel.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find mobile_base_description)/meshes/right_wheel.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="right_wheel_joint"
+    type="continuous">
+    <origin
+      xyz="0.132 0 0"
+      rpy="1.5708 0 1.5708" />
+    <parent
+      link="base_link" />
+    <child
+      link="right_wheel" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="camera">
+    <inertial>
+      <origin
+        xyz="-0.00744919022353967 -1.33048035397265E-06 -0.0345144672362048"
+        rpy="0 0 0" />
+      <mass
+        value="0.369842488759113" />
+      <inertia
+        ixx="0.000256169957334383"
+        ixy="-3.4750104335447E-08"
+        ixz="-1.13013119191708E-05"
+        iyy="0.00048809875532772"
+        iyz="-1.77820749757088E-08"
+        izz="0.000595013214946321" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find mobile_base_description)/meshes/camera.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find mobile_base_description)/meshes/camera.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="camera_joint"
+    type="fixed">
+    <origin
+      xyz="-0.00229958657923851 0.270218938648069 0.043279647148146"
+      rpy="2.35619448960539 0 -3.14154419926722" />
+    <parent
+      link="base_link" />
+    <child
+      link="camera" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="scan">
+    <inertial>
+      <origin
+        xyz="-0.000537849970747406 3.24297391453357E-05 -0.0304099645492067"
+        rpy="0 0 0" />
+      <mass
+        value="0.77572976548165" />
+      <inertia
+        ixx="0.000813219708307499"
+        ixy="-1.32636836280718E-06"
+        ixz="1.59543719347387E-06"
+        iyy="0.000937718836199801"
+        iyz="3.80088779512424E-07"
+        izz="0.000971728129759389" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find mobile_base_description)/meshes/laser.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find mobile_base_description)/meshes/laser.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="scan_joint"
+    type="fixed">
+    <origin
+      xyz="-0.0024966 0.13302 -0.025212"
+      rpy="-3.1416 0 1.5708" />
+    <parent
+      link="base_link" />
+    <child
+      link="scan" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="crust_base_link1">
+    <inertial>
+      <origin
+        xyz="-3.36265261816071E-08 0.0769069450394676 0.0161783208782746"
+        rpy="0 0 0" />
+      <mass
+        value="0.0643151587812771" />
+      <inertia
+        ixx="5.65916574952039E-05"
+        ixy="-7.18002494047286E-11"
+        ixz="-1.1856366830447E-11"
+        iyy="4.41373624530225E-05"
+        iyz="-2.11729650494233E-05"
+        izz="7.36661131733712E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find mobile_base_description)/meshes/crust_base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find mobile_base_description)/meshes/crust_base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="crust_base_joint1"
+    type="fixed">
+    <origin
+      xyz="-0.0025 0.12075 0.066"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="crust_base_link1" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+</robot>

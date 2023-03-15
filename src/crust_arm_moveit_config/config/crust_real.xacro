@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="crust_arm">
+    <xacro:arg name="initial_positions_file" default="initial_positions.yaml" />
+
+    <!-- Import panda urdf file -->
+    <xacro:include filename="$(find crust_arm_description)/urdf/crust_arm_mobile_realsense.urdf.xacro" />
+
+    <!-- Import panda ros2_control description -->
+    <xacro:include filename="crust.ros2_control.xacro" />
+    
+    <xacro:crust_ros2_control name="CrustSystem" />
+    <!--initial_positions_file="$(arg initial_positions_file)"-->
+    
+</robot>

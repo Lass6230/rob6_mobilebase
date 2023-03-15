@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="crust_arm_mobile">
+  <link
+    name="crust_base_link">
+    <inertial>
+      <origin
+        xyz="-0.0011371 0.00077543 0.04167"
+        rpy="0 0 0" />
+      <mass
+        value="0.70106" />
+      <inertia
+        ixx="0.0013838"
+        ixy="5.5315E-08"
+        ixz="-1.7418E-06"
+        iyy="0.0011971"
+        iyz="-9.596E-08"
+        izz="0.0025267" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.89804 0.91765 0.92941 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="link_1">
+    <inertial>
+      <origin
+        xyz="2.7088E-06 -0.00034362 0.032412"
+        rpy="0 0 0" />
+      <mass
+        value="0.1159" />
+      <inertia
+        ixx="6.1382E-05"
+        ixy="-2.3112E-09"
+        ixz="-1.6418E-09"
+        iyy="5.2378E-05"
+        iyz="1.0628E-06"
+        izz="6.273E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes/link_1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.89804 0.91765 0.92941 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes/link_1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_1"
+    type="revolute">
+    <origin
+      xyz="0 0 0.059"
+      rpy="0 0 0" />
+    <parent
+      link="crust_base_link" />
+    <child
+      link="link_1" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-2.3561944902"
+      upper="2.3561944902"
+      effort="200"
+      velocity="3" />
+  </joint>
+  <link
+    name="link_2">
+    <inertial>
+      <origin
+        xyz="-0.00096315 -0.16138 -0.00028433"
+        rpy="0 0 0" />
+      <mass
+        value="0.11516" />
+      <inertia
+        ixx="8.1961E-05"
+        ixy="-1.5264E-08"
+        ixz="4.1398E-13"
+        iyy="2.8324E-05"
+        iyz="-8.8059E-07"
+        izz="7.0335E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes/link_2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.89804 0.91765 0.92941 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes/link_2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_2"
+    type="revolute">
+    <origin
+      xyz="0 -0.00315 0.0576"
+      rpy="-1.5708 0 0" />
+    <parent
+      link="link_1" />
+    <child
+      link="link_2" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-2.2"
+      upper="2.2"
+      effort="200"
+      velocity="3" />
+  </joint>
+  <link
+    name="link_3">
+    <inertial>
+      <origin
+        xyz="-0.0012662 -0.14133 1.5697E-05"
+        rpy="0 0 0" />
+      <mass
+        value="0.087599" />
+      <inertia
+        ixx="6.3554E-05"
+        ixy="-1.5265E-08"
+        ixz="-5.2962E-12"
+        iyy="1.8123E-05"
+        iyz="-1.8274E-07"
+        izz="5.571E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes/link_3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.89804 0.91765 0.92941 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes/link_3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_3"
+    type="revolute">
+    <origin
+      xyz="0 -0.2198 -0.003"
+      rpy="0 0 0" />
+    <parent
+      link="link_2" />
+    <child
+      link="link_3" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-2.2"
+      upper="2.2"
+      effort="200"
+      velocity="3" />
+  </joint>
+  <link
+    name="link_4">
+    <inertial>
+      <origin
+        xyz="4.3021E-16 -0.016617 -4.996E-16"
+        rpy="0 0 0" />
+      <mass
+        value="0.012313" />
+      <inertia
+        ixx="4.0917E-06"
+        ixy="9.1719E-22"
+        ixz="-6.3244E-21"
+        iyy="3.3133E-06"
+        iyz="1.0536E-20"
+        izz="2.0111E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes/link_4.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.89804 0.91765 0.92941 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes/link_4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_4"
+    type="revolute">
+    <origin
+      xyz="0 -0.2113 -0.001675"
+      rpy="0 0 0" />
+    <parent
+      link="link_3" />
+    <child
+      link="link_4" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-2.2"
+      upper="2.2"
+      effort="200"
+      velocity="3" />
+  </joint>
+  <link
+    name="tool_link">
+    <inertial>
+      <origin
+        xyz="-0.063996 7.0045E-09 -0.011875"
+        rpy="0 0 0" />
+      <mass
+        value="0.024955" />
+      <inertia
+        ixx="9.2987E-06"
+        ixy="-3.2544E-12"
+        ixz="-2.7666E-06"
+        iyy="9.664E-06"
+        iyz="-1.54E-13"
+        izz="1.2046E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes/tool_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes/tool_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_tool"
+    type="fixed">
+    <origin
+      xyz="0.040898 -0.1244 0"
+      rpy="1.5708 0 -0.7854" />
+    <parent
+      link="link_4" />
+    <child
+      link="tool_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <!--<link
+    name="realsense_link">
+    <inertial>
+      <origin
+        xyz="-0.0086825 -0.017953 -0.0014659"
+        rpy="0 0 0" />
+      <mass
+        value="0.12527" />
+      <inertia
+        ixx="8.2527E-05"
+        ixy="-1.7931E-08"
+        ixz="1.4028E-06"
+        iyy="1.2414E-05"
+        iyz="-2.5157E-10"
+        izz="7.8282E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes/realsense_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes/realsense_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="realsense_joint"
+    type="fixed">
+    <origin
+      xyz="-0.016872 -0.10552 0.017962"
+      rpy="1.5708 0 -0.7854" />
+    <parent
+      link="link_4" />
+    <child
+      link="realsense_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>-->
+</robot>
