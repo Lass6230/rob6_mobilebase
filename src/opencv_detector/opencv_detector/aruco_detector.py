@@ -6,6 +6,10 @@ import cv2
 from cv2 import aruco
 import numpy as np
 import message_filters 
+from std_msgs.msg import String
+
+from geometry_msgs.msg import TransformStamped
+from tf2_ros import TransformBroadcaster
 
 class ImageSubscriberNode(Node):
 
@@ -17,6 +21,7 @@ class ImageSubscriberNode(Node):
         self.bridge = CvBridge()
         self.image_sub = message_filters.Subscriber(self, Image,'/camera/color/image_raw')
         self.depth_sub = message_filters.Subscriber(self, Image,'/camera/aligned_depth_to_color/image_raw')
+        self.tf_broadcaster = TransformBroadcaster(self)
    
         # Syncronize topics
         #ts = message_filters.ApproximateTimeSynchronizer([self.image_sub, self.depth_sub], 1, 0.1)
@@ -32,7 +37,6 @@ class ImageSubscriberNode(Node):
 
 
     def process_image(self, cv_image, cv_depth):
-        print("4")
         dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_100)
         parameters =  cv2.aruco.DetectorParameters()
         detector = cv2.aruco.ArucoDetector(dictionary, parameters)
@@ -52,21 +56,47 @@ class ImageSubscriberNode(Node):
             y = int((markerCorners[0][0][0][1] + markerCorners[0][0][2][1]) /2)
 
             cv2.circle(cv_image, (x,y), 5, (0,0,255))
-            print(cv_depth[y,x])
+            z = cv_depth[y,x]
+            
+            center_x, center_y = cv_image.shape[1]/2, cv_image.shape[0]/2
+
+            #calculate angle from center
+            x_angle = (center_x - x) / cv_image.shape[1] * 69
+            y_angle = (center_y - y) / cv_image.shape[0] * 42
+            z_angle = np.sqrt(np.square((center_x - x)) + np.square((center_y - y))) / np.sqrt(np.square(cv_image.shape[1]) + np.square(cv_image.shape[0])) * 80.78
+
+            #calculate cartesian coordinates in m
+            cartesian_x = np.sin(np.deg2rad(x_angle)) * z / 1000
+            cartesian_y = np.sin(np.deg2rad(y_angle)) * z / 1000
+            cartesian_z = np.cos(np.deg2rad(z_angle)) * z / 1000
+
+            self.publish_transform(cartesian_x, cartesian_y, cartesian_z)
 
         # display the image with overlayed markers
         cv2.imshow("Image", cv_image)
         cv2.waitKey(1)
 
-    # Create image subscribers
-    
+
+    def publish_transform(self, x, y, z):
+        tf = TransformStamped()
+
+        tf.header.stamp = self.get_clock().now().to_msg()
+        tf.header.frame_id = 'camera_link'
+        tf.child_frame_id = 'aruco_code'
+        tf.transform.translation.x = float(z) #z
+        tf.transform.translation.y = float(x) 
+        tf.transform.translation.z = float(y) #x
+        tf.transform.rotation.x = 0.0
+        tf.transform.rotation.y = 0.0
+        tf.transform.rotation.z = 0.0
+        tf.transform.rotation.w = 1.0
+
+        self.tf_broadcaster.sendTransform(tf)
 
 
-    # sub_color_image = message_filters.Subscriber('/camera/color/image_raw/', Image)
-    # sub_depth_image = message_filters.Subscriber('/camera/aligned_depth_to_color/image_raw', Image)
 
-    # ts = message_filters.TimeSynchronizer([sub_color_image, sub_depth_image], 1000)
-    # ts.registerCallback(synchronized_callback)
+
+
 
 
 def main(args=None):
