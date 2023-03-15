@@ -17,9 +17,42 @@ find_package(ros2_controllers REQUIRED)
 find_package(dynamixel_hardware REQUIRED)
 find_package(gazebo_ros REQUIRED)
 find_package(gazebo_ros2_control REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(crust_msgs REQUIRED)
+find_package(moveit_ros_planning_interface REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
+
+set(dependencies
+  std_msgs
+  tf2
+  geometry_msgs
+  tf2_ros
+  tf2_geometry_msgs
+)
+
+add_executable(sensor_node src/sensor_test.cpp)
+ament_target_dependencies(sensor_node ${dependencies})
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
+
+add_executable(server src/robot_cmd_node.cpp)
+ament_target_dependencies(server
+  rclcpp crust_msgs moveit_ros_planning_interface tf2 tf2_geometry_msgs)  
+add_executable(client src/crust_test_node.cpp)
+ament_target_dependencies(client
+  rclcpp crust_msgs)  
+
+install(TARGETS
+server
+client
+sensor_node
+DESTINATION lib/${PROJECT_NAME})
+
+
 install(DIRECTORY config launch world DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)
