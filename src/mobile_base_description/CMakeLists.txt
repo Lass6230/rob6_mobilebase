@@ -11,7 +11,7 @@ find_package(rclcpp REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(nav_msgs REQUIRED)
-
+find_package(message_filters REQUIRED)
 
 
 # uncomment the following section in order to fill in
@@ -35,6 +35,7 @@ ament_target_dependencies(
   tf2
   geometry_msgs
   std_msgs
+  message_filters
 )
 
 
