@@ -1,10 +1,11 @@
 #include "rclcpp/rclcpp.hpp"
-#include "std_msgs/msg/int32.hpp"
+#include "std_msgs/msg/int64_multi_array.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <geometry_msgs/msg/pose.hpp>
+#include "iostream"
 
 
 class OdometryCalculator : public rclcpp::Node
@@ -19,19 +20,22 @@ public:
     last_time_ = this->now();
 
     // Create a subscription to the encoder ticks topic
-    encoder_sub_ = this->create_subscription<std_msgs::msg::Int32>(
-      "encoder_ticks", 10,
+    encoder_sub_ = this->create_subscription<std_msgs::msg::Int64MultiArray>(
+      "/encoder1", 1,
       std::bind(&OdometryCalculator::encoderCallback, this, std::placeholders::_1));
+
+      
 
     // Create a publisher for the odometry topic
     odometry_pub_ = this->create_publisher<nav_msgs::msg::Odometry>("/odom", 10);
   }
 
 private:
-  void encoderCallback(const std_msgs::msg::Int32::SharedPtr msg)
+  void encoderCallback(const std_msgs::msg::Int64MultiArray::SharedPtr msg)
   {
-    encoder_ticks_left_ = msg->data >> 16;  
-    encoder_ticks_right_ = msg->data & 0xFFFF;  
+    encoder_ticks_left_ = msg->data[0] >> 16;  
+    encoder_ticks_right_ = msg->data[1] & 0xFFFF;  
+    std::cout << encoder_ticks_left_ + "\n";
 
     // Calculate time since last callback and update last time
     rclcpp::Time current_time = this->now();
@@ -77,7 +81,7 @@ private:
 
 
   // ROS 2 objects
-  rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr encoder_sub_;
+  rclcpp::Subscription<std_msgs::msg::Int64MultiArray>::SharedPtr encoder_sub_;
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odometry_pub_;
 
   // Odometry state variables
@@ -86,10 +90,10 @@ private:
   double last_heading_ = 0.0;
 
   // Encoder state variables
-  int32_t encoder_ticks_left_;
-  int32_t encoder_ticks_right_;
-  int32_t last_encoder_ticks_left_;
-  int32_t last_encoder_ticks_right_;
+  int64_t encoder_ticks_left_;
+  int64_t encoder_ticks_right_;
+  int64_t last_encoder_ticks_left_;
+  int64_t last_encoder_ticks_right_;
   rclcpp::Time last_time_;
 
   // Constants
