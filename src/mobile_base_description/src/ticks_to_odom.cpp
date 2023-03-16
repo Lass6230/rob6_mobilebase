@@ -11,6 +11,7 @@
 #include <message_filters/time_synchronizer.h>
 #include <math.h>
 
+
 using std::placeholders::_1;
 using std::placeholders::_2;
 
@@ -79,9 +80,9 @@ private:
       double r = displacement/d_theta;
       
       current_x = current_x + (r * (sin(d_theta + current_theta) - sin(current_theta)));
-      current_y = current_y + (r * (cos(d_theta + current_theta) - cos(current_theta)));
+      current_y = current_y - (r * (cos(d_theta + current_theta) - cos(current_theta)));
 
-      current_theta = OdometryCalculator::constrainAngle1(current_theta + d_theta);
+      current_theta = OdometryCalculator::constrainAngle(current_theta + d_theta);
       //current_theta = current_theta + d_theta;
       
     }
@@ -112,7 +113,9 @@ private:
     odom_msg.pose.pose.position.x = current_x;
     odom_msg.pose.pose.position.y = current_y;
     odom_msg.pose.pose.position.z = 0.0;
-    odom_msg.pose.pose.orientation = tf2::toMsg(tf2::Quaternion(tf2::Vector3(0, 0, 1), current_theta));
+    tf2::Quaternion q_rot;
+    q_rot.setRPY(0.0,0.0,current_theta);
+    odom_msg.pose.pose.orientation = tf2::toMsg(q_rot);//tf2::toMsg(tf2::Quaternion(tf2::Vector3(0, 0, 1), current_theta));
     
     odom_msg.twist.twist.linear.x = displacement / dt.seconds();
     odom_msg.twist.twist.angular.z = d_theta / dt.seconds();
