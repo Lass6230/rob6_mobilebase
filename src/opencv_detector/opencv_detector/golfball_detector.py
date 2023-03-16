@@ -6,15 +6,14 @@ import cv2
 from cv2 import aruco
 import numpy as np
 import message_filters 
-from std_msgs.msg import String
+from std_msgs.msg import Bool
 
 from geometry_msgs.msg import TransformStamped
 from tf2_ros import TransformBroadcaster
 
 class ImageSubscriberNode(Node):
-
-  
     
+    search = True
 
     def __init__(self):
         super().__init__('image_subscriber_node')
@@ -22,6 +21,8 @@ class ImageSubscriberNode(Node):
         self.image_sub = message_filters.Subscriber(self, Image,'/camera/color/image_raw')
         self.depth_sub = message_filters.Subscriber(self, Image,'/camera/aligned_depth_to_color/image_raw')
         self.tf_broadcaster = TransformBroadcaster(self)
+        self.subscription = self.create_subscription(Bool, '/search_golfball', self.start_callback, 10)
+        self.subscription
        
    
         # Syncronize topics
@@ -29,11 +30,16 @@ class ImageSubscriberNode(Node):
         ts.registerCallback(self.image_callback)
   
         
+    def start_callback(self, msg):
+        self.search = msg.data
+        print("searching")
+
 
     def image_callback(self, rgb_image, depth_image):
-        cv_image = self.bridge.imgmsg_to_cv2(rgb_image, desired_encoding='passthrough')
-        cv_depth = self.bridge.imgmsg_to_cv2(depth_image, desired_encoding="passthrough")
-        self.process_image(cv_image, cv_depth)
+        if self.search:
+            cv_image = self.bridge.imgmsg_to_cv2(rgb_image, desired_encoding='passthrough')
+            cv_depth = self.bridge.imgmsg_to_cv2(depth_image, desired_encoding="passthrough")
+            self.process_image(cv_image, cv_depth)
 
     
     def post_process(self, image, color):
@@ -41,8 +47,8 @@ class ImageSubscriberNode(Node):
         image = cv2.erode(image, kernel)
         image = cv2.dilate(image, kernel)
         blur = cv2.medianBlur(image, 9)
-        text = "post process: " + str(color)
-        cv2.imshow(text, blur)
+        #text = "post process: " + str(color)
+        #cv2.imshow(text, blur)
         return blur
        
 
@@ -69,7 +75,7 @@ class ImageSubscriberNode(Node):
         blur = self.post_process(frame_all, "green")
         
         circles = cv2.HoughCircles(blur, cv2.HOUGH_GRADIENT, dp=1, minDist=50,
-                               param1=1000, param2=15, minRadius=5, maxRadius=80)
+                               param1=1000, param2=15, minRadius=10, maxRadius=80)
     
         #print(circles)
         if circles is not None:

@@ -6,33 +6,41 @@ import cv2
 from cv2 import aruco
 import numpy as np
 import message_filters 
-from std_msgs.msg import String
+from std_msgs.msg import Bool
 
 from geometry_msgs.msg import TransformStamped
 from tf2_ros import TransformBroadcaster
 
 class ImageSubscriberNode(Node):
 
-  
+    search = True
     
 
     def __init__(self):
         super().__init__('image_subscriber_node')
+        
         self.bridge = CvBridge()
         self.image_sub = message_filters.Subscriber(self, Image,'/camera/color/image_raw')
         self.depth_sub = message_filters.Subscriber(self, Image,'/camera/aligned_depth_to_color/image_raw')
         self.tf_broadcaster = TransformBroadcaster(self)
+        self.subscription = self.create_subscription(Bool, '/search_aruco', self.start_callback, 10)
+        self.subscription 
+        
    
         # Syncronize topics
         ts = message_filters.TimeSynchronizer([self.image_sub, self.depth_sub], 1)
         ts.registerCallback(self.image_callback)
   
-        
+    def start_callback(self, msg):
+        self.search = msg.data
+        print("searching")
+
 
     def image_callback(self, rgb_image, depth_image):
-        cv_image = self.bridge.imgmsg_to_cv2(rgb_image, desired_encoding='bgr8')
-        cv_depth = self.bridge.imgmsg_to_cv2(depth_image, desired_encoding="passthrough")
-        self.process_image(cv_image, cv_depth)
+        if self.search:
+            cv_image = self.bridge.imgmsg_to_cv2(rgb_image, desired_encoding='bgr8')
+            cv_depth = self.bridge.imgmsg_to_cv2(depth_image, desired_encoding="passthrough")
+            self.process_image(cv_image, cv_depth)
 
 
     def process_image(self, cv_image, cv_depth):
