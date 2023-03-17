@@ -142,6 +142,20 @@ class MainProgram : public rclcpp::Node
                 break;
             case 70:
                 RCLCPP_INFO(this->get_logger(), "robot_done");
+                robot_msg.cmd = 4;
+                robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};
+                pub_robot_->publish(robot_msg);
+                sfc = 80;
+                break;
+            case 80:
+                if(robot_status == 1){
+                    robot_status = 0;
+                    sfc = 90;
+                }
+                break;
+            
+            case 90:
+                RCLCPP_INFO(this->get_logger(), "robot_done");
                 break;
             
             default:

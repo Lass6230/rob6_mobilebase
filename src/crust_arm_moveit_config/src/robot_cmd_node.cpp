@@ -93,6 +93,8 @@ class RobotHandler : public rclcpp::Node
         12: move relative from base rpy 
         13: stop
         14: go to detected object
+        15: go to arcro
+        16: go to golfball
 
     */
     void cmdCaseMsg(const crust_msgs::msg::RobotCmdMsg::SharedPtr msg){
