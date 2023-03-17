@@ -3,6 +3,9 @@
 #include "rclcpp/rclcpp.hpp"
 //#include "crust_msgs/srv/RobotCmdSrv.hpp"
 #include <crust_msgs/srv/robot_cmd_srv.hpp>
+#include <crust_msgs/msg/robot_cmd_msg.hpp>
+//#include <crust_msgs/msg/robot_cmd_msg.h>
+//#include <crust_msgs/srv/robot_cmd_srv.h>
 #include <memory>
 
 #include <moveit/move_group_interface/move_group_interface.h>
@@ -23,11 +26,13 @@
 #include "tf2/exceptions.h"
 #include "tf2_ros/transform_listener.h"
 #include "tf2_ros/buffer.h"
+#include <std_msgs/msg/int8.hpp>
 
 //#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <tf2/LinearMath/Quaternion.h>
 using std::placeholders::_1;
 using std::placeholders::_2;
+using std::placeholders::_3;
 #include <stdio.h>
 void robot_handler(const std::shared_ptr<crust_msgs::srv::RobotCmdSrv::Request> request,
           std::shared_ptr<crust_msgs::srv::RobotCmdSrv::Response>      response)
@@ -66,7 +71,10 @@ class RobotHandler : public rclcpp::Node
       pose_sub_ = create_subscription<geometry_msgs::msg::PoseStamped>
           ("/detected_object", 10,
           std::bind(&RobotHandler::poseCallback, this, std::placeholders::_1));
-
+      //cmd_sub = create_subscription<<crust_msgs::srv::RobotCmdSrv>("/cmd_msg",10,std::bind(&RobotHandler::cmdCallback, this, std::placeholders::_3));
+      //status_pub = 
+      cmd_sub_ = this->create_subscription<crust_msgs::msg::RobotCmdMsg>("/robot_cmd_msg",10,std::bind(&RobotHandler::cmdCaseMsg, this, std::placeholders::_1));
+      cmd_pub_ = this->create_publisher<std_msgs::msg::Int8>("/robot_cmd_status",10);
     }
     
     /*
@@ -87,6 +95,67 @@ class RobotHandler : public rclcpp::Node
         14: go to detected object
 
     */
+    void cmdCaseMsg(const crust_msgs::msg::RobotCmdMsg::SharedPtr msg){
+        robot_msg = *msg;
+         switch (robot_msg.cmd)
+              {
+              case 1:
+                  status_msg.data = RobotHandler::relativeMovementQuad(robot_msg.pose[0],robot_msg.pose[1],robot_msg.pose[2],robot_msg.pose[3],robot_msg.pose[4],robot_msg.pose[5],robot_msg.pose[6]);
+                
+                break;
+              case 2:
+
+                break;
+              
+              case 3:
+                  status_msg.data = RobotHandler::packDownRobot();
+                break;
+              
+              case 4:
+                  status_msg.data = RobotHandler::defaultPose();
+                break;
+              
+              case 5:
+
+                break;
+
+              case 6:
+                  status_msg.data = RobotHandler::absoluteMovementRPYCrustBase(robot_msg.pose[0],robot_msg.pose[1],robot_msg.pose[2],robot_msg.pose[3],robot_msg.pose[4],robot_msg.pose[5]);
+
+                break;
+              
+              case 7:
+
+                break;
+              
+              case 8:
+                  status_msg.data = RobotHandler::jointMovement(robot_msg.pose[0],robot_msg.pose[1],robot_msg.pose[2],robot_msg.pose[3]);
+                break;
+              
+              case 9:
+                  status_msg.data = RobotHandler::relativeMovementRPY(robot_msg.pose[0],robot_msg.pose[1],robot_msg.pose[2],robot_msg.pose[3],robot_msg.pose[4],robot_msg.pose[5]);
+
+                break;
+              
+              case 11:
+                  status_msg.data = RobotHandler::baseRelativeMovementQuad(robot_msg.pose[0],robot_msg.pose[1],robot_msg.pose[2],robot_msg.pose[3],robot_msg.pose[4],robot_msg.pose[5],robot_msg.pose[6]);
+                
+                break;
+              
+              case 12:
+                  status_msg.data = RobotHandler::baseRelativeMovementRPY(robot_msg.pose[0],robot_msg.pose[1],robot_msg.pose[2],robot_msg.pose[3],robot_msg.pose[4],robot_msg.pose[5]);
+                break;
+              
+              case 14:
+                  status_msg.data = RobotHandler::moveToObject();
+                break;
+              
+              default:
+                break;
+              }
+              cmd_pub_ ->publish(status_msg);
+
+    }
 
     void cmdCase(const std::shared_ptr<crust_msgs::srv::RobotCmdSrv::Request> request,
             std::shared_ptr<crust_msgs::srv::RobotCmdSrv::Response>      response)
@@ -616,6 +685,8 @@ class RobotHandler : public rclcpp::Node
 
         // Subscription to pose published by sensor node
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr pose_sub_;
+    rclcpp::Subscription<crust_msgs::msg::RobotCmdMsg>::SharedPtr cmd_sub_;
+    rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr cmd_pub_;
     // Listener for the broadcast transform message
     std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
     // Buffer that stores several seconds of transforms for easy lookup by the listener
@@ -624,6 +695,11 @@ class RobotHandler : public rclcpp::Node
     geometry_msgs::msg::PoseStamped pose_in_;
     // Pose in target frame (`arm_end_link`)
     geometry_msgs::msg::PoseStamped pose_out_;
+
+    crust_msgs::msg::RobotCmdMsg robot_msg;
+
+    std_msgs::msg::Int8 status_msg;
+
 
     void poseCallback(const geometry_msgs::msg::PoseStamped::SharedPtr msg){
         try {
