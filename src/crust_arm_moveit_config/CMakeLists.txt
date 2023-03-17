@@ -24,6 +24,7 @@ find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(std_msgs REQUIRED)
 
 set(dependencies
   std_msgs
@@ -41,7 +42,7 @@ ament_target_dependencies(sensor_node ${dependencies})
 
 add_executable(server src/robot_cmd_node.cpp)
 ament_target_dependencies(server
-  rclcpp crust_msgs moveit_ros_planning_interface tf2 tf2_geometry_msgs)  
+  rclcpp crust_msgs moveit_ros_planning_interface tf2 tf2_geometry_msgs std_msgs)  
 add_executable(client src/crust_test_node.cpp)
 ament_target_dependencies(client
   rclcpp crust_msgs)  

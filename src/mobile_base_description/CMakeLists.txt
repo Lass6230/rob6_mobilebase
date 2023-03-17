@@ -12,11 +12,21 @@ find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(message_filters REQUIRED)
+find_package(crust_msgs REQUIRED)
 
 
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
+add_executable(main_program src/main_program.cpp)
+ament_target_dependencies(
+  main_program
+  rclcpp
+  tf2
+  tf2_ros
+  nav_msgs
+  crust_msgs 
+)
 
 add_executable(odom_rebroadcaster src/odom_ZOH.cpp)
 ament_target_dependencies(
@@ -42,6 +52,7 @@ ament_target_dependencies(
 install(TARGETS
   odom_rebroadcaster
   ticks_to_odom
+  main_program
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY
