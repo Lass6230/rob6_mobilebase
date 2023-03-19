@@ -152,11 +152,55 @@ class RobotHandler : public rclcpp::Node
                   status_msg.data = RobotHandler::moveToObject();
                 break;
               
+              case 15:
+                  status_msg.data = RobotHandler::moveToAruco();
+                break;
+              
+              case 16:
+                  status_msg.data = RobotHandler::moveToBall();
+                break;
+              
               default:
                 break;
               }
               cmd_pub_ ->publish(status_msg);
 
+    }
+
+    bool moveToBall(){
+      geometry_msgs::msg::TransformStamped target_pose; //= tf_buffer_.lookupTransform("tool_link","crust_base_link");
+      
+      try {
+          //target_pose = tf_buffer_->lookupTransform();
+          target_pose = tf_buffer_->lookupTransform(
+            "crust_base_link", "ball",
+            tf2::TimePointZero);
+          return RobotHandler::absoluteMovementQuadCrustBase(target_pose.transform.translation.x,target_pose.transform.translation.y,target_pose.transform.translation.z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w);
+   
+        } catch (const tf2::TransformException & ex) {
+          RCLCPP_INFO(
+            this->get_logger(), "Could not transform %s to %s: %s",
+            "ball", "crust_base_link", ex.what());
+          return false;
+        }
+    }
+
+    bool moveToAruco(){
+      geometry_msgs::msg::TransformStamped target_pose; //= tf_buffer_.lookupTransform("tool_link","crust_base_link");
+      
+      try {
+          //target_pose = tf_buffer_->lookupTransform();
+          target_pose = tf_buffer_->lookupTransform(
+            "crust_base_link", "aruco",
+            tf2::TimePointZero);
+          return RobotHandler::absoluteMovementQuadCrustBase(target_pose.transform.translation.x,target_pose.transform.translation.y,target_pose.transform.translation.z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w);
+   
+        } catch (const tf2::TransformException & ex) {
+          RCLCPP_INFO(
+            this->get_logger(), "Could not transform %s to %s: %s",
+            "aruco", "crust_base_link", ex.what());
+          return false;
+        }
     }
 
     void cmdCase(const std::shared_ptr<crust_msgs::srv::RobotCmdSrv::Request> request,

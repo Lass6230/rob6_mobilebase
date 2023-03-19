@@ -40,7 +40,7 @@ class MainProgram : public rclcpp::Node
             auto sub2_opt = rclcpp::SubscriptionOptions();
             sub2_opt.callback_group = callback_group_subscriber2_;
             
-            timer_ = this->create_wall_timer(20ms, std::bind(&MainProgram::timer_callback, this),callback_group_subscriber2_ );
+            timer_ = this->create_wall_timer(100ms, std::bind(&MainProgram::timer_callback, this),callback_group_subscriber2_ );
             //sub_vac_ = this->create_subscription<std_msgs::msg::Int8>("vaccumControl", 10, std::bind(&MainProgram::vacCallback, this, _1), sub1_opt);
             pub_vac_ = this->create_publisher<std_msgs::msg::Int8>("vaccumControl",10);
 
@@ -155,12 +155,59 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 90:
-                RCLCPP_INFO(this->get_logger(), "robot_done");
+                RCLCPP_INFO(this->get_logger(), "robot_15");
+                robot_msg.cmd = 15;
+                robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};
+                pub_robot_->publish(robot_msg);
+                t_time1 = clock();
+                sfc = 100;
                 break;
             
+            case 100:
+                t_time2 = clock();
+                if((float)((t_time2 -t_time1)*10.0/CLOCKS_PER_SEC) >5.0){
+                    sfc = 110;
+                }
+                if(robot_status == 1){
+                    robot_status = 0;
+                    sfc = 110;
+                }
+                break;
+            
+            case 110:
+                t_time2 = clock();
+                RCLCPP_INFO(this->get_logger(), "robot_16");
+                robot_msg.cmd = 16;
+                robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};
+                pub_robot_->publish(robot_msg);
+                t_time1 = clock();
+                sfc = 120;
+                break;
+            
+            case 120:
+                if(robot_status == 1){
+                    robot_status = 0;
+                    sfc = 130;
+                }
+                if((float)((t_time2 -t_time1)*10.0/CLOCKS_PER_SEC) >5.0){
+                    sfc = 140;
+                }
+                break;
+            
+            case 130:
+                RCLCPP_INFO(this->get_logger(), "done");
+                sfc = 140;
+                break;
+            
+            case 140:
+                RCLCPP_INFO(this->get_logger(), "timed out, restarting program");
+                sfc = 0;
+                break;
+
             default:
                 break;
             }
+            RCLCPP_INFO(this->get_logger(), "sfc: %d",sfc);
         }
 
         bool service_done_ = false;

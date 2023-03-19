@@ -9,7 +9,7 @@ class Sensor: public rclcpp::Node{
 private:
     void objectCallback(){
 
-        geometry_msgs::msg::TransformStamped t;
+        
 
         // Read message content and assign it to
         // corresponding tf variables
@@ -33,6 +33,40 @@ private:
         // Change the detected object's position, depending on whether count_ is even or odd
         count_++;
         pose_pub_->publish(pose_);
+
+        geometry_msgs::msg::TransformStamped t;
+
+        t.header.stamp = this->get_clock()->now();
+        t.header.frame_id = "tool_link";
+        t.child_frame_id = "aruco";
+
+        t.transform.translation.x = 0.06;//atof(transformation[2]);
+        //t.transform.translation.y = atof(transformation[3]);
+        //t.transform.translation.z = atof(transformation[4]);
+        tf2::Quaternion q;
+        q.setRPY(0,0,0);
+        t.transform.rotation.x = q.x();
+        t.transform.rotation.y = q.y();
+        t.transform.rotation.z = q.z();
+        t.transform.rotation.w = q.w();
+
+        tf_broadcaster_->sendTransform(t);
+        geometry_msgs::msg::TransformStamped t2;
+        t2.header.stamp = this->get_clock()->now();
+        t2.header.frame_id = "tool_link";
+        t2.child_frame_id = "ball";
+
+        t2.transform.translation.x = 0.06;//atof(transformation[2]);
+        //t.transform.translation.y = atof(transformation[3]);
+        //t.transform.translation.z = atof(transformation[4]);
+        tf2::Quaternion q2;
+        q2.setRPY(0,0,0);
+        t2.transform.rotation.x = q.x();
+        t2.transform.rotation.y = q.y();
+        t2.transform.rotation.z = q.z();
+        t2.transform.rotation.w = q.w();
+
+        tf_broadcaster_->sendTransform(t2);
     }
 
     // Timer for the simulated detected object
