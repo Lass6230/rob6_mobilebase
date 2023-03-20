@@ -4,7 +4,7 @@
     name="camera_link">
     <inertial>
       <origin
-        xyz="-0.012882 -0.030953 -0.0014659"
+        xyz="-0.0086825 -0.017953 -0.0014659"
         rpy="0 0 0" />
       <mass
         value="0.12527" />
@@ -44,7 +44,7 @@
     name="camera_joint"
     type="fixed">
     <origin
-      xyz="-0.05 0.030962 0.0375"
+      xyz="-0.0542 0.017962 0.0375"
       rpy="0 0 0" />
     <parent
       link="tool_link" />

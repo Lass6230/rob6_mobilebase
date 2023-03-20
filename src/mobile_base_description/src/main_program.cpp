@@ -93,7 +93,7 @@ class MainProgram : public rclcpp::Node
                 RCLCPP_INFO(this->get_logger(), "time2: %f",(m_lastTime2-m_lastTime1));
                 if((float)((t_time2 -t_time1)*10.0/CLOCKS_PER_SEC) >3.0){
                     sfc = 20;
-                }1
+                }
                 if((m_lastTime2-m_lastTime1)>3.0){
                     sfc = 20;
                 }
@@ -176,32 +176,50 @@ class MainProgram : public rclcpp::Node
             
             case 110:
                 t_time2 = clock();
-                RCLCPP_INFO(this->get_logger(), "robot_16");
+                RCLCPP_INFO(this->get_logger(), "robot_15 w offset");
                 robot_msg.cmd = 16;
-                robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};
+                robot_msg.pose = {0.0,0.0,0.1,0.0,0.0,0.0};
                 pub_robot_->publish(robot_msg);
                 t_time1 = clock();
                 sfc = 120;
                 break;
             
             case 120:
+                t_time2 = clock();
                 if(robot_status == 1){
                     robot_status = 0;
                     sfc = 130;
                 }
-                if((float)((t_time2 -t_time1)*10.0/CLOCKS_PER_SEC) >5.0){
-                    sfc = 140;
+                if((float)((t_time2 -t_time1)*10.0/CLOCKS_PER_SEC) >10.0){
+                    sfc = 150;
+                    RCLCPP_INFO(this->get_logger(), "timed out");
                 }
                 break;
             
             case 130:
-                RCLCPP_INFO(this->get_logger(), "done");
+                RCLCPP_INFO(this->get_logger(), "robot_15");
+                robot_msg.cmd = 16;
+                robot_msg.pose = {0.0,0.0,-0.01,0.0,0.0,0.0};
+                pub_robot_->publish(robot_msg);
+                t_time1 = clock();
                 sfc = 140;
                 break;
             
             case 140:
-                RCLCPP_INFO(this->get_logger(), "timed out, restarting program");
-                sfc = 0;
+                t_time2 = clock();
+                if(robot_status == 1){
+                    robot_status = 0;
+                    sfc = 150;
+                }
+                if((float)((t_time2 -t_time1)*10.0/CLOCKS_PER_SEC) >10.0){
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    sfc = 150;
+                }
+                break;
+            
+            case 150:
+                RCLCPP_INFO(this->get_logger(), "restarting program");
+                //sfc = 0;
                 break;
 
             default:
