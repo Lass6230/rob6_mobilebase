@@ -82,7 +82,7 @@ class MainProgram : public rclcpp::Node
                 t_time1 = clock();
                 m_lastTime1 = m_clock->now().seconds();
                 
-                sfc = 10;
+                sfc = 110;
 
                 break;
             case 10:
@@ -93,7 +93,7 @@ class MainProgram : public rclcpp::Node
                 RCLCPP_INFO(this->get_logger(), "time2: %f",(m_lastTime2-m_lastTime1));
                 if((float)((t_time2 -t_time1)*10.0/CLOCKS_PER_SEC) >3.0){
                     sfc = 20;
-                }
+                }1
                 if((m_lastTime2-m_lastTime1)>3.0){
                     sfc = 20;
                 }
@@ -150,7 +150,7 @@ class MainProgram : public rclcpp::Node
             case 80:
                 if(robot_status == 1){
                     robot_status = 0;
-                    sfc = 90;
+                    sfc = 110;
                 }
                 break;
             

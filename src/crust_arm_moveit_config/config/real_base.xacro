@@ -4,6 +4,7 @@
 
     <!-- Import panda urdf file -->
     <xacro:include filename="$(find crust_arm_description)/urdf/crust_arm_mobile_realsense.urdf.xacro" />
+    <xacro:include filename="$(find crust_arm_description)/urdf/realsense.urdf.xacro" />
 
     <!-- Import panda ros2_control description -->
     <xacro:include filename="crust.ros2_control.xacro" />

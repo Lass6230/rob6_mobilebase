@@ -153,11 +153,11 @@ class RobotHandler : public rclcpp::Node
                 break;
               
               case 15:
-                  status_msg.data = RobotHandler::moveToAruco();
+                  status_msg.data = RobotHandler::moveToAruco(robot_msg.pose[0],robot_msg.pose[1],robot_msg.pose[2]);
                 break;
               
               case 16:
-                  status_msg.data = RobotHandler::moveToBall();
+                  status_msg.data = RobotHandler::moveToBall(robot_msg.pose[0],robot_msg.pose[1],robot_msg.pose[2]);
                 break;
               
               default:
@@ -167,7 +167,7 @@ class RobotHandler : public rclcpp::Node
 
     }
 
-    bool moveToBall(){
+    bool moveToBall(double x, double y, double z){
       geometry_msgs::msg::TransformStamped target_pose; //= tf_buffer_.lookupTransform("tool_link","crust_base_link");
       
       try {
@@ -175,7 +175,15 @@ class RobotHandler : public rclcpp::Node
           target_pose = tf_buffer_->lookupTransform(
             "crust_base_link", "ball",
             tf2::TimePointZero);
-          return RobotHandler::absoluteMovementQuadCrustBase(target_pose.transform.translation.x,target_pose.transform.translation.y,target_pose.transform.translation.z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w);
+          auto const LOGGER = rclcpp::get_logger("moveToObject");
+          RCLCPP_INFO(LOGGER,"x: %f", target_pose.transform.translation.x);
+          RCLCPP_INFO(LOGGER,"y: %f", target_pose.transform.translation.y);
+          RCLCPP_INFO(LOGGER,"z: %f", target_pose.transform.translation.z);
+          RCLCPP_INFO(LOGGER,"x: %f", target_pose.transform.rotation.x);
+          RCLCPP_INFO(LOGGER,"y: %f", target_pose.transform.rotation.y);
+          RCLCPP_INFO(LOGGER,"z: %f", target_pose.transform.rotation.z);
+          RCLCPP_INFO(LOGGER,"x: %f", target_pose.transform.rotation.w);
+          return RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.5);
    
         } catch (const tf2::TransformException & ex) {
           RCLCPP_INFO(
@@ -185,7 +193,7 @@ class RobotHandler : public rclcpp::Node
         }
     }
 
-    bool moveToAruco(){
+    bool moveToAruco(double x, double y, double z){
       geometry_msgs::msg::TransformStamped target_pose; //= tf_buffer_.lookupTransform("tool_link","crust_base_link");
       
       try {
@@ -193,7 +201,15 @@ class RobotHandler : public rclcpp::Node
           target_pose = tf_buffer_->lookupTransform(
             "crust_base_link", "aruco",
             tf2::TimePointZero);
-          return RobotHandler::absoluteMovementQuadCrustBase(target_pose.transform.translation.x,target_pose.transform.translation.y,target_pose.transform.translation.z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w);
+          auto const LOGGER = rclcpp::get_logger("moveToObject");
+          RCLCPP_INFO(LOGGER,"x: %f", target_pose.transform.translation.x);
+          RCLCPP_INFO(LOGGER,"y: %f", target_pose.transform.translation.y);
+          RCLCPP_INFO(LOGGER,"z: %f", target_pose.transform.translation.z);
+          RCLCPP_INFO(LOGGER,"x: %f", target_pose.transform.rotation.x);
+          RCLCPP_INFO(LOGGER,"y: %f", target_pose.transform.rotation.y);
+          RCLCPP_INFO(LOGGER,"z: %f", target_pose.transform.rotation.z);
+          RCLCPP_INFO(LOGGER,"x: %f", target_pose.transform.rotation.w);
+          return RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.5);
    
         } catch (const tf2::TransformException & ex) {
           RCLCPP_INFO(
@@ -343,6 +359,59 @@ class RobotHandler : public rclcpp::Node
               return status;
     }
 
+    bool absoluteMovementQuadCrustBaseWOrientationTolerance(double x, double y, double z, double q_x, double q_y, double q_z, double q_w, double orientation_tolerance)
+      {
+              bool status;
+              rclcpp::NodeOptions node_options;
+              node_options.automatically_declare_parameters_from_overrides(true);
+              auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
+              rclcpp::executors::MultiThreadedExecutor executor;
+              executor.add_node(move_group_node);
+              std::thread([&executor]() { executor.spin(); }).detach();
+              static const std::string PLANNING_GROUP = "manipulator";
+              moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
+              moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+              const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+              auto const LOGGER = rclcpp::get_logger("absoluteMovementQuadCrustbase");
+             
+              move_group.setNumPlanningAttempts(5);
+
+              move_group.setPlanningTime(10.0);
+              move_group.setGoalOrientationTolerance(orientation_tolerance);
+
+              moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+
+              move_group.setPoseReferenceFrame("crust_base_link");
+              geometry_msgs::msg::PoseStamped current_pose;
+              
+              move_group.setStartStateToCurrentState();
+              
+              geometry_msgs::msg::Pose pos;
+              pos.orientation.x = q_x;
+              pos.orientation.y = q_y;
+              pos.orientation.z = q_z;
+              pos.orientation.w = q_w;
+              pos.position.x = x;
+              pos.position.y = y;
+              pos.position.z = z;
+              move_group.setPoseTarget(pos);
+              bool success = static_cast<bool>(move_group.plan(my_plan));
+              RCLCPP_INFO(LOGGER, " (baseRelativeMovementQuad) %s", success ? "" : "FAILED");
+              if(success == true){
+                  //move_group.move();
+                  move_group.execute(my_plan);
+                  status = true;
+
+                  
+              }
+              else
+              {
+                  status = false;
+              }
+              executor.cancel();
+              return status;
+      }
+
     bool absoluteMovementQuadCrustBase(double x, double y, double z, double q_x, double q_y, double q_z, double q_w)
       {
               bool status;
@@ -361,6 +430,7 @@ class RobotHandler : public rclcpp::Node
               move_group.setNumPlanningAttempts(5);
 
               move_group.setPlanningTime(10.0);
+              //move_group.setGoalOrientationTolerance(0.5);
 
               moveit::planning_interface::MoveGroupInterface::Plan my_plan;
 
