@@ -111,8 +111,8 @@ class ImageSubscriberNode(Node):
         center_x, center_y = cv_image.shape[1]/2, cv_image.shape[0]/2
                     
         #calculate angle from center
-        x_angle = (center_x - x) / cv_image.shape[1] * 2 * 69
-        y_angle = (center_y - y) / cv_image.shape[0] * 2 * 42
+        x_angle = (center_x - x) / cv_image.shape[1] * 69
+        y_angle = (center_y - y) / cv_image.shape[0] * 42
         z_angle = np.sqrt(np.square((center_x - x)) + np.square((center_y - y))) / np.sqrt(np.square(cv_image.shape[1]) + np.square(cv_image.shape[0])) * 80.78
 
         #calculate cartesian coordinates in m
