@@ -42,4 +42,5 @@
     <disable_collisions link1="link_3" link2="link_4" reason="Adjacent"/>
     <disable_collisions link1="link_3" link2="tool_link" reason="Never"/>
     <disable_collisions link1="link_4" link2="tool_link" reason="Adjacent"/>
+    
 </robot>

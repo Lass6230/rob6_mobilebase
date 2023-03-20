@@ -42,4 +42,7 @@
     <disable_collisions link1="link_3" link2="link_4" reason="Adjacent"/>
     <disable_collisions link1="link_3" link2="tool_link" reason="Never"/>
     <disable_collisions link1="link_4" link2="tool_link" reason="Adjacent"/>
+    <disable_collisions link1="tool_link" link2="camera_link" reason="Never"/> <!-- lasse have added-->
+    <disable_collisions link1="tool_link" link2="camera_link" reason="Adjacent"/> <!-- lasse have added-->
+    
 </robot>

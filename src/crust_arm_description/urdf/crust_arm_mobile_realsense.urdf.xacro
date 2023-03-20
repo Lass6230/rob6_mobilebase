@@ -330,7 +330,7 @@
       xyz="0 0 0" />
   </joint>
   <!--<link
-    name="realsense_link">
+    name="camera_link">
     <inertial>
       <origin
         xyz="-0.0086825 -0.017953 -0.0014659"
@@ -370,7 +370,7 @@
     </collision>
   </link>
   <joint
-    name="realsense_joint"
+    name="camera_joint"
     type="fixed">
     <origin
       xyz="-0.016872 -0.10552 0.017962"
@@ -378,7 +378,7 @@
     <parent
       link="link_4" />
     <child
-      link="realsense_link" />
+      link="camera_link" />
     <axis
       xyz="0 0 0" />
   </joint>-->
