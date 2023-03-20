@@ -37,10 +37,10 @@ class ImageSubscriberNode(Node):
 
 
     def image_callback(self, rgb_image, depth_image):
-        if self.search:
-            cv_image = self.bridge.imgmsg_to_cv2(rgb_image, desired_encoding='bgr8')
-            cv_depth = self.bridge.imgmsg_to_cv2(depth_image, desired_encoding="passthrough")
-            self.process_image(cv_image, cv_depth)
+        #if self.search:
+        cv_image = self.bridge.imgmsg_to_cv2(rgb_image, desired_encoding='bgr8')
+        cv_depth = self.bridge.imgmsg_to_cv2(depth_image, desired_encoding="passthrough")
+        self.process_image(cv_image, cv_depth)
 
 
     def process_image(self, cv_image, cv_depth):
