@@ -95,6 +95,7 @@ class RobotHandler : public rclcpp::Node
         14: go to detected object
         15: go to arcro
         16: go to golfball
+        17: Cartesian path w. tolerance
 
     */
     void cmdCaseMsg(const crust_msgs::msg::RobotCmdMsg::SharedPtr msg){
@@ -163,6 +164,10 @@ class RobotHandler : public rclcpp::Node
               
               case 16:
                   status_msg.data = RobotHandler::moveToBall(robot_msg.pose[0],robot_msg.pose[1],robot_msg.pose[2]);
+                break;
+              
+              case 17:
+                status_msg.data = RobotHandler::CartesianPath(robot_msg.pose[0],robot_msg.pose[1],robot_msg.pose[2],robot_msg.pose[3],robot_msg.pose[4],robot_msg.pose[5],robot_msg.pose[6],robot_msg.pose[7]);
                 break;
               
               default:
