@@ -148,6 +148,11 @@ class RobotHandler : public rclcpp::Node
                   status_msg.data = RobotHandler::baseRelativeMovementRPY(robot_msg.pose[0],robot_msg.pose[1],robot_msg.pose[2],robot_msg.pose[3],robot_msg.pose[4],robot_msg.pose[5]);
                 break;
               
+              case 13:
+                  status_msg.data = RobotHandler::stop();
+
+                break;
+              
               case 14:
                   status_msg.data = RobotHandler::moveToObject();
                 break;
@@ -167,6 +172,87 @@ class RobotHandler : public rclcpp::Node
 
     }
 
+    bool CartesianPath(double x, double y, double z, double q_x, double q_y, double q_z, double q_w, double orientation_tolerance){
+        std::vector<geometry_msgs::msg::Pose> waypoints;
+        bool status;
+        rclcpp::NodeOptions node_options;
+        node_options.automatically_declare_parameters_from_overrides(true);
+        auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
+        rclcpp::executors::MultiThreadedExecutor executor;
+        executor.add_node(move_group_node);
+        std::thread([&executor]() { executor.spin(); }).detach();
+        static const std::string PLANNING_GROUP = "manipulator";
+        moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
+        moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+        const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+        auto const LOGGER = rclcpp::get_logger("absoluteMovementQuadCrustbase");
+        
+        move_group.setNumPlanningAttempts(5);
+
+        move_group.setPlanningTime(10.0);
+        move_group.setGoalOrientationTolerance(orientation_tolerance);
+
+        moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+
+        move_group.setPoseReferenceFrame("crust_base_link");
+        //geometry_msgs::msg::PoseStamped current_pose;
+        
+        move_group.setStartStateToCurrentState();
+
+        
+        geometry_msgs::msg::Pose pos;
+        pos.orientation.x = q_x;
+        pos.orientation.y = q_y;
+        pos.orientation.z = q_z;
+        pos.orientation.w = q_w;
+        pos.position.x = x;
+        pos.position.y = y;
+        pos.position.z = z;
+        pos.position.z += 0.05;
+        waypoints.push_back(pos);
+        pos.position.z = z;
+        waypoints.push_back(pos);
+        moveit_msgs::msg::RobotTrajectory trajectory;
+        const double jump_threshold = 0.0;
+        const double eef_step = 0.01;
+        double fraction = move_group.computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory);
+        move_group.execute(trajectory);
+
+        if(fraction < 0.0){
+           
+            status = false;
+
+            
+        }
+        else
+        {
+            status = true;
+        }
+        executor.cancel();
+        return status;
+
+
+    }
+
+    bool stop(){
+      bool status;
+      rclcpp::NodeOptions node_options;
+      node_options.automatically_declare_parameters_from_overrides(true);
+      auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
+      rclcpp::executors::MultiThreadedExecutor executor;
+      executor.add_node(move_group_node);
+      std::thread([&executor]() { executor.spin(); }).detach();
+      static const std::string PLANNING_GROUP = "manipulator";
+      moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
+      moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+      const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+      auto const LOGGER = rclcpp::get_logger("stop");
+      move_group.stop();
+      status = true;
+      return status;
+
+    }
+
     bool moveToBall(double x, double y, double z){
       geometry_msgs::msg::TransformStamped target_pose; //= tf_buffer_.lookupTransform("tool_link","crust_base_link");
       
@@ -183,8 +269,9 @@ class RobotHandler : public rclcpp::Node
           RCLCPP_INFO(LOGGER,"y: %f", target_pose.transform.rotation.y);
           RCLCPP_INFO(LOGGER,"z: %f", target_pose.transform.rotation.z);
           RCLCPP_INFO(LOGGER,"x: %f", target_pose.transform.rotation.w);
-          return RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.4);
-   
+          //return RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.4);
+          return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.4);
+          
         } catch (const tf2::TransformException & ex) {
           RCLCPP_INFO(
             this->get_logger(), "Could not transform %s to %s: %s",
@@ -209,8 +296,9 @@ class RobotHandler : public rclcpp::Node
           RCLCPP_INFO(LOGGER,"y: %f", target_pose.transform.rotation.y);
           RCLCPP_INFO(LOGGER,"z: %f", target_pose.transform.rotation.z);
           RCLCPP_INFO(LOGGER,"x: %f", target_pose.transform.rotation.w);
-          return RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.4);
-   
+          //return RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.4);
+          return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.4);
+          
         } catch (const tf2::TransformException & ex) {
           RCLCPP_INFO(
             this->get_logger(), "Could not transform %s to %s: %s",
