@@ -30,7 +30,17 @@ def generate_launch_description():
     # Get the launch directory
     bringup_dir = get_package_share_directory('nav2_bringup')
     mobile_base_dir = get_package_share_directory('mobile_base_description')
+    turtlebotgaz = get_package_share_directory('turtlebot3_gazebo')
     launch_dir = os.path.join(bringup_dir, 'launch')
+
+
+    launch_file_dir = os.path.join(get_package_share_directory('turtlebot3_gazebo'), 'launch')
+    pkg_gazebo_ros = get_package_share_directory('gazebo_ros')
+
+    x_pose = LaunchConfiguration('x_pose', default='-2.0')
+    y_pose = LaunchConfiguration('y_pose', default='-0.5')
+
+
 
     # Create the launch configuration variables
     slam = LaunchConfiguration('slam')
@@ -71,7 +81,7 @@ def generate_launch_description():
 
     declare_slam_cmd = DeclareLaunchArgument(
         'slam',
-        default_value='True', #False
+        default_value='False', #False
         description='Whether run a SLAM')
 
     declare_map_yaml_cmd = DeclareLaunchArgument(
@@ -79,10 +89,16 @@ def generate_launch_description():
         default_value=os.path.join(
             mobile_base_dir, 'maps', 'map.yaml'),
         description='Full path to map file to load')
+    
+    # declare_map_yaml_cmd = DeclareLaunchArgument(
+    #     'map',
+    #     default_value=os.path.join(
+    #         bringup_dir, 'maps', 'turtlebot3_world.yaml'),
+    #     description='Full path to map file to load')
 
     declare_use_sim_time_cmd = DeclareLaunchArgument(
         'use_sim_time',
-        default_value='true',
+        default_value='True',
         description='Use simulation (Gazebo) clock if true')
 
     declare_params_file_cmd = DeclareLaunchArgument(
@@ -97,7 +113,7 @@ def generate_launch_description():
     declare_rviz_config_file_cmd = DeclareLaunchArgument(
         'rviz_config_file',
         default_value=os.path.join(
-            bringup_dir, 'rviz', 'nav2_default_view.rviz'),
+            mobile_base_dir, 'config', 'default.rviz'),
         description='Full path to the RVIZ config file to use')
 
     declare_use_simulator_cmd = DeclareLaunchArgument(
@@ -126,7 +142,10 @@ def generate_launch_description():
         #              https://github.com/ROBOTIS-GIT/turtlebot3_simulations/issues/91
         # default_value=os.path.join(get_package_share_directory('turtlebot3_gazebo'),
         # worlds/turtlebot3_worlds/waffle.model')
-        default_value=os.path.join(bringup_dir, 'worlds', 'waffle.model'),
+        default_value=os.path.join(
+            turtlebotgaz,
+            'worlds',
+            'turtlebot3_house.world'),
         description='Full path to world model file to load')
 
     # Specify the actions
@@ -172,6 +191,17 @@ def generate_launch_description():
                           'use_sim_time': use_sim_time,
                           'params_file': params_file,
                           'autostart': autostart}.items())
+    
+
+    spawn_turtlebot_cmd = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(launch_file_dir, 'spawn_turtlebot3.launch.py')
+        ),
+        launch_arguments={
+            'x_pose': x_pose,
+            'y_pose': y_pose
+        }.items()
+    )
 
     # Create the launch description and populate
     ld = LaunchDescription()
@@ -200,5 +230,7 @@ def generate_launch_description():
     ld.add_action(start_robot_state_publisher_cmd)
     ld.add_action(rviz_cmd)
     ld.add_action(bringup_cmd)
+
+    ld.add_action(spawn_turtlebot_cmd)
 
     return ld
