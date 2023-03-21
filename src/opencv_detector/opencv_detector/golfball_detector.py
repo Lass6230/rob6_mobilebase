@@ -6,7 +6,7 @@ import cv2
 from cv2 import aruco
 import numpy as np
 import message_filters 
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, Int8
 
 from geometry_msgs.msg import TransformStamped
 from tf2_ros import TransformBroadcaster
@@ -23,7 +23,8 @@ class ImageSubscriberNode(Node):
         self.tf_broadcaster = TransformBroadcaster(self)
         self.subscription = self.create_subscription(Bool, '/search_golfball', self.start_callback, 10)
         self.subscription
-       
+        self.status_publisher = self.create_publisher(Int8, '/status_golfball',10)
+        self.found_ball_counter = 0
    
         # Syncronize topics
         ts = message_filters.TimeSynchronizer([self.image_sub, self.depth_sub], 1)
@@ -137,6 +138,14 @@ class ImageSubscriberNode(Node):
         tf.transform.rotation.w = 1.0
 
         self.tf_broadcaster.sendTransform(tf)
+        self.found_ball_counter += 1
+        if self.found_ball_counter == 5:
+            msg = Int8()
+            msg.data = 1
+            self.status_publisher(msg)
+            self.found_ball_counter = 0
+            
+        
 
 
 
