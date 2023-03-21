@@ -142,7 +142,7 @@ class ImageSubscriberNode(Node):
         if self.found_ball_counter == 5:
             msg = Int8()
             msg.data = 1
-            self.status_publisher(msg)
+            self.status_publisher.publish(msg)
             self.found_ball_counter = 0
             
         

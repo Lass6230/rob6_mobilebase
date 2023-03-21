@@ -37,10 +37,10 @@ private:
         geometry_msgs::msg::TransformStamped t;
 
         t.header.stamp = this->get_clock()->now();
-        t.header.frame_id = "tool_link";
+        t.header.frame_id = "camera_link";
         t.child_frame_id = "aruco";
 
-        t.transform.translation.x = 0.06;//atof(transformation[2]);
+        t.transform.translation.x = 0.1;//atof(transformation[2]);
         //t.transform.translation.y = atof(transformation[3]);
         //t.transform.translation.z = atof(transformation[4]);
         tf2::Quaternion q;
@@ -53,10 +53,10 @@ private:
         tf_broadcaster_->sendTransform(t);
         geometry_msgs::msg::TransformStamped t2;
         t2.header.stamp = this->get_clock()->now();
-        t2.header.frame_id = "tool_link";
+        t2.header.frame_id = "camera_link";
         t2.child_frame_id = "ball";
 
-        t2.transform.translation.x = 0.06;//atof(transformation[2]);
+        t2.transform.translation.x = 0.1;//atof(transformation[2]);
         //t.transform.translation.y = atof(transformation[3]);
         //t.transform.translation.z = atof(transformation[4]);
         tf2::Quaternion q2;
