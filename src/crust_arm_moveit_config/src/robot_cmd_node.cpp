@@ -85,7 +85,7 @@ class RobotHandler : public rclcpp::Node
         4: defalut pos    (Viker)
         5: search 
         6: absolute pose RPY crust_base_link  (Viker)
-        7: absolute pose RPY baselink
+        7: absoluteMovementQuadCrustBase crust_baselink
         8: joint movement
         9: relative movement rpy
         10: relative movement rpy with camera offset
@@ -128,7 +128,8 @@ class RobotHandler : public rclcpp::Node
                 break;
               
               case 7:
-
+                  status_msg.data = RobotHandler::absoluteMovementQuadCrustBase(robot_msg.pose[0],robot_msg.pose[1],robot_msg.pose[2],robot_msg.pose[3],robot_msg.pose[4],robot_msg.pose[5],robot_msg.pose[6]);
+                
                 break;
               
               case 8:
@@ -341,9 +342,9 @@ class RobotHandler : public rclcpp::Node
                   response->status = RobotHandler::absoluteMovementRPYCrustBase(request->pose[0],request->pose[1],request->pose[2],request->pose[3],request->pose[4],request->pose[5]);
 
                 break;
-              
+                  
               case 7:
-
+                  response->status = RobotHandler::absoluteMovementQuadCrustBase(request->pose[0],request->pose[1],request->pose[2],request->pose[3],request->pose[4],request->pose[5],request->pose[6]);
                 break;
               
               case 8:
@@ -570,23 +571,38 @@ class RobotHandler : public rclcpp::Node
               moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
               moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
               const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
-              auto const LOGGER = rclcpp::get_logger("Relative movement quad");
+              auto const LOGGER = rclcpp::get_logger("Relative movement quad rpy");
              
               move_group.setNumPlanningAttempts(5);
 
               move_group.setPlanningTime(10.0);
+              move_group.setGoalOrientationTolerance(0.1);
               //std::vector< double > current_rpy =	move_group.getCurrentRPY();
               moveit::planning_interface::MoveGroupInterface::Plan my_plan;
              
               
               move_group.setPoseReferenceFrame("crust_base_link");
-              geometry_msgs::msg::PoseStamped current_pose;
-              current_pose = move_group.getCurrentPose();
+              //geometry_msgs::msg::PoseStamped current_pose;
+              //current_pose = move_group.getCurrentPose();
               
               
               move_group.setStartStateToCurrentState();
-              move_group.setPositionTarget(x,y,z);
-              move_group.setRPYTarget(rot_r, rot_p, rot_y);
+              geometry_msgs::msg::Pose pos;
+              tf2::Quaternion q_rot;
+              //q_orig.setRPY(current_rpy[0],current_rpy[1],current_rpy[2]);
+              q_rot.setRPY(rot_r, rot_p, rot_y);
+              //q_new = q_rot * q_orig;
+              q_rot.normalize();
+              pos.orientation.x = q_rot.x();
+              pos.orientation.y = q_rot.y();
+              pos.orientation.z = q_rot.z();
+              pos.orientation.w = q_rot.w();
+              pos.position.x = x;
+              pos.position.y = y;
+              pos.position.z = z;
+              //move_group.setPositionTarget(x,y,z);
+              //move_group.setRPYTarget(rot_r, rot_p, rot_y);
+              move_group.setPoseTarget(pos);
               
               bool success = static_cast<bool>(move_group.plan(my_plan));
               RCLCPP_INFO(LOGGER, " (baseRelativeMovementQuad) %s", success ? "" : "FAILED");

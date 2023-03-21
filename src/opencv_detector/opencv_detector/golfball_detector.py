@@ -23,7 +23,7 @@ class ImageSubscriberNode(Node):
         self.tf_broadcaster = TransformBroadcaster(self)
         self.subscription = self.create_subscription(Bool, '/search_golfball', self.start_callback, 10)
         self.subscription
-        self.status_publisher = self.create_publisher(Int8, '/status_golfball',10)
+        self.status_publisher = self.create_publisher(Int8, '/status_ball',10)
         self.found_ball_counter = 0
    
         # Syncronize topics
