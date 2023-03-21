@@ -11,6 +11,7 @@
 
 //#include "std_msgs/int8.hpp"
 #include <std_msgs/msg/int8.hpp>
+#include <std_msgs/msg/bool.hpp>
 #include <thread>
 #include <string>
 #include "std_msgs/msg/string.hpp"
@@ -46,10 +47,25 @@ class MainProgram : public rclcpp::Node
 
             pub_robot_ = this->create_publisher<crust_msgs::msg::RobotCmdMsg>("/robot_cmd_msg",10);
             sub_robot_ = this->create_subscription<std_msgs::msg::Int8>("/robot_cmd_status",10,std::bind(&MainProgram::subRobotStatus, this, _1), sub1_opt);
+            
+            // camera sub and pub
+            sub_camera_aruco_ = this->create_subscription<std_msgs::msg::Int8>("/status_aruco",10,std::bind(&MainProgram::subArucoStatus, this, _1), sub1_opt);
+            sub_camera_ball_ = this->create_subscription<std_msgs::msg::Int8>("/status_ball",10,std::bind(&MainProgram::subBallStatus, this, _1), sub1_opt);
+            pub_camera_aruco_ = this->create_publisher<std_msgs::msg::Bool>("/search_aruco",10);
+            pub_camera_ball_ = this->create_publisher<std_msgs::msg::Bool>("/search_golfball",10);
             //MainProgram::main_program();
         }
     
     private:
+
+        void subArucoStatus(const std_msgs::msg::Int8 & msg){
+            status_aruco = msg.data;
+        }
+
+        void subBallStatus(const std_msgs::msg::Int8 & msg){
+            status_ball = msg.data;
+        }
+
         void subRobotStatus(const std_msgs::msg::Int8 & msg){
             robot_status = msg.data;
         }
@@ -176,9 +192,11 @@ class MainProgram : public rclcpp::Node
             
             case 110:
                 t_time2 = clock();
-                RCLCPP_INFO(this->get_logger(), "robot_15 w offset");
+                vac_msg.data = 2;
+                pub_vac_->publish(vac_msg);
+                RCLCPP_INFO(this->get_logger(), "robot_16");
                 robot_msg.cmd = 16;
-                robot_msg.pose = {0.0,0.0,0.1,0.0,0.0,0.0};
+                robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};
                 pub_robot_->publish(robot_msg);
                 t_time1 = clock();
                 sfc = 120;
@@ -193,14 +211,18 @@ class MainProgram : public rclcpp::Node
                 if((float)((t_time2 -t_time1)*10.0/CLOCKS_PER_SEC) >10.0){
                     sfc = 150;
                     RCLCPP_INFO(this->get_logger(), "timed out");
+                    
                 }
                 break;
             
             case 130:
                 RCLCPP_INFO(this->get_logger(), "robot_15");
-                robot_msg.cmd = 16;
-                robot_msg.pose = {0.0,0.0,-0.01,0.0,0.0,0.0};
-                pub_robot_->publish(robot_msg);
+                vac_msg.data = 0;
+                pub_vac_->publish(vac_msg);
+
+                //robot_msg.cmd = 16;
+                //robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};
+                //pub_robot_->publish(robot_msg);
                 t_time1 = clock();
                 sfc = 140;
                 break;
@@ -221,6 +243,12 @@ class MainProgram : public rclcpp::Node
                 RCLCPP_INFO(this->get_logger(), "restarting program");
                 //sfc = 0;
                 break;
+            
+            case 160: // start of vision, vac and robot test
+                vac_msg.data = 2;
+                pub_vac_->publish(vac_msg);// Turn on vaccum pup
+                // make the robot go to the defalut pos
+                break;
 
             default:
                 break;
@@ -231,13 +259,34 @@ class MainProgram : public rclcpp::Node
         bool service_done_ = false;
 
         bool is_service_done() const {return this->service_done_;}
+
+
+        // crust arm service
         rclcpp::Client<crust_msgs::srv::RobotCmdSrv>::SharedPtr robot_client_ ;
+
+        // vaccum
         rclcpp::Subscription<std_msgs::msg::Int8>::SharedPtr sub_vac_;
         rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr pub_vac_;
+
+        // crust arm
         rclcpp::Publisher<crust_msgs::msg::RobotCmdMsg>::SharedPtr pub_robot_;
         rclcpp::Subscription<std_msgs::msg::Int8>::SharedPtr sub_robot_;
+
+        // callback group
         rclcpp::CallbackGroup::SharedPtr callback_group_subscriber1_;
         rclcpp::CallbackGroup::SharedPtr callback_group_subscriber2_;
+
+        //camera 
+        rclcpp::Subscription<std_msgs::msg::Int8>::SharedPtr sub_camera_aruco_;
+        rclcpp::Subscription<std_msgs::msg::Int8>::SharedPtr sub_camera_ball_;
+        rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr pub_camera_aruco_;
+        rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr pub_camera_ball_;
+        int32_t status_aruco = 0;
+        int32_t status_ball = 0;
+        std_msgs::msg::Bool aruco_msg;
+        std_msgs::msg::Bool ball_msg;
+
+
         rclcpp::TimerBase::SharedPtr timer_;
         size_t count_;
         int32_t sfc = 0;
