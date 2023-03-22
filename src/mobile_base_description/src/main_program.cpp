@@ -98,7 +98,7 @@ class MainProgram : public rclcpp::Node
                 t_time1 = clock();
                 m_lastTime1 = m_clock->now().seconds();
                 
-                sfc = 110;
+                sfc = 160;
 
                 break;
             case 10:
@@ -244,10 +244,94 @@ class MainProgram : public rclcpp::Node
                 //sfc = 0;
                 break;
             
-            case 160: // start of vision, vac and robot test
+            case 160: // start of vision, vac and robot test and set both ball and aruco shearch off
                 vac_msg.data = 2;
                 pub_vac_->publish(vac_msg);// Turn on vaccum pup
-                // make the robot go to the defalut pos
+
+                aruco_msg.data = false;
+                pub_camera_aruco_->publish(aruco_msg);
+                ball_msg.data = false;
+                pub_camera_ball_->publish(aruco_msg);
+                status_aruco = 0;
+                status_ball = 0;
+                
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.37336,-0.007814,0.24958,0.0,1.57,0.0};
+                pub_robot_->publish(robot_msg);// make the robot go to the defalut pos
+                m_lastTime1 = m_clock->now().seconds();
+                sfc = 170;
+                break;
+            
+            case 170: // check if robot default pos have en reached
+                m_lastTime2 = m_clock->now().seconds();
+                
+                if((m_lastTime2-m_lastTime1) >10.0){
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    sfc = 160;
+                    if(robot_attempts == 5){
+                        sfc = 1000;
+                    }
+                }
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 180;
+                }
+                break;
+            case 180: // Start the ball shearch
+                ball_msg.data = true;
+                pub_camera_ball_->publish(ball_msg);
+
+                sfc = 190;
+                break;
+            
+            case 190:
+                if(status_ball == 1)
+                {
+                    status_ball = 0;
+                    sfc = 200;
+                }
+
+                break;
+            
+            case 200:
+                robot_msg.cmd = 16;
+                robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};
+                pub_robot_->publish(robot_msg);
+                ball_msg.data = false;
+                pub_camera_ball_->publish(aruco_msg);
+                status_ball = 0;
+                m_lastTime1 = m_clock->now().seconds();
+                sfc = 210;
+                
+                break;
+            
+            case 210:
+                 m_lastTime2 = m_clock->now().seconds();
+                if(robot_status == 1){
+                    robot_status = 0;
+                    sfc = 220;
+                }
+                if((m_lastTime2-m_lastTime1) >10.0){
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    sfc = 200;
+                    if(robot_attempts == 5){
+                        sfc = 1000;
+                    }
+                }
+                break;
+                
+            
+            case 220:
+                vac_msg.data = 0;
+                pub_vac_->publish(vac_msg);
+                break;
+
+            case 1000:
+                vac_msg.data = 0;
+                pub_vac_->publish(vac_msg);
                 break;
 
             default:
@@ -302,6 +386,7 @@ class MainProgram : public rclcpp::Node
         rclcpp::TimerBase::SharedPtr m_timer2;
         int8_t robot_status = 0;
         crust_msgs::msg::RobotCmdMsg robot_msg;
+        int8_t robot_attempts = 0;
 };
 
 int main(int argc, char **argv)
