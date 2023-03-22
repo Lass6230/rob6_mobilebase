@@ -6,15 +6,46 @@ import os
 from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription
-from launch.conditions import IfCondition
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription, LogInfo
+from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch_ros.actions import Node
 
+import launch_ros
+from nav2_common.launch import HasNodeParams
+import yaml
+import xacro
+
+
+
+
+def load_file(package_name, file_path):
+    package_path = get_package_share_directory(package_name)
+    absolute_file_path = os.path.join(package_path, file_path)
+
+    try:
+        with open(absolute_file_path, "r") as file:
+            return file.read()
+    except EnvironmentError:  # parent of IOError, OSError *and* WindowsError where available
+        return None
+
+
+def load_yaml(package_name, file_path):
+    package_path = get_package_share_directory(package_name)
+    absolute_file_path = os.path.join(package_path, file_path)
+
+    try:
+        with open(absolute_file_path, "r") as file:
+            return yaml.safe_load(file)
+    except EnvironmentError:  # parent of IOError, OSError *and* WindowsError where available
+        return None
+
+
 
 def generate_launch_description():
-    # Get the launch directory
+
+     # Get the launch directory
     bringup_dir = get_package_share_directory('nav2_bringup')
     mobile_base_dir = get_package_share_directory('mobile_base_description')
     turtlebotgaz = get_package_share_directory('turtlebot3_gazebo')
@@ -53,8 +84,7 @@ def generate_launch_description():
     # TODO(orduno) Substitute with `PushNodeRemapping`
     #              https://github.com/ros2/launch_ros/issues/56
     remappings = [('/tf', 'tf'),
-                  ('/tf_static', 'tf_static'),
-                  ('/odom', 'odometry')]
+                  ('/tf_static', 'tf_static')]
 
     # Declare the launch arguments
     declare_namespace_cmd = DeclareLaunchArgument(
@@ -141,6 +171,44 @@ def generate_launch_description():
             'turtlebot3_house.world'),
         description='Full path to world model file to load')
 
+
+    # planning_context
+    robot_description_config = xacro.process_file(
+        os.path.join(
+            get_package_share_directory("crust_arm_moveit_config"),
+            "config",
+            "base.xacro",
+        )
+    )
+    robot_description = {"robot_description": robot_description_config.toxml()}
+
+  
+    # Publish TF
+    robot_state_publisher = Node(
+        package="robot_state_publisher",
+        executable="robot_state_publisher",
+        name="robot_state_publisher",
+        output="both",
+        parameters=[robot_description],
+    )
+
+    # Publish arbitrary joint angles
+    joint_state_publisher_node = launch_ros.actions.Node(
+        package='joint_state_publisher',
+        executable='joint_state_publisher',
+        name='joint_state_publisher',
+        #condition=launch.conditions.UnlessCondition(LaunchConfiguration('gui'))
+    )
+
+
+    odomZOH = Node(
+        package='mobile_base_description',
+        executable='odom_rebroadcaster',
+        name='odom_rebroadcaster',
+        output='screen'
+    )
+
+   
     # Specify the actions
     start_gazebo_server_cmd = ExecuteProcess(
         condition=IfCondition(use_simulator),
@@ -196,6 +264,9 @@ def generate_launch_description():
         }.items()
     )
 
+
+    
+
     # Create the launch description and populate
     ld = LaunchDescription()
 
@@ -225,7 +296,8 @@ def generate_launch_description():
     ld.add_action(bringup_cmd)
 
     ld.add_action(spawn_turtlebot_cmd)
-
+    ld.add_action(robot_state_publisher)
+    ld.add_action(odomZOH)
     return ld
 
 
