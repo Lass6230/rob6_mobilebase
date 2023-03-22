@@ -6,7 +6,7 @@ amcl:
     alpha3: 0.2
     alpha4: 0.2
     alpha5: 0.2
-    base_frame_id: "base_footprint"
+    base_frame_id: "base_link"
     beam_skip_distance: 0.5
     beam_skip_error_threshold: 0.9
     beam_skip_threshold: 0.3
@@ -14,7 +14,7 @@ amcl:
     global_frame_id: "map"
     lambda_short: 0.1
     laser_likelihood_max_dist: 2.0
-    laser_max_range: 20.0
+    laser_max_range: 10.0
     laser_min_range: 0.1
     laser_model_type: "likelihood_field"
     max_beams: 60
@@ -51,7 +51,7 @@ bt_navigator:
   ros__parameters:
     use_sim_time: False
     global_frame: map
-    robot_base_frame: base_link
+    robot_base_frame: base_link 
     odom_topic: /odom
     bt_loop_duration: 10
     default_server_timeout: 40 #20 seconds
@@ -191,7 +191,7 @@ local_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.3 #0.55
+        inflation_radius: 0.35 #0.55
       voxel_layer:
         plugin: "nav2_costmap_2d::VoxelLayer"
         enabled: True
@@ -222,13 +222,39 @@ local_costmap:
     ros__parameters:
       use_sim_time: False
 
+# local_costmap:
+#   local_costmap:
+#     ros__parameters:
+#       update_frequency: 5.0
+#       publish_frequency: 2.0
+#       global_frame: odom
+#       robot_base_frame: base_link
+#       use_sim_time: True
+#       rolling_window: true
+#       width: 3
+#       height: 3
+#       resolution: 0.02
+#       footprint: "[ [0.3, 0.18], [0.3, -0.18],[-0.43, -0.18],[-0.43, 0.18] ]"
+#       plugins: ["static_layer", "inflation_layer"]
+#       static_layer:
+#         plugin: "nav2_costmap_2d::StaticLayer"
+#         map_subscribe_transient_local: False
+#         map_topic: /map
+#         enabled: True
+#       inflation_layer:
+#         plugin: "nav2_costmap_2d::InflationLayer"
+#         cost_scaling_factor: 3.0
+#         inflation_radius: 0.55
+#         enabled: True
+#       always_send_full_costmap: True
+
 global_costmap:
   global_costmap:
     ros__parameters:
       update_frequency: 1.0
       publish_frequency: 1.0
       global_frame: map
-      robot_base_frame: base_link
+      robot_base_frame: base_link 
       use_sim_time: False
       robot_radius: 0.18
       resolution: 0.05
@@ -266,7 +292,7 @@ global_costmap:
 map_server:
   ros__parameters:
     use_sim_time: False
-    yaml_filename: "turtlebot3_world.yaml"
+    yaml_filename: "hall.yaml"
 
 map_saver:
   ros__parameters:
@@ -304,7 +330,7 @@ recoveries_server:
     wait:
       plugin: "nav2_recoveries/Wait"
     global_frame: odom
-    robot_base_frame: base_link
+    robot_base_frame: base_link 
     transform_timeout: 0.1
     use_sim_time: False
     simulate_ahead_time: 2.0

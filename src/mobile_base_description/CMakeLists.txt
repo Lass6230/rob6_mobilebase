@@ -63,6 +63,8 @@ install(DIRECTORY
   world
   launch
   maps
+  #maps/hall
+  #maps/sim
   DESTINATION share/${PROJECT_NAME}
 )
 
