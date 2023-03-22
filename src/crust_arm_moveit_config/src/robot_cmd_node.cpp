@@ -276,7 +276,7 @@ class RobotHandler : public rclcpp::Node
           RCLCPP_INFO(LOGGER,"z: %f", target_pose.transform.rotation.z);
           RCLCPP_INFO(LOGGER,"x: %f", target_pose.transform.rotation.w);
           //return RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.4);
-          return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.3);
+          return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.1);
           
         } catch (const tf2::TransformException & ex) {
           RCLCPP_INFO(
@@ -303,7 +303,7 @@ class RobotHandler : public rclcpp::Node
           RCLCPP_INFO(LOGGER,"z: %f", target_pose.transform.rotation.z);
           RCLCPP_INFO(LOGGER,"x: %f", target_pose.transform.rotation.w);
           //return RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.4);
-          return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.3);
+          return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.1);
           
         } catch (const tf2::TransformException & ex) {
           RCLCPP_INFO(

@@ -89,7 +89,11 @@ class MainProgram : public rclcpp::Node
             //auto message = std_msgs::msg::String();
             //message.data = "Hello, world! " + std::to_string(count_++);
             //RCLCPP_INFO(this->get_logger(), "timer_callback: '%s'", message.data.c_str());
-            
+        
+
+            // robot look out positions
+            // long look x:0.23881 Y:0.2679 Z:0.18507 R0.0 P:0.785398163 Y0.0
+
             switch (sfc)
             {
             case 0:
@@ -261,6 +265,9 @@ class MainProgram : public rclcpp::Node
                 m_lastTime1 = m_clock->now().seconds();
                 sfc = 170;
                 break;
+
+                // function should be look long 45 degrees down for the left middle and right, then look close for left middle right, have a timeout on each to decide when we are done looking
+                
             
             case 170: // check if robot default pos have en reached
                 m_lastTime2 = m_clock->now().seconds();
@@ -321,12 +328,38 @@ class MainProgram : public rclcpp::Node
                         sfc = 1000;
                     }
                 }
+                
+
                 break;
                 
             
             case 220:
                 vac_msg.data = 0;
                 pub_vac_->publish(vac_msg);
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.3,-0.007814,0.2958,0.0,1.57,0.0};
+                pub_robot_->publish(robot_msg);// make the robot go to the defalut pos
+                m_lastTime1 = m_clock->now().seconds();
+                sfc = 230;
+                break;
+
+            case 230:
+                 m_lastTime2 = m_clock->now().seconds();
+                if(robot_status == 1){
+                    robot_status = 0;
+                    sfc = 240;
+                }
+                if((m_lastTime2-m_lastTime1) >10.0){
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    sfc = 220;
+                    if(robot_attempts == 5){
+                        sfc = 1000;
+                    }
+                }
+                break;
+            case 240:
+
                 break;
 
             case 1000:
