@@ -53,17 +53,18 @@ def generate_launch_description():
     # TODO(orduno) Substitute with `PushNodeRemapping`
     #              https://github.com/ros2/launch_ros/issues/56
     remappings = [('/tf', 'tf'),
-                  ('/tf_static', 'tf_static')]
+                  ('/tf_static', 'tf_static'),
+                  ('/odom', 'odometry')]
 
     # Declare the launch arguments
     declare_namespace_cmd = DeclareLaunchArgument(
         'namespace',
-        default_value='False', #''
+        default_value='nav_stack', #''
         description='Top-level namespace')
 
     declare_use_namespace_cmd = DeclareLaunchArgument(
         'use_namespace',
-        default_value='False',
+        default_value='True',
         description='Whether to apply a namespace to the navigation stack')
 
     declare_slam_cmd = DeclareLaunchArgument(
