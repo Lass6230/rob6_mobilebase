@@ -318,7 +318,7 @@ class MainProgram : public rclcpp::Node
                  m_lastTime2 = m_clock->now().seconds();
                 if(robot_status == 1){
                     robot_status = 0;
-                    sfc = 220;
+                    sfc = 240;
                 }
                 if((m_lastTime2-m_lastTime1) >10.0){
                     RCLCPP_INFO(this->get_logger(), "timed out");
