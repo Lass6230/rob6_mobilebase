@@ -64,6 +64,28 @@ class ImageSubscriberNode(Node):
 
             cv2.circle(cv_image, (x,y), 5, (0,0,255))
             z = cv_depth[y,x]
+            #### lasse stuff #####
+            range2 = 0
+            sum = 0
+            count = 0
+            for k in range(int(markerCorners[0][0][0][0]),int(markerCorners[0][0][2][0]+1)):
+                for j in range(int(markerCorners[0][0][2][1]), int(markerCorners[0][0][0][1]+1)):
+                    sum += cv_depth[j,k]
+                    count += 1
+            if count != 0:
+                range2 = sum/count
+            else:
+                range2 = z
+            # self.get_logger().info("corner 1: %i" %int(markerCorners[0][0][0][0]))
+            # self.get_logger().info("corner 2: %i" %int(markerCorners[0][0][2][0]))
+            # self.get_logger().info("corner 3: %i" %int(markerCorners[0][0][0][1]))
+            # self.get_logger().info("corner 4: %i" %int(markerCorners[0][0][2][1]))
+            # self.get_logger().info("count: %i" %count)
+            # self.get_logger().info("range aruco: %f" %range2)
+
+            # self.get_logger().info('z aruco: "%f"' % z)
+            z = range2
+            ######################
 
             center_x, center_y = cv_image.shape[1]/2, cv_image.shape[0]/2
 

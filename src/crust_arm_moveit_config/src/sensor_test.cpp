@@ -4,7 +4,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "tf2/LinearMath/Quaternion.h"
 #include "tf2_ros/transform_broadcaster.h"
-
+#include "std_msgs/msg/int8.hpp"
 class Sensor: public rclcpp::Node{
 private:
     void objectCallback(){
@@ -56,9 +56,9 @@ private:
         t2.header.frame_id = "camera_link";
         t2.child_frame_id = "ball";
 
-        t2.transform.translation.x = 0.1;//atof(transformation[2]);
-        //t.transform.translation.y = atof(transformation[3]);
-        //t.transform.translation.z = atof(transformation[4]);
+        t2.transform.translation.x = 0.33;//atof(transformation[2]);
+        t2.transform.translation.y = 0.1;//atof(transformation[3]);
+        t2.transform.translation.z = -0.09;//atof(transformation[4]);
         tf2::Quaternion q2;
         q2.setRPY(0,0,0);
         t2.transform.rotation.x = q.x();
@@ -67,19 +67,25 @@ private:
         t2.transform.rotation.w = q.w();
 
         tf_broadcaster_->sendTransform(t2);
+
+        status_msg.data = 1;
+        status_ball_->publish(status_msg);
+
     }
 
     // Timer for the simulated detected object
     rclcpp::TimerBase::SharedPtr object_timer_;
     // Publisher for the simulated detected object
     rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pose_pub_;
+    rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr status_ball_;
+    std_msgs::msg::Int8 status_msg;
     // Pose to publish
     geometry_msgs::msg::PoseStamped pose_;
     // Aux variable that determines the detected object's position
 
     std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
     int count_ = 0;
-
+    
 public:
     Sensor(const std::string & name):Node(name){
 
@@ -90,7 +96,8 @@ public:
 
         // Initialize publisher for object detection
         pose_pub_ = create_publisher<geometry_msgs::msg::PoseStamped>(
-            "/detected_object", 10);    
+            "/detected_object", 10);
+        status_ball_ = create_publisher<std_msgs::msg::Int8>("/status_ball", 10);
     }
 
     ~Sensor(){}

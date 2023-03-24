@@ -85,6 +85,50 @@ class ImageSubscriberNode(Node):
                 center = (i[0], i[1])
                 x, y = center
                 z = cv_depth[y,x]
+                radius_i = int(i[2]/2)
+                #self.get_logger().info('z: "%f"' % z)
+                #self.get_logger().info("pixel x: %i" %x)
+                #self.get_logger().info("pixel y: %i" %y)
+                #self.get_logger().info("radius: %i" %radius_i)
+                count = 0
+                sum = 0
+                range2 = 0
+                # for k in blur[0,:]:
+                #     for j in blur[:,k]:
+                #         count +=1
+
+                if radius_i + y < 640 or radius_i + x < 640:
+
+                    for k in range(radius_i):
+                        for j in range(radius_i):
+                            count +=1
+                            sum += cv_depth[y+j,x+k]
+                    for k in range(-radius_i):
+                        for j in range(-radius_i):
+                            count +=1
+                            sum += cv_depth[y+j,x+k]
+                
+                
+                
+                #self.get_logger().info("count: %i" %count)
+                #self.get_logger().info("sum: %f" %sum)
+                range2 = sum/count
+
+                self.get_logger().info("range: %f" %range2)
+
+                z = range2+0.02
+                # radius_i =i[2]
+                # sum = 0
+                # count = 0
+                # for k in range(radius_i):
+                #     for j in range(radius_i):
+                #         sum += cv_depth[y+k,x+j]
+                #         count += 1
+                # for k in range(-radius_i):
+                #     for j in range(-radius_i):
+                #         sum += cv_depth[y+k,x+j]
+                #         count += 1
+                # print(str(sum/count))
 
                 if z < 2000:
                     # circle center
@@ -93,7 +137,7 @@ class ImageSubscriberNode(Node):
                     radius = i[2]
                     cv2.circle(cv_image, center, radius, (255, 0, 255), 3)
 
-                    self.calculate_cartesian(x, y, z, cv_image)
+                    self.calculate_cartesian(x, y, z, cv_image,range2)
 
                 else:
                     print("ball rejected: >2m")
@@ -108,18 +152,23 @@ class ImageSubscriberNode(Node):
         cv2.waitKey(1)
 
 
-    def calculate_cartesian(self, x, y, z, cv_image):
+    def calculate_cartesian(self, x, y, z, cv_image, range2):
         center_x, center_y = cv_image.shape[1]/2, cv_image.shape[0]/2
                     
         #calculate angle from center
         x_angle = (center_x - x) / cv_image.shape[1] * 69
         y_angle = (center_y - y) / cv_image.shape[0] * 42
-        z_angle = np.sqrt(np.square((center_x - x)) + np.square((center_y - y))) / np.sqrt(np.square(cv_image.shape[1]) + np.square(cv_image.shape[0])) * 80.78
-
+        z_angle = (np.sqrt(np.square((center_x - x)) + np.square((center_y - y))) / np.sqrt(np.square(cv_image.shape[1]) + np.square(cv_image.shape[0]))) *40.39#* 77#42#80.78
+        self.get_logger().info('angle x: "%f"' % x_angle)
+        self.get_logger().info('angle y: "%f"' % y_angle)
+        self.get_logger().info('angle z: "%f"' % z_angle)
         #calculate cartesian coordinates in m
         cartesian_x = np.sin(np.deg2rad(x_angle)) * z / 1000
         cartesian_y = np.sin(np.deg2rad(y_angle)) * z / 1000
         cartesian_z = np.cos(np.deg2rad(z_angle)) * z / 1000
+        #new_z = np.cos(np.deg2rad(z_angle)) * range2 / 1000
+        #self.get_logger().info('cartesian z: "%f"' % cartesian_z)
+        #self.get_logger().info('new cartesian z: "%f"' % new_z)
         self.publish_transform(cartesian_x, cartesian_y, cartesian_z)
 
 
@@ -129,8 +178,8 @@ class ImageSubscriberNode(Node):
         tf.header.stamp = self.get_clock().now().to_msg()
         tf.header.frame_id = 'camera_link'
         tf.child_frame_id = 'ball'
-        tf.transform.translation.x = float(z) #z
-        tf.transform.translation.y = float(x) 
+        tf.transform.translation.x = float(z) # +0.02#z
+        tf.transform.translation.y = float(x)+0.035
         tf.transform.translation.z = float(y) #x
         tf.transform.rotation.x = 0.0
         tf.transform.rotation.y = 0.0
