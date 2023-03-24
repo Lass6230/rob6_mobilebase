@@ -1,32 +1,32 @@
-amcl:
+amcl: #
   ros__parameters:
     use_sim_time: True
-    alpha1: 0.2
-    alpha2: 0.2
-    alpha3: 0.2
-    alpha4: 0.2
-    alpha5: 0.2
+    alpha1: 0.1 #increase #Expected process noise in odometry’s rotation estimate from rotation.
+    alpha2: 0.1 #increase? #Expected process noise in odometry’s rotation estimate from translation.
+    alpha3: 0.1 #decrease? #Expected process noise in odometry’s translation estimate from translation.
+    alpha4: 0.1 #Expected process noise in odometry’s translation estimate from rotation.
+    alpha5: 0.2 #For Omni models only: translation noise.
     base_frame_id: "base_footprint"
-    beam_skip_distance: 0.5
-    beam_skip_error_threshold: 0.9
-    beam_skip_threshold: 0.3
-    do_beamskip: false
+    beam_skip_distance: 0.5 #decrease
+    beam_skip_error_threshold: 0.9 #decrease
+    beam_skip_threshold: 0.3 
+    do_beamskip: false #try true
     global_frame_id: "map"
     lambda_short: 0.1
-    laser_likelihood_max_dist: 2.0
-    laser_max_range: 100.0
-    laser_min_range: -1.0
-    laser_model_type: "likelihood_field"
+    laser_likelihood_max_dist: 2.0 #try 3 or 4
+    laser_max_range: 15.0 #100
+    laser_min_range: 0.1
+    laser_model_type: "likelihood_field" #likelihood_field_prob this should incorporate beamskip
     max_beams: 60
     max_particles: 2000
     min_particles: 500
     odom_frame_id: "odom"
     pf_err: 0.05
     pf_z: 0.99
-    recovery_alpha_fast: 0.0
-    recovery_alpha_slow: 0.0
+    recovery_alpha_fast: 0.0 #0.1
+    recovery_alpha_slow: 0.0 #0.001
     resample_interval: 1
-    robot_model_type: "differential"
+    robot_model_type: "differential" #"nav2_amcl::DifferentialMotionModel" 
     save_pose_rate: 0.5
     sigma_hit: 0.2
     tf_broadcast: true
@@ -151,17 +151,17 @@ controller_server:
       vy_samples: 5
       vtheta_samples: 20
       sim_time: 1.7
-      linear_granularity: 0.05
-      angular_granularity: 0.025
-      transform_tolerance: 0.2
-      xy_goal_tolerance: 0.25
+      linear_granularity: 0.05 #
+      angular_granularity: 0.025 #
+      transform_tolerance: 0.2 #
+      xy_goal_tolerance: 0.25 
       trans_stopped_velocity: 0.25
       short_circuit_trajectory_evaluation: True
       stateful: True
       critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
-      BaseObstacle.scale: 0.02
-      PathAlign.scale: 32.0
-      PathAlign.forward_point_distance: 0.1
+      BaseObstacle.scale: 0.02 #0.02
+      PathAlign.scale: 32.0 #
+      PathAlign.forward_point_distance: 0.05 #0.325
       GoalAlign.scale: 24.0
       GoalAlign.forward_point_distance: 0.1
       PathDist.scale: 32.0
@@ -178,7 +178,7 @@ local_costmap:
   local_costmap:
     ros__parameters:
       update_frequency: 5.0
-      publish_frequency: 4.0
+      publish_frequency: 5.0
       global_frame: map
       robot_base_frame: base_footprint
       use_sim_time: True
@@ -187,7 +187,7 @@ local_costmap:
       height: 3
       resolution: 0.02
       #robot_radius: 0.22
-      footprint: "[ [0.3, 0.18], [0.3, -0.18],[-0.45, -0.18],[-0.45, 0.18] ]"
+      footprint: "[ [0.3, 0.18], [0.3, -0.2],[-0.5, -0.2],[-0.5, 0.18] ]"
       plugins: ["voxel_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
@@ -226,12 +226,12 @@ local_costmap:
 global_costmap:
   global_costmap:
     ros__parameters:
-      update_frequency: 1.0
-      publish_frequency: 1.0
+      update_frequency: 2.0
+      publish_frequency: 2.0
       global_frame: map
       robot_base_frame: base_link
       use_sim_time: True
-      robot_radius: 0.18
+      robot_radius: 0.18 #0.18
       resolution: 0.05
       track_unknown_space: true
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
@@ -267,7 +267,7 @@ global_costmap:
 map_server:
   ros__parameters:
     use_sim_time: True
-    yaml_filename: "turtlebot3_world.yaml"
+    yaml_filename: "hall.yaml"
 
 map_saver:
   ros__parameters:
@@ -277,16 +277,52 @@ map_saver:
     occupied_thresh_default: 0.65
     map_subscribe_transient_local: True
 
+# planner_server:
+#   ros__parameters:
+#     expected_planner_frequency: 20.0
+#     use_sim_time: True
+#     planner_plugins: ["GridBased"]
+#     GridBased:
+#       plugin: "nav2_navfn_planner/NavfnPlanner"
+#       tolerance: 0.5
+#       use_astar: false
+#       allow_unknown: true
+
 planner_server:
   ros__parameters:
-    expected_planner_frequency: 20.0
-    use_sim_time: True
     planner_plugins: ["GridBased"]
+    use_sim_time: True
+
     GridBased:
-      plugin: "nav2_navfn_planner/NavfnPlanner"
-      tolerance: 0.5
-      use_astar: false
-      allow_unknown: true
+      plugin: "nav2_smac_planner/SmacPlannerHybrid"
+      downsample_costmap: false           # whether or not to downsample the map
+      downsampling_factor: 1              # multiplier for the resolution of the costmap layer (e.g. 2 on a 5cm costmap would be 10cm)
+      tolerance: 0.25                     # dist-to-goal heuristic cost (distance) for valid tolerance endpoints if exact goal cannot be found.
+      allow_unknown: true                 # allow traveling in unknown space
+      max_iterations: 1000000             # maximum total iterations to search for before failing (in case unreachable), set to -1 to disable
+      max_on_approach_iterations: 1000    # Maximum number of iterations after within tolerances to continue to try to find exact solution
+      max_planning_time: 5.0              # max time in s for planner to plan, smooth
+      motion_model_for_search: "DUBIN"    # Hybrid-A* Dubin, Redds-Shepp
+      angle_quantization_bins: 72         # Number of angle bins for search
+      analytic_expansion_ratio: 3.5       # The ratio to attempt analytic expansions during search for final approach.
+      analytic_expansion_max_length: 3.0  # For Hybrid/Lattice nodes: The maximum length of the analytic expansion to be considered valid to prevent unsafe shortcutting
+      minimum_turning_radius: 0.10        # minimum turning radius in m of path / vehicle
+      reverse_penalty: 2.0                # Penalty to apply if motion is reversing, must be => 1
+      change_penalty: 0.2                 # Penalty to apply if motion is changing directions (L to R), must be >= 0
+      non_straight_penalty: 1.5           # Penalty to apply if motion is non-straight, must be => 1
+      cost_penalty: 2.0                   # Penalty to apply to higher cost areas when adding into the obstacle map dynamic programming distance expansion heuristic. This drives the robot more towards the center of passages. A value between 1.3 - 3.5 is reasonable.
+      retrospective_penalty: 0.015
+      lookup_table_size: 20.0             # Size of the dubin/reeds-sheep distance window to cache, in meters.
+      cache_obstacle_heuristic: false     # Cache the obstacle map dynamic programming distance expansion heuristic between subsiquent replannings of the same goal location. Dramatically speeds up replanning performance (40x) if costmap is largely static.
+      smooth_path: True #True                   # If true, does a simple and quick smoothing post-processing to the path
+
+      smoother:
+        max_iterations: 1000
+        w_smooth: 0.3
+        w_data: 0.2
+        tolerance: 1.0e-10
+        do_refinement: true
+        refinement_num: 2
 
 planner_server_rclcpp_node:
   ros__parameters:

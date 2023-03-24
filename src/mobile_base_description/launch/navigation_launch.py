@@ -108,21 +108,12 @@ def generate_launch_description():
             mobile_base_dir, 'maps/hall', 'hall.yaml'),
         description='Full path to map file to load')
     
-    # declare_map_yaml_cmd = DeclareLaunchArgument(
-    #     'map',
-    #     default_value=os.path.join(
-    #         bringup_dir, 'maps', 'turtlebot3_world.yaml'),
-    #     description='Full path to map file to load')
 
     declare_use_sim_time_cmd = DeclareLaunchArgument(
         'use_sim_time',
         default_value='False',
         description='Use simulation (Gazebo) clock if true')
 
-    # declare_params_file_cmd = DeclareLaunchArgument(
-    #     'params_file',
-    #     default_value=os.path.join(bringup_dir, 'params', 'nav2_params.yaml'),
-    #     description='Full path to the ROS2 parameters file to use for all launched nodes')
     
     declare_params_file_cmd = DeclareLaunchArgument(
         'params_file',
