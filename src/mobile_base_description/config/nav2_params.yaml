@@ -1,10 +1,10 @@
 amcl: #
   ros__parameters:
     use_sim_time: True
-    alpha1: 0.1 #increase #Expected process noise in odometry’s rotation estimate from rotation.
-    alpha2: 0.1 #increase? #Expected process noise in odometry’s rotation estimate from translation.
-    alpha3: 0.1 #decrease? #Expected process noise in odometry’s translation estimate from translation.
-    alpha4: 0.1 #Expected process noise in odometry’s translation estimate from rotation.
+    alpha1: 0.2 #increase #Expected process noise in odometry’s rotation estimate from rotation.
+    alpha2: 0.2 #increase? #Expected process noise in odometry’s rotation estimate from translation.
+    alpha3: 0.2 #decrease? #Expected process noise in odometry’s translation estimate from translation.
+    alpha4: 0.2 #Expected process noise in odometry’s translation estimate from rotation.
     alpha5: 0.2 #For Omni models only: translation noise.
     base_frame_id: "base_footprint"
     beam_skip_distance: 0.5 #decrease
@@ -13,8 +13,8 @@ amcl: #
     do_beamskip: false #try true
     global_frame_id: "map"
     lambda_short: 0.1
-    laser_likelihood_max_dist: 2.0 #try 3 or 4
-    laser_max_range: 15.0 #100
+    laser_likelihood_max_dist: 3.0 #2.0 #try 3 or 4
+    laser_max_range: 20.0 #100
     laser_min_range: 0.1
     laser_model_type: "likelihood_field" #likelihood_field_prob this should incorporate beamskip
     max_beams: 60
@@ -160,8 +160,8 @@ controller_server:
       stateful: True
       critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
       BaseObstacle.scale: 0.02 #0.02
-      PathAlign.scale: 32.0 #
-      PathAlign.forward_point_distance: 0.05 #0.325
+      PathAlign.scale: 22.0 #
+      PathAlign.forward_point_distance: 0.1 #0.325
       GoalAlign.scale: 24.0
       GoalAlign.forward_point_distance: 0.1
       PathDist.scale: 32.0
