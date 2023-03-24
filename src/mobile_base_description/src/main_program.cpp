@@ -249,7 +249,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 160: // start of vision, vac and robot test and set both ball and aruco shearch off
-                vac_msg.data = 2;
+                vac_msg.data = 1;// set vaccum on
                 pub_vac_->publish(vac_msg);// Turn on vaccum pup
 
                 aruco_msg.data = false;
@@ -318,9 +318,9 @@ class MainProgram : public rclcpp::Node
                  m_lastTime2 = m_clock->now().seconds();
                 if(robot_status == 1){
                     robot_status = 0;
-                    sfc = 240;
+                    sfc = 220;
                 }
-                if((m_lastTime2-m_lastTime1) >10.0){
+                if((m_lastTime2-m_lastTime1) >15.0){
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     sfc = 200;
@@ -334,8 +334,8 @@ class MainProgram : public rclcpp::Node
                 
             
             case 220:
-                vac_msg.data = 0;
-                pub_vac_->publish(vac_msg);
+                //vac_msg.data = 0;
+                //pub_vac_->publish(vac_msg);
                 robot_msg.cmd = 6;
                 robot_msg.pose = {0.3,-0.007814,0.2958,0.0,1.57,0.0};
                 pub_robot_->publish(robot_msg);// make the robot go to the defalut pos
@@ -359,7 +359,7 @@ class MainProgram : public rclcpp::Node
                 }
                 break;
             case 240:
-
+                sfc = 1000;
                 break;
 
             case 1000:

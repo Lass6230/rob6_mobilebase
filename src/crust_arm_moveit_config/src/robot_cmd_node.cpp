@@ -196,7 +196,7 @@ class RobotHandler : public rclcpp::Node
         move_group.setNumPlanningAttempts(5);
 
         move_group.setPlanningTime(10.0);
-        move_group.setGoalOrientationTolerance(orientation_tolerance);
+        //move_group.setGoalOrientationTolerance(orientation_tolerance);
 
         moveit::planning_interface::MoveGroupInterface::Plan my_plan;
 
@@ -214,7 +214,9 @@ class RobotHandler : public rclcpp::Node
         pos.position.x = x;
         pos.position.y = y;
         pos.position.z = z;
-        pos.position.z += 0.05;
+        pos.position.z += 0.1;
+        //waypoints.push_back(pos);
+        pos.position.z -= 0.05;
         waypoints.push_back(pos);
         pos.position.z = z;
         waypoints.push_back(pos);
@@ -275,9 +277,15 @@ class RobotHandler : public rclcpp::Node
           RCLCPP_INFO(LOGGER,"y: %f", target_pose.transform.rotation.y);
           RCLCPP_INFO(LOGGER,"z: %f", target_pose.transform.rotation.z);
           RCLCPP_INFO(LOGGER,"x: %f", target_pose.transform.rotation.w);
-          //return RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.4);
-          return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.1);
-          
+          bool i = RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z+0.1,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.3);
+          if(i == 1){
+
+            return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z -0.01,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.005);
+          }
+          else{
+            return false;
+          }
+
         } catch (const tf2::TransformException & ex) {
           RCLCPP_INFO(
             this->get_logger(), "Could not transform %s to %s: %s",
