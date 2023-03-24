@@ -24,7 +24,8 @@ setup(
     entry_points={
         'console_scripts': [
             'aruco_detector = opencv_detector.aruco_detector:main',
-            'golfball_detector = opencv_detector.golfball_detector:main'
+            'golfball_detector = opencv_detector.golfball_detector:main',
+            'goal_transformer = opencv_detector.goal_pose_transformer:main'
         ],
     },
 )

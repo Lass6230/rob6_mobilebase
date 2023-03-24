@@ -140,12 +140,12 @@ def generate_launch_description():
     return LaunchDescription(
         [   
             headless,
-            #rviz_node,
+            rviz_node,
             robot_state_publisher,
             declare_use_sim_time_argument,
             declare_params_file_cmd,
             log_param_change,
-            #start_async_slam_toolbox_node,
+            start_async_slam_toolbox_node,
             odomZOH
             
         ]   
