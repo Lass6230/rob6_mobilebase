@@ -24,6 +24,7 @@ find_package(gazebo_ros2_control REQUIRED)
 install(DIRECTORY
   meshes
   meshes2
+  meshes_gripper
   urdf
   #controllers
   launch

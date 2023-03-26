@@ -1,0 +1,614 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="crust_arm_mobile">
+  <link
+    name="crust_base_link">
+    <inertial>
+      <origin
+        xyz="-0.0011371 0.00077543 0.04167"
+        rpy="0 0 0" />
+      <mass
+        value="0.70106" />
+      <inertia
+        ixx="0.0013838"
+        ixy="5.5315E-08"
+        ixz="-1.7418E-06"
+        iyy="0.0011971"
+        iyz="-9.596E-08"
+        izz="0.0025267" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes_gripper/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.89804 0.91765 0.92941 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes_gripper/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="link_1">
+    <inertial>
+      <origin
+        xyz="2.7088E-06 -0.00034362 0.032412"
+        rpy="0 0 0" />
+      <mass
+        value="0.1159" />
+      <inertia
+        ixx="6.1382E-05"
+        ixy="-2.3112E-09"
+        ixz="-1.6418E-09"
+        iyy="5.2378E-05"
+        iyz="1.0628E-06"
+        izz="6.273E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes_gripper/link_1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.89804 0.91765 0.92941 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes_gripper/link_1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_1"
+    type="revolute">
+    <origin
+      xyz="0 0 0.059"
+      rpy="0 0 0" />
+    <parent
+      link="crust_base_link" />
+    <child
+      link="link_1" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-2.2"
+      upper="2.2"
+      effort="200"
+      velocity="3" />
+  </joint>
+  <link
+    name="link_2">
+    <inertial>
+      <origin
+        xyz="0.00088105 -0.16138 -0.00028433"
+        rpy="0 0 0" />
+      <mass
+        value="0.11516" />
+      <inertia
+        ixx="8.1961E-05"
+        ixy="-1.5264E-08"
+        ixz="4.1398E-13"
+        iyy="2.8324E-05"
+        iyz="-8.8059E-07"
+        izz="7.0335E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes_gripper/link_2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.89804 0.91765 0.92941 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes_gripper/link_2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <!--<joint
+    name="joint_2"
+    type="revolute">
+    <origin
+      xyz="-0.0018442 -0.00315 0.0576"
+      rpy="-1.5708 0 0" />
+    <parent
+      link="link_1" />
+    <child
+      link="link_2" />
+    <axis
+      xyz="-0.075311 0 0.99716" />
+    <limit
+      lower="-2.2"
+      upper="2.2"
+      effort="200"
+      velocity="3" />
+  </joint>-->
+  <joint
+    name="joint_2"
+    type="revolute">
+    <origin
+      xyz="-0.00184419164302273 -0.00314999999999882 0.0575999999999965"
+      rpy="-1.5707963267949 0 0" />
+    <parent
+      link="link_1" />
+    <child
+      link="link_2" />
+    <axis
+      xyz="-0.0753114848976472 0 0.99716005748451" />
+    <limit
+      lower="-2.2"
+      upper="2.2"
+      effort="200"
+      velocity="3" />
+  </joint>
+  <link
+    name="link_3">
+    <inertial>
+      <origin
+        xyz="-0.00094318 -0.15971 -0.00027844"
+        rpy="0 0 0" />
+      <mass
+        value="0.1176" />
+      <inertia
+        ixx="8.1432E-05"
+        ixy="-1.5264E-08"
+        ixz="4.1398E-13"
+        iyy="2.7973E-05"
+        iyz="-8.8059E-07"
+        izz="7.0409E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes_gripper/link_3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.89804 0.91765 0.92941 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes_gripper/link_3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <!--<joint
+    name="joint_3"
+    type="revolute">
+    <origin
+      xyz="0.0018442 -0.2198 -0.003"
+      rpy="0 0 0" />
+    <parent
+      link="link_2" />
+    <child
+      link="link_3" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-2.2"
+      upper="2.2"
+      effort="200"
+      velocity="3" />
+  </joint>-->
+  <joint
+    name="joint_3"
+    type="revolute">
+    <origin
+      xyz="0.00184419164302234 -0.2198 -0.00299999999999676"
+      rpy="0 0 0" />
+    <parent
+      link="link_2" />
+    <child
+      link="link_3" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-2.2"
+      upper="2.2"
+      effort="200"
+      velocity="3" />
+  </joint>
+  <link
+    name="link_4">
+    <inertial>
+      <origin
+        xyz="-1.0547E-14 -0.017324 -9.1593E-16"
+        rpy="0 0 0" />
+      <mass
+        value="0.012733" />
+      <inertia
+        ixx="5.3648E-06"
+        ixy="-6.7106E-22"
+        ixz="-3.9867E-22"
+        iyy="4.553E-06"
+        iyz="1.1243E-20"
+        izz="2.0871E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes_gripper/link_4.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.89804 0.91765 0.92941 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes_gripper/link_4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_4"
+    type="revolute">
+    <origin
+      xyz="0 -0.2208 -0.003"
+      rpy="0 0 0" />
+    <parent
+      link="link_3" />
+    <child
+      link="link_4" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-2.2"
+      upper="2.2"
+      effort="200"
+      velocity="3" />
+  </joint>
+   <link
+    name="flange_link">
+    <inertial>
+      <origin
+        xyz="0.0017146 -6.5642E-15 -3.0531E-16"
+        rpy="0 0 0" />
+      <mass
+        value="0.0029645" />
+      <inertia
+        ixx="5.4073E-07"
+        ixy="1.0594E-22"
+        ixz="1.8732E-22"
+        iyy="4.0167E-07"
+        iyz="5.1654E-22"
+        izz="1.6602E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes_gripper/flange_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.89804 0.91765 0.92941 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes_gripper/flange_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="flange_joint"
+    type="fixed">
+    <origin
+      xyz="0 -0.0385000000000004 0"
+      rpy="1.5707963267949 0 -1.5707963267949" />
+    <parent
+      link="link_4" />
+    <child
+      link="flange_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="tool_link">
+    </link>
+  <joint
+    name="tool_joint"
+    type="fixed">
+    <origin
+      xyz="0.12831 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="flange_link" />
+    <child
+      link="tool_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+
+
+
+
+  <link
+    name="camera_link">
+    <inertial>
+      <origin
+        xyz="-0.0094472 -0.017953 -0.0015914"
+        rpy="0 0 0" />
+      <mass
+        value="0.12525" />
+      <inertia
+        ixx="8.5958E-05"
+        ixy="-1.7858E-08"
+        ixz="-5.2292E-07"
+        iyy="1.3969E-05"
+        iyz="2.3752E-10"
+        izz="7.897E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes_gripper/camera_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes_gripper/camera_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="camera_joint"
+    type="fixed">
+    <origin
+      xyz="0.0288 0.017962 0.055"
+      rpy="0 0 0" />
+    <parent
+      link="flange_link" />
+    <child
+      link="camera_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="gripper_link">
+    <inertial>
+      <origin
+        xyz="0.029256 4.8004E-09 -3.0878E-05"
+        rpy="0 0 0" />
+      <mass
+        value="0.089066" />
+      <inertia
+        ixx="1.5005E-05"
+        ixy="-5.9945E-13"
+        ixz="-3.6548E-07"
+        iyy="2.4693E-05"
+        iyz="-1.0592E-11"
+        izz="2.1002E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes_gripper/gripper_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.20784 0.20784 0.20784 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes_gripper/gripper_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="gripper_joint"
+    type="fixed">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="flange_link" />
+    <child
+      link="gripper_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="finger1_link">
+    <inertial>
+      <origin
+        xyz="0.00064145 -0.040478 -3.636E-15"
+        rpy="0 0 0" />
+      <mass
+        value="0.024008" />
+      <inertia
+        ixx="8.2624E-06"
+        ixy="1.6564E-07"
+        ixz="-2.1043E-22"
+        iyy="4.9212E-06"
+        iyz="-2.0723E-20"
+        izz="4.8948E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes_gripper/finger1_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.89804 0.91765 0.92941 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes_gripper/finger1_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="finger1_joint"
+    type="revolute">
+    <origin
+      xyz="0.0408 0.017 0.001675"
+      rpy="3.1416 0 -1.5708" />
+    <parent
+      link="gripper_link" />
+    <child
+      link="finger1_link" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-2.2"
+      upper="2.2"
+      effort="200"
+      velocity="3" />
+  </joint>
+  <link
+    name="finger2_link">
+    <inertial>
+      <origin
+        xyz="0.00064145 -0.040478 4.0107E-15"
+        rpy="0 0 0" />
+      <mass
+        value="0.024008" />
+      <inertia
+        ixx="8.2624E-06"
+        ixy="1.6564E-07"
+        ixz="-1.112E-22"
+        iyy="4.9212E-06"
+        iyz="1.6594E-21"
+        izz="4.8948E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes_gripper/finger2_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.89804 0.91765 0.92941 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="file://$(find crust_arm_description)/meshes_gripper/finger2_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="finger2_joint"
+    type="revolute">
+    <origin
+      xyz="0.0408 -0.017 0.001675"
+      rpy="0 0 1.5708" />
+    <parent
+      link="gripper_link" />
+    <child
+      link="finger2_link" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-2.2"
+      upper="2.2"
+      effort="200"
+      velocity="3" />
+    <mimic
+      joint="finger1_joint"
+      multiplier="1"
+      offset="0" />
+  </joint>
+</robot>
