@@ -7,6 +7,7 @@ from cv2 import aruco
 import numpy as np
 import message_filters 
 from std_msgs.msg import Bool, Int8
+import imutils
 
 from geometry_msgs.msg import TransformStamped
 from tf2_ros import TransformBroadcaster
@@ -55,15 +56,16 @@ class ImageSubscriberNode(Node):
 
 
     def process_image(self, cv_image, cv_depth):
+        cv_image = cv2.GaussianBlur(cv_image, (11, 11), 0)
         # # Blue
         frame_HSV = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
         #frame_threshold_blue = cv2.inRange(frame_HSV, (14, 148, 122), (23, 255, 255))
-        frame_threshold_blue = cv2.inRange(frame_HSV, (14, 97, 77), (24, 255, 255))
+        frame_threshold_blue = cv2.inRange(frame_HSV, (17, 156, 54), (255, 255, 255))#(14, 97, 77), (24, 255, 255)
         #cv2.imshow("blue", frame_threshold_blue)
          
         # Green
         frame_HSV = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
-        frame_threshold_green = cv2.inRange(frame_HSV, (35, 72, 89), (48, 255, 255))
+        frame_threshold_green = cv2.inRange(frame_HSV, (0, 78, 0), (80, 255, 255)) #(35, 72, 89), (48, 255, 255)
         #cv2.imshow("green", frame_threshold_green)
 
         # # Yellow
@@ -74,22 +76,24 @@ class ImageSubscriberNode(Node):
         frame_all = frame_threshold_green + frame_threshold_yellow + frame_threshold_blue
 
         blur = self.post_process(frame_all, "green")
-        
-        circles = cv2.HoughCircles(blur, cv2.HOUGH_GRADIENT, dp=1, minDist=50,
-                               param1=1000, param2=15, minRadius=10, maxRadius=80)
-    
-        #print(circles)
-        if circles is not None:
-            circles = np.uint16(np.around(circles))
-            for i in circles[0, :]:
-                center = (i[0], i[1])
+
+        cnts = cv2.findContours(blur.copy(), cv2.RETR_EXTERNAL,
+                            cv2.CHAIN_APPROX_SIMPLE)
+        cnts = imutils.grab_contours(cnts)
+        center = None
+
+        if len(cnts) > 0:
+            c = max(cnts, key=cv2.contourArea)
+            ((x, y), radius) = cv2.minEnclosingCircle(c)
+            M = cv2.moments(c)
+            center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+            width, height = cv_image.shape[:2]
+            if radius > 10:
+                cv2.circle(cv_image, (int(x), int(y)), int(radius), (0, 255, 255), 5)
+                #cv2.imwrite("circled_frame.png", cv2.resize(cv_image, (int(height / 2), int(width / 2))))
+                cv2.circle(cv_image, center, 5, (0, 0, 255), -1)
+                radius_i = int(radius)
                 x, y = center
-                z = cv_depth[y,x]
-                radius_i = int(i[2]/2)
-                #self.get_logger().info('z: "%f"' % z)
-                #self.get_logger().info("pixel x: %i" %x)
-                #self.get_logger().info("pixel y: %i" %y)
-                #self.get_logger().info("radius: %i" %radius_i)
                 count = 0
                 sum = 0
                 range2 = 0
@@ -97,55 +101,111 @@ class ImageSubscriberNode(Node):
                 #     for j in blur[:,k]:
                 #         count +=1
 
-                if radius_i + y < 640 or radius_i + x < 640:
+                if radius_i + y < 480 and radius_i + x < 640:
 
                     for k in range(radius_i):
                         for j in range(radius_i):
-                            count +=1
+                            count +=1(35, 72, 89), (48, 255, 255)
                             sum += cv_depth[y+j,x+k]
                     for k in range(-radius_i):
                         for j in range(-radius_i):
                             count +=1
                             sum += cv_depth[y+j,x+k]
-                
-                
-                
-                #self.get_logger().info("count: %i" %count)
-                #self.get_logger().info("sum: %f" %sum)
-                range2 = sum/count
+                    
+                    range2 = sum/count
 
                 self.get_logger().info("range: %f" %range2)
 
-                z = range2+0.02
-                # radius_i =i[2]
-                # sum = 0
-                # count = 0
-                # for k in range(radius_i):
-                #     for j in range(radius_i):
-                #         sum += cv_depth[y+k,x+j]
-                #         count += 1
-                # for k in range(-radius_i):
-                #     for j in range(-radius_i):
-                #         sum += cv_depth[y+k,x+j]
-                #         count += 1
-                # print(str(sum/count))
+                z = range2+0.05
 
                 if z < 2000:
                     # circle center
-                    cv2.circle(cv_image, center, 1, (0, 100, 100), 3)
+                    #cv2.circle(cv_image, center, 1, (0, 100, 100), 3)
                     # circle outline
-                    radius = i[2]
-                    cv2.circle(cv_image, center, radius, (255, 0, 255), 3)
+                    #radius = i[2]
+                    #cv2.circle(cv_image, center, radius, (255, 0, 255), 3)
 
                     self.calculate_cartesian(x, y, z, cv_image,range2)
 
                 else:
                     print("ball rejected: >2m")
                     # circle center
-                    cv2.circle(cv_image, center, 1, (0, 255, 255), 3)
+                    #cv2.circle(cv_image, center, 1, (0, 255, 255), 3)
                     # circle outline
-                    radius = i[2]
-                    cv2.circle(cv_image, center, radius, (0, 0, 255), 3)
+                    #radius = i[2]
+                    #cv2.circle(cv_image, center, radius, (0, 0, 255), 3)
+        
+        #circles = cv2.HoughCircles(blur, cv2.HOUGH_GRADIENT, dp=1, minDist=50,
+        #                       param1=1000, param2=15, minRadius=10, maxRadius=80)
+    
+        #print(circles)
+        # if circles is not None:
+        #     circles = np.uint16(np.around(circles))
+        #     for i in circles[0, :]:
+        #         center = (i[0], i[1])
+        #         x, y = center
+        #         z = cv_depth[y,x]
+        #         radius_i = int(i[2]/2)
+        #         #self.get_logger().info('z: "%f"' % z)
+        #         #self.get_logger().info("pixel x: %i" %x)
+        #         #self.get_logger().info("pixel y: %i" %y)
+        #         #self.get_logger().info("radius: %i" %radius_i)
+        #         count = 0
+        #         sum = 0
+        #         range2 = 0
+        #         # for k in blur[0,:]:
+        #         #     for j in blur[:,k]:
+        #         #         count +=1
+
+        #         if radius_i + y < 640 or radius_i + x < 640:
+
+        #             for k in range(radius_i):
+        #                 for j in range(radius_i):
+        #                     count +=1
+        #                     sum += cv_depth[y+j,x+k]
+        #             for k in range(-radius_i):
+        #                 for j in range(-radius_i):
+        #                     count +=1
+        #                     sum += cv_depth[y+j,x+k]
+                
+                
+                
+                # #self.get_logger().info("count: %i" %count)
+                # #self.get_logger().info("sum: %f" %sum)
+                # range2 = sum/count
+
+                # self.get_logger().info("range: %f" %range2)
+
+                # z = range2+0.05
+                # # radius_i =i[2]
+                # # sum = 0
+                # # count = 0
+                # # for k in range(radius_i):
+                # #     for j in range(radius_i):
+                # #         sum += cv_depth[y+k,x+j]
+                # #         count += 1
+                # # for k in range(-radius_i):
+                # #     for j in range(-radius_i):
+                # #         sum += cv_depth[y+k,x+j]
+                # #         count += 1
+                # # print(str(sum/count))
+
+                # if z < 2000:
+                #     # circle center
+                #     cv2.circle(cv_image, center, 1, (0, 100, 100), 3)
+                #     # circle outline
+                #     radius = i[2]
+                #     cv2.circle(cv_image, center, radius, (255, 0, 255), 3)
+
+                #     self.calculate_cartesian(x, y, z, cv_image,range2)
+
+                # else:
+                #     print("ball rejected: >2m")
+                #     # circle center
+                #     cv2.circle(cv_image, center, 1, (0, 255, 255), 3)
+                #     # circle outline
+                #     radius = i[2]
+                #     cv2.circle(cv_image, center, radius, (0, 0, 255), 3)
 
 
         cv2.imshow("detected circles", cv_image)
@@ -179,8 +239,8 @@ class ImageSubscriberNode(Node):
         tf.header.frame_id = 'camera_link'
         tf.child_frame_id = 'ball'
         tf.transform.translation.x = float(z) # +0.02#z
-        tf.transform.translation.y = float(x)+0.035
-        tf.transform.translation.z = float(y) #x
+        tf.transform.translation.y = float(x)#+0.03
+        tf.transform.translation.z = float(y) #+0.02#x
         tf.transform.rotation.x = 0.0
         tf.transform.rotation.y = 0.0
         tf.transform.rotation.z = 0.0
