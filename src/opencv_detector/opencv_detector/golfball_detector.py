@@ -105,7 +105,7 @@ class ImageSubscriberNode(Node):
 
                     for k in range(radius_i):
                         for j in range(radius_i):
-                            count +=1
+                            count +=1(35, 72, 89), (48, 255, 255)
                             sum += cv_depth[y+j,x+k]
                     for k in range(-radius_i):
                         for j in range(-radius_i):
