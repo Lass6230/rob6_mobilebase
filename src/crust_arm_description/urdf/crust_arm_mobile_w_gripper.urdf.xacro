@@ -562,15 +562,15 @@
     <child
       link="finger2_link" />
     <axis
-      xyz="0 0 -1" />
+      xyz="0 0 1" />
     <limit
       lower="-2.2"
       upper="2.2"
       effort="200"
       velocity="3" />
-    <mimic
+    <!--<mimic
       joint="finger1_joint"
-      multiplier="1"
-      offset="0" />
+      multiplier="-1"
+      offset="0" />-->
   </joint>
 </robot>

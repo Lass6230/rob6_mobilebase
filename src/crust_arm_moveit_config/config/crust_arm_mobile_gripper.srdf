@@ -19,8 +19,10 @@
         <joint name="joint_2"/>
         <joint name="joint_3"/>
         <joint name="joint_4"/>
+        
+
         <joint name="flange_joint"/>
-        <!--<joint name="tool_joint"/>-->
+        <joint name="tool_joint"/>
     </group>
     <group name="gripper">
         <joint name="finger1_joint"/>
@@ -40,8 +42,8 @@
     </group_state>
 
     <group_state group="gripper" name="open">
-    <joint name="finger1_joint" value="-0.35"/>
-    <joint name="finger2_joint" value="-0.35"/>
+    <joint name="finger1_joint" value="-0.55"/>
+    <joint name="finger2_joint" value="-0.55"/>
   </group_state>
   <group_state group="gripper" name="close">
     <joint name="finger1_joint" value="0"/>

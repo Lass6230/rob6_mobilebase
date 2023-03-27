@@ -8,17 +8,38 @@ moveit_controller_manager: moveit_simple_controller_manager/MoveItSimpleControll
 controller_names:
   - manipulator_position_controllers
   - gripper_controller
+  
 
-gripper_controller:
-    action_ns: gripper_cmd
-    type: GripperCommand
-    default: True
-    joints:
-      - finger1_joint
+# gripper_controller:
+#   ros__parameters:
+#     type: forward_command_controller/ForwardCommandController
+#     default: True
+#     joints:
+#       - finger1_joint
+#       - finger2_joint
+#     interface_name: position
+
+# gripper_controller:
+#     #action_ns: follow_joint_trajectory
+#     #type: FollowJointTrajectory
+#     action_ns: gripper_cmd
+#     #action_ns: gripper_action
+#     type: GripperCommand
+#     #default: True
+#     joints:
+#       - finger1_joint
+#       #- finger2_joint
     
 
 
-
+gripper_controller:
+    action_ns: follow_joint_trajectory
+    type: FollowJointTrajectory
+    
+    default: True
+    joints:
+      - finger1_joint
+      - finger2_joint
 
 manipulator_position_controllers:
     action_ns: follow_joint_trajectory
@@ -30,5 +51,7 @@ manipulator_position_controllers:
       - joint_2
       - joint_3
       - joint_4
+      
+      #- finger1_joint
   #- name: joint_state_broadcaster
    # type: joint_state_broadcaster/JointStateBroadcaster

@@ -96,6 +96,9 @@ class RobotHandler : public rclcpp::Node
         15: go to arcro
         16: go to golfball
         17: Cartesian path w. tolerance
+        18: gripper On
+        19: gripper off
+        20: gripper set joint value
 
     */
     void cmdCaseMsg(const crust_msgs::msg::RobotCmdMsg::SharedPtr msg){
@@ -171,11 +174,125 @@ class RobotHandler : public rclcpp::Node
                 status_msg.data = RobotHandler::CartesianPath(robot_msg.pose[0],robot_msg.pose[1],robot_msg.pose[2],robot_msg.pose[3],robot_msg.pose[4],robot_msg.pose[5],robot_msg.pose[6],robot_msg.pose[7]);
                 break;
               
+              case 18:
+                status_msg.data = RobotHandler::gripperOn();
+                break;
+
+              case 19:
+                status_msg.data = RobotHandler::gripperOff();
+                break;
+              case 20:
+
+                break;
+
               default:
                 break;
               }
               cmd_pub_ ->publish(status_msg);
 
+    }
+    bool gripperSetValue(double j1, double j2){
+        bool status;
+        rclcpp::NodeOptions node_options;
+        node_options.automatically_declare_parameters_from_overrides(true);
+        auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
+        rclcpp::executors::MultiThreadedExecutor executor;
+        executor.add_node(move_group_node);
+        std::thread([&executor]() { executor.spin(); }).detach();
+        static const std::string PLANNING_GROUP = "gripper";
+        moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
+        moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+        const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+        auto const LOGGER = rclcpp::get_logger("gripper On");
+        moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+        std::vector<double> joints = {j1, j2};
+        move_group.setJointValueTarget(joints);
+        bool success = static_cast<bool>(move_group.plan(my_plan));
+        RCLCPP_INFO(LOGGER, " (gripper On) %s", success ? "" : "FAILED");
+        if(success == true){
+            //move_group.move();
+            move_group.execute(my_plan);
+            status = true;
+
+            
+        }
+        else
+        {
+            status = false;
+        }
+        executor.cancel();
+        return status;
+
+    }
+
+    bool gripperOn(){
+        bool status;
+        rclcpp::NodeOptions node_options;
+        node_options.automatically_declare_parameters_from_overrides(true);
+        auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
+        rclcpp::executors::MultiThreadedExecutor executor;
+        executor.add_node(move_group_node);
+        std::thread([&executor]() { executor.spin(); }).detach();
+        static const std::string PLANNING_GROUP = "gripper";
+        moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
+        moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+        const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+        auto const LOGGER = rclcpp::get_logger("gripper On");
+        moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+        std::vector<double> joints = {0.0, 0.0};
+        std::vector<std::string> joint_names = {"finger1_joint", "finger2_joint"};
+        move_group.setJointValueTarget(joint_names,joints);
+        bool success = static_cast<bool>(move_group.plan(my_plan));
+        RCLCPP_INFO(LOGGER, " (gripper On) %s", success ? "" : "FAILED");
+        if(success == true){
+            //move_group.move();
+            move_group.execute(my_plan);
+            status = true;
+
+            
+        }
+        else
+        {
+            status = false;
+        }
+        executor.cancel();
+        return status;
+
+    }
+
+    bool gripperOff(){
+        bool status;
+        rclcpp::NodeOptions node_options;
+        node_options.automatically_declare_parameters_from_overrides(true);
+        auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
+        rclcpp::executors::MultiThreadedExecutor executor;
+        executor.add_node(move_group_node);
+        std::thread([&executor]() { executor.spin(); }).detach();
+        static const std::string PLANNING_GROUP = "gripper";
+        moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
+        moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+        const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+        auto const LOGGER = rclcpp::get_logger("gripper Off");
+        moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+        std::vector<double> joints = {-0.55, -0.55};
+        std::vector<std::string> joint_names = {"finger1_joint", "finger2_joint"};
+        move_group.setJointValueTarget(joint_names,joints);
+        //move_group.setJointValueTarget(joints);
+        bool success = static_cast<bool>(move_group.plan(my_plan));
+        RCLCPP_INFO(LOGGER, " (gripper On) %s", success ? "" : "FAILED");
+        if(success == true){
+            //move_group.move();
+            move_group.execute(my_plan);
+            status = true;
+
+            
+        }
+        else
+        {
+            status = false;
+        }
+        executor.cancel();
+        return status;
     }
 
     bool CartesianPath(double x, double y, double z, double q_x, double q_y, double q_z, double q_w, double orientation_tolerance){
@@ -280,7 +397,7 @@ class RobotHandler : public rclcpp::Node
           bool i = RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z+0.1,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.3);
           if(i == 1){
 
-            return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z -0.01,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.005);
+            return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z -0.01,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.05);
           }
           else{
             return false;
@@ -311,7 +428,7 @@ class RobotHandler : public rclcpp::Node
           RCLCPP_INFO(LOGGER,"z: %f", target_pose.transform.rotation.z);
           RCLCPP_INFO(LOGGER,"x: %f", target_pose.transform.rotation.w);
           //return RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.4);
-          return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.1);
+          return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.5);
           
         } catch (const tf2::TransformException & ex) {
           RCLCPP_INFO(

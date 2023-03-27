@@ -116,7 +116,7 @@ class ImageSubscriberNode(Node):
 
                 self.get_logger().info("range: %f" %range2)
 
-                z = range2+0.02
+                z = range2+0.05
                 # radius_i =i[2]
                 # sum = 0
                 # count = 0
@@ -179,8 +179,8 @@ class ImageSubscriberNode(Node):
         tf.header.frame_id = 'camera_link'
         tf.child_frame_id = 'ball'
         tf.transform.translation.x = float(z) # +0.02#z
-        tf.transform.translation.y = float(x)+0.035
-        tf.transform.translation.z = float(y) #x
+        tf.transform.translation.y = float(x)+0.03
+        tf.transform.translation.z = float(y) +0.02#x
         tf.transform.rotation.x = 0.0
         tf.transform.rotation.y = 0.0
         tf.transform.rotation.z = 0.0

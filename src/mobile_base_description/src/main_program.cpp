@@ -102,7 +102,7 @@ class MainProgram : public rclcpp::Node
                 t_time1 = clock();
                 m_lastTime1 = m_clock->now().seconds();
                 
-                sfc = 160;
+                sfc = 155;
 
                 break;
             case 10:
@@ -247,7 +247,44 @@ class MainProgram : public rclcpp::Node
                 RCLCPP_INFO(this->get_logger(), "restarting program");
                 //sfc = 0;
                 break;
+
             
+            case 155:
+                robot_msg.cmd = 18; // set gripper off
+                robot_msg.pose = {0.37336,-0.007814,0.24958,0.0,1.57,0.0};
+                pub_robot_->publish(robot_msg); // send to robot to set gripper off
+                sfc = 156;
+                break;
+            
+            case 156:
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 157;
+                }
+
+                break;
+            
+            case 157:
+                robot_msg.cmd = 19; // set gripper on
+                robot_msg.pose = {0.37336,-0.007814,0.24958,0.0,1.57,0.0};
+                pub_robot_->publish(robot_msg); // send to robot to set gripper on
+                sfc = 158;
+                break;
+            
+            case 158:
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 160;
+                }
+
+                break;
+            
+            case 159:
+
+                break;
+
             case 160: // start of vision, vac and robot test and set both ball and aruco shearch off
                 vac_msg.data = 1;// set vaccum on
                 pub_vac_->publish(vac_msg);// Turn on vaccum pup
@@ -260,7 +297,7 @@ class MainProgram : public rclcpp::Node
                 status_ball = 0;
                 
                 robot_msg.cmd = 6;
-                robot_msg.pose = {0.37336,-0.007814,0.24958,0.0,1.57,0.0};
+                robot_msg.pose = {0.34,0.0,0.13129,0.0,1.4,0.0};//{0.37336,-0.007814,0.24958,0.0,1.57,0.0};
                 pub_robot_->publish(robot_msg);// make the robot go to the defalut pos
                 m_lastTime1 = m_clock->now().seconds();
                 sfc = 170;
@@ -318,7 +355,7 @@ class MainProgram : public rclcpp::Node
                  m_lastTime2 = m_clock->now().seconds();
                 if(robot_status == 1){
                     robot_status = 0;
-                    sfc = 220;
+                    sfc = 211;
                 }
                 if((m_lastTime2-m_lastTime1) >15.0){
                     RCLCPP_INFO(this->get_logger(), "timed out");
@@ -331,13 +368,30 @@ class MainProgram : public rclcpp::Node
                 
 
                 break;
+            
+            case 211:
+                robot_msg.cmd = 18; // set gripper off
+                robot_msg.pose = {0.37336,-0.007814,0.24958,0.0,1.57,0.0};
+                pub_robot_->publish(robot_msg); // send to robot to set gripper off
+                sfc = 212;
+                break;
+            
+            case 212:
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 220;
+                }
+
+                break;
+
                 
             
             case 220:
                 //vac_msg.data = 0;
                 //pub_vac_->publish(vac_msg);
                 robot_msg.cmd = 6;
-                robot_msg.pose = {0.3,-0.007814,0.2958,0.0,1.57,0.0};
+                robot_msg.pose = {0.32873,0.026232,0.09716,0.0,0.57,0.0};//{0.3,-0.007814,0.2958,0.0,1.57,0.0};
                 pub_robot_->publish(robot_msg);// make the robot go to the defalut pos
                 m_lastTime1 = m_clock->now().seconds();
                 sfc = 230;
