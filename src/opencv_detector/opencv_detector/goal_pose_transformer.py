@@ -3,7 +3,6 @@ from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped
 from tf2_ros import TransformListener, Buffer, TransformStamped
 from rclpy.duration import Duration
-import tf2_ros
 from tf2_ros import LookupException, ConnectivityException, ExtrapolationException
 from tf2_geometry_msgs import do_transform_pose
 
@@ -13,39 +12,40 @@ class MyNode(Node):
     
 
     def __init__(self):
-        super().__init__('my_node')
+        super().__init__('vision_goal_publisher')
         self.tf_buffer = Buffer(cache_time=Duration(seconds=10))
         self.tf_listener = TransformListener(self.tf_buffer, self)
-        self.publisher = self.create_publisher(PoseStamped, '/goal', 10)
+        self.publisher = self.create_publisher(
+            PoseStamped, 
+            '/goal_pose', 
+            10)
+        
         self.subscription = self.create_subscription(
-            PoseStamped, '/goal_pose', self.goal_callback, 10)
+            PoseStamped, 
+            '/goal', 
+            self.goal_callback,
+            10)
         self.subscription
 
 
     def goal_callback(self, msg):
+        print("recieved relative goal, x:" + str(msg.pose.position.x) + ", y:" + str(msg.pose.position.y) + ", rotz:" + str(msg.pose.orientation.z))
         try:
-            transform = self.tf_buffer.lookup_transform(self.target_frame, msg.header.frame_id, rclpy.time.Time())
+            transform = self.tf_buffer.lookup_transform('map', 'base_link', rclpy.time.Time()) 
+            print("Transform found!")
             ts_msg = TransformStamped()
             ts_msg.header = msg.header
-            ts_msg.child_frame_id = self.target_frame
-            ts_msg.transform.translation.x = transform.transform.translation.x
-            ts_msg.transform.translation.y = transform.transform.translation.y
-            ts_msg.transform.translation.z = transform.transform.translation.z
-            ts_msg.transform.rotation.x = transform.transform.rotation.x
-            ts_msg.transform.rotation.y = transform.transform.rotation.y
-            ts_msg.transform.rotation.z = transform.transform.rotation.z
-            ts_msg.transform.rotation.w = transform.transform.rotation.w
+            ts_msg.child_frame_id = 'base_link'
+            ts_msg.transform = transform.transform
 
             transformed_pose = do_transform_pose(msg.pose, ts_msg)
             pose_stamped = PoseStamped()
             pose_stamped.header.frame_id = "map"
             pose_stamped.header.stamp = self.get_clock().now().to_msg()
-            pose_stamped.pose = transformed_pose
-            pose_stamped.pose.position.z = float(0)
-            pose_stamped.pose.orientation.x = float(0)
-            pose_stamped.pose.orientation.y = float(0)
-
+            pose_stamped.pose = transformed_pose  
+            
             self.publisher.publish(pose_stamped)
+            print("Pose published!")
             
         except (LookupException, ConnectivityException, ExtrapolationException) as e:
             print(e)

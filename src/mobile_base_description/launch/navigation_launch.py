@@ -105,7 +105,7 @@ def generate_launch_description():
     declare_map_yaml_cmd = DeclareLaunchArgument(
         'map',
         default_value=os.path.join(
-            mobile_base_dir, 'maps/hall', 'hall.yaml'),
+            mobile_base_dir, 'maps/hall2', 'map3.yaml'),
         description='Full path to map file to load')
     
 
