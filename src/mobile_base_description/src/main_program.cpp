@@ -102,7 +102,7 @@ class MainProgram : public rclcpp::Node
                 t_time1 = clock();
                 m_lastTime1 = m_clock->now().seconds();
                 
-                sfc = 155;
+                sfc = 1100;
 
                 break;
             case 10:
@@ -249,7 +249,7 @@ class MainProgram : public rclcpp::Node
                 break;
 
             
-            case 155:
+            case 155:/// start test af gripper
                 robot_msg.cmd = 18; // set gripper off
                 robot_msg.pose = {0.37336,-0.007814,0.24958,0.0,1.57,0.0};
                 pub_robot_->publish(robot_msg); // send to robot to set gripper off
@@ -428,6 +428,85 @@ class MainProgram : public rclcpp::Node
             case 1000:
                 vac_msg.data = 0;
                 pub_vac_->publish(vac_msg);
+                break;
+
+
+
+
+
+            /// look ball move mobile platform
+            case 1100: // Open gripper and set both detectors off
+                robot_msg.cmd = 19; // set gripper off
+                robot_msg.pose = {0.37336,-0.007814,0.24958,0.0,1.57,0.0};
+                pub_robot_->publish(robot_msg); // send to robot to set gripper off
+                
+                aruco_msg.data = false; // setting both detectots off
+                pub_camera_aruco_->publish(aruco_msg); // setting both detectots off
+                ball_msg.data = false; // setting both detectots off
+                pub_camera_ball_->publish(aruco_msg); // setting both detectots off
+                status_aruco = 0; // setting detecttor status to 0
+                status_ball = 0; // setting detecttor status to 0
+
+                sfc = 1110;
+                break;
+
+            case 1110: // Wait for gripper to be open
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 1120;
+                }
+                break;
+            
+            case 1120: // give command for robot to go to position
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.34,0.0,0.13129,0.0,1.4,0.0};//{0.37336,-0.007814,0.24958,0.0,1.57,0.0};
+                pub_robot_->publish(robot_msg);// make the robot go to the defalut pos
+                m_lastTime1 = m_clock->now().seconds();
+                sfc = 1130;
+                break;
+
+            case 1130: // waitting for robot to go to position
+                 m_lastTime2 = m_clock->now().seconds();
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempt = 0;
+                    sfc = 1140;
+                }
+                if((m_lastTime2-m_lastTime1) >15.0){
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    sfc = 1120;
+                    if(robot_attempts == 5){
+                        sfc = 1000;
+                    }
+                }
+                break;
+
+            case 1140: // give command to ball detector to begin
+                ball_msg.data = true;
+                pub_camera_ball_->publish(ball_msg);
+                sfc = 1150;
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+                break;
+            
+            case 1150: // Waitting for ball detetor to detect
+                if(status_ball == 1)
+                {
+                    status_ball = 0;
+                    sfc = 1160;
+                }
+                m_lastTime2 = m_clock->now().seconds();
+                if((m_lastTime2-m_lastTime1) >3.0){
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    
+                    sfc = 1000;
+                    
+                }
+                break;
+
+            case 1160:
+                
                 break;
 
             default:

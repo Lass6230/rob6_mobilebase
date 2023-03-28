@@ -382,6 +382,24 @@
     <axis
       xyz="0 0 0" />
   </joint>
+
+  <link 
+    name="workspace_center"> 
+    </link>
+  <joint
+    name="workspace_center_joint"
+    type="fixed">
+    <origin
+      xyz="0.32 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="crust_base_link" />
+    <child
+      link="workspace_center" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  
   <link
     name="tool_link">
     </link>
