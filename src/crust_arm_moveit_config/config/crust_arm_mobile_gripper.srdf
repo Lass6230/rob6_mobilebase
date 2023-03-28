@@ -46,8 +46,8 @@
     <joint name="finger2_joint" value="-0.55"/>
   </group_state>
   <group_state group="gripper" name="close">
-    <joint name="finger1_joint" value="0"/>
-    <joint name="finger2_joint" value="0"/>
+    <joint name="finger1_joint" value="0.13962634"/>
+    <joint name="finger2_joint" value="0.13962634"/>
   </group_state>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
     

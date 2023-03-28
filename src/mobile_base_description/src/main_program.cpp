@@ -18,7 +18,7 @@
 #include "crust_msgs/srv/robot_cmd_srv.hpp"
 #include "crust_msgs/msg/robot_cmd_msg.hpp"
 #include <time.h>
-
+#include <geometry_msgs/msg/pose_stamped.hpp>
 using std::placeholders::_1;
 using std::placeholders::_2;
 
@@ -323,9 +323,11 @@ class MainProgram : public rclcpp::Node
                     sfc = 180;
                 }
                 break;
-            case 180: // Start the ball shearch
-                ball_msg.data = true;
+            case 180: // Start the aruco shearch
+                ball_msg.data = false;
                 pub_camera_ball_->publish(ball_msg);
+                aruco_msg.data = true;
+                pub_camera_aruco_->publish(aruco_msg);
 
                 sfc = 190;
                 break;
@@ -336,15 +338,22 @@ class MainProgram : public rclcpp::Node
                     status_ball = 0;
                     sfc = 200;
                 }
+                if(status_aruco == 1)
+                {
+                    status_aruco = 0;
+                    sfc = 200;
+                }
 
                 break;
             
             case 200:
-                robot_msg.cmd = 16;
+                robot_msg.cmd = 15; // go to aruco
                 robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};
                 pub_robot_->publish(robot_msg);
                 ball_msg.data = false;
                 pub_camera_ball_->publish(aruco_msg);
+                aruco_msg.data = false;
+                pub_camera_aruco_->publish(aruco_msg);
                 status_ball = 0;
                 m_lastTime1 = m_clock->now().seconds();
                 sfc = 210;
@@ -474,6 +483,10 @@ class MainProgram : public rclcpp::Node
         int8_t robot_status = 0;
         crust_msgs::msg::RobotCmdMsg robot_msg;
         int8_t robot_attempts = 0;
+
+
+        // mobile robot movement
+        geometry_msgs::msg::PoseStamped mobile_pose;
 };
 
 int main(int argc, char **argv)
