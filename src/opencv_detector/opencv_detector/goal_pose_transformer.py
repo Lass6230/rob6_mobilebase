@@ -8,9 +8,7 @@ from tf2_geometry_msgs import do_transform_pose
 
 
 class MyNode(Node):
-    target_frame = 'base_link'
-    
-
+    #target_frame = 'base_link'
     def __init__(self):
         super().__init__('vision_goal_publisher')
         self.tf_buffer = Buffer(cache_time=Duration(seconds=10))
@@ -29,10 +27,11 @@ class MyNode(Node):
 
 
     def goal_callback(self, msg):
-        print("recieved relative goal, x:" + str(msg.pose.position.x) + ", y:" + str(msg.pose.position.y) + ", rotz:" + str(msg.pose.orientation.z))
+        Node.get_logger(self).info(f'Recieved relative goal, x: {msg.pose.position.x}, y: {msg.pose.position.x}, quat_z: {msg.pose.orientation.z}')
+        
         try:
             transform = self.tf_buffer.lookup_transform('map', 'base_link', rclpy.time.Time()) 
-            print("Transform found!")
+            Node.get_logger(self).info('Transform found!')
             ts_msg = TransformStamped()
             ts_msg.header = msg.header
             ts_msg.child_frame_id = 'base_link'
@@ -45,10 +44,11 @@ class MyNode(Node):
             pose_stamped.pose = transformed_pose  
             
             self.publisher.publish(pose_stamped)
-            print("Pose published!")
+            Node.get_logger(self).info(f'Published pose in map frame! x: {pose_stamped.pose.position.x}, y: {pose_stamped.pose.position.y}, quat_z: {pose_stamped.pose.orientation.z}')
+            
             
         except (LookupException, ConnectivityException, ExtrapolationException) as e:
-            print(e)
+            Node.get_logger(self).warn(f'{e}')
 
     
 
