@@ -49,6 +49,9 @@ class ImageSubscriberNode(Node):
         detector = cv2.aruco.ArucoDetector(dictionary, parameters)
 
         markerCorners, markerIds, rejectedCandidates = detector.detectMarkers(cv_image)
+        #print("marker id: " + str(markerIds))
+        #id = float(markerIds)
+        
         
         cv2.aruco.drawDetectedMarkers(cv_image, markerCorners, markerIds, (0, 255, 0))
         
@@ -99,7 +102,7 @@ class ImageSubscriberNode(Node):
             cartesian_y = np.sin(np.deg2rad(y_angle)) * z / 1000
             cartesian_z = np.cos(np.deg2rad(z_angle)) * z / 1000
 
-            self.publish_transform(cartesian_x, cartesian_y, cartesian_z)
+            self.publish_transform(cartesian_x, cartesian_y, cartesian_z, markerIds)
 
 
         # display the image with overlayed markers
@@ -107,7 +110,7 @@ class ImageSubscriberNode(Node):
         cv2.waitKey(1)
 
 
-    def publish_transform(self, x, y, z):
+    def publish_transform(self, x, y, z, id):
         tf = TransformStamped()
 
         tf.header.stamp = self.get_clock().now().to_msg()
@@ -123,9 +126,9 @@ class ImageSubscriberNode(Node):
 
         self.tf_broadcaster.sendTransform(tf)
         self.found_aruco_counter += 1
-        if self.found_aruco_counter == 5:
+        if self.found_aruco_counter == 5 and int(id) != 53:
             msg = Int8()
-            msg.data = 1
+            msg.data = int(id)
             self.status_publisher.publish(msg)
             self.found_aruco_counter = 0
 
