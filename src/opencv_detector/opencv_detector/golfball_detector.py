@@ -105,7 +105,7 @@ class ImageSubscriberNode(Node):
 
                     for k in range(radius_i):
                         for j in range(radius_i):
-                            count +=1(35, 72, 89), (48, 255, 255)
+                            count +=1
                             sum += cv_depth[y+j,x+k]
                     for k in range(-radius_i):
                         for j in range(-radius_i):
@@ -239,7 +239,7 @@ class ImageSubscriberNode(Node):
         tf.header.frame_id = 'camera_link'
         tf.child_frame_id = 'ball'
         tf.transform.translation.x = float(z) # +0.02#z
-        tf.transform.translation.y = float(x)#+0.03
+        tf.transform.translation.y = float(x)+0.02
         tf.transform.translation.z = float(y) #+0.02#x
         tf.transform.rotation.x = 0.0
         tf.transform.rotation.y = 0.0
@@ -248,7 +248,7 @@ class ImageSubscriberNode(Node):
 
         self.tf_broadcaster.sendTransform(tf)
         self.found_ball_counter += 1
-        if self.found_ball_counter == 5:
+        if self.found_ball_counter == 10:
             msg = Int8()
             msg.data = 1
             self.status_publisher.publish(msg)

@@ -84,7 +84,7 @@ class ImageSubscriberNode(Node):
             # self.get_logger().info("range aruco: %f" %range2)
 
             # self.get_logger().info('z aruco: "%f"' % z)
-            z = range2
+            z = range2+0.02
             ######################
 
             center_x, center_y = cv_image.shape[1]/2, cv_image.shape[0]/2
@@ -112,9 +112,9 @@ class ImageSubscriberNode(Node):
 
         tf.header.stamp = self.get_clock().now().to_msg()
         tf.header.frame_id = 'camera_link'
-        tf.child_frame_id = 'aruco_code'
+        tf.child_frame_id = 'aruco'
         tf.transform.translation.x = float(z) #z
-        tf.transform.translation.y = float(x) 
+        tf.transform.translation.y = float(x) +0.025
         tf.transform.translation.z = float(y) #x
         tf.transform.rotation.x = 0.0
         tf.transform.rotation.y = 0.0

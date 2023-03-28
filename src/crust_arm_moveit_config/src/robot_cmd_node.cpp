@@ -181,8 +181,9 @@ class RobotHandler : public rclcpp::Node
               case 19:
                 status_msg.data = RobotHandler::gripperOff();
                 break;
-              case 20:
 
+              case 20:
+                status_msg.data = RobotHandler::gripperSetValue(robot_msg.pose[0],robot_msg.pose[1]);
                 break;
 
               default:
@@ -239,7 +240,7 @@ class RobotHandler : public rclcpp::Node
         const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
         auto const LOGGER = rclcpp::get_logger("gripper On");
         moveit::planning_interface::MoveGroupInterface::Plan my_plan;
-        std::vector<double> joints = {0.0, 0.0};
+        std::vector<double> joints = {0.13962634, 0.13962634};
         std::vector<std::string> joint_names = {"finger1_joint", "finger2_joint"};
         move_group.setJointValueTarget(joint_names,joints);
         bool success = static_cast<bool>(move_group.plan(my_plan));
@@ -428,8 +429,15 @@ class RobotHandler : public rclcpp::Node
           RCLCPP_INFO(LOGGER,"z: %f", target_pose.transform.rotation.z);
           RCLCPP_INFO(LOGGER,"x: %f", target_pose.transform.rotation.w);
           //return RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.4);
-          return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.5);
-          
+          //return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.5);
+          bool i = RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z+0.1,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.3);
+          if(i == 1){
+
+            return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z -0.03,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.05);
+          }
+          else{
+            return false;
+          }
         } catch (const tf2::TransformException & ex) {
           RCLCPP_INFO(
             this->get_logger(), "Could not transform %s to %s: %s",
