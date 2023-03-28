@@ -19,6 +19,12 @@
 #include "crust_msgs/msg/robot_cmd_msg.hpp"
 #include <time.h>
 #include <geometry_msgs/msg/pose_stamped.hpp>
+#include <tf2/LinearMath/Quaternion.h>
+#include "tf2/exceptions.h"
+#include "tf2_ros/transform_listener.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+#include "tf2_ros/buffer.h"
+
 using std::placeholders::_1;
 using std::placeholders::_2;
 
@@ -30,6 +36,9 @@ class MainProgram : public rclcpp::Node
     public:
         MainProgram() : Node("MainProgram")
         {   
+            tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
+            // Listen to the buffer of transforms
+            tf_listener_ = std::make_unique<tf2_ros::TransformListener>(*tf_buffer_);
             m_clock = std::make_shared< rclcpp::Clock >(RCL_SYSTEM_TIME);
             callback_group_subscriber1_ = this->create_callback_group(
                     rclcpp::CallbackGroupType::MutuallyExclusive);
@@ -53,6 +62,7 @@ class MainProgram : public rclcpp::Node
             sub_camera_ball_ = this->create_subscription<std_msgs::msg::Int8>("/status_ball",10,std::bind(&MainProgram::subBallStatus, this, _1), sub1_opt);
             pub_camera_aruco_ = this->create_publisher<std_msgs::msg::Bool>("/search_aruco",10);
             pub_camera_ball_ = this->create_publisher<std_msgs::msg::Bool>("/search_golfball",10);
+            pub_mobile_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/goal",10);
             //MainProgram::main_program();
         }
     
@@ -102,7 +112,7 @@ class MainProgram : public rclcpp::Node
                 t_time1 = clock();
                 m_lastTime1 = m_clock->now().seconds();
                 
-                sfc = 1100;
+                sfc = 155;//1100;
 
                 break;
             case 10:
@@ -470,7 +480,7 @@ class MainProgram : public rclcpp::Node
                  m_lastTime2 = m_clock->now().seconds();
                 if(robot_status == 1){
                     robot_status = 0;
-                    robot_attempt = 0;
+                    robot_attempts = 0;
                     sfc = 1140;
                 }
                 if((m_lastTime2-m_lastTime1) >15.0){
@@ -506,7 +516,30 @@ class MainProgram : public rclcpp::Node
                 break;
 
             case 1160:
-                
+                transform_pose = tf_buffer_->lookupTransform(
+                    "workspace_center", "ball",
+                    tf2::TimePointZero);
+                sfc = 1170;
+                break;
+
+            case 1170:
+                if(sqrt(pow(transform_pose.transform.translation.x,2)+pow(transform_pose.transform.translation.y,2))<0.1){
+                    // the ball are in range
+                }
+                else{
+                    sfc = 1180;
+                }
+                break;
+            
+            case 1180:
+                target_pose.pose.position.x = transform_pose.transform.translation.x;
+                target_pose.pose.position.y = transform_pose.transform.translation.y;
+                target_pose.pose.orientation.x = transform_pose.transform.rotation.x;
+                target_pose.pose.orientation.y = transform_pose.transform.rotation.y;
+                target_pose.pose.orientation.z = transform_pose.transform.rotation.z;
+                target_pose.pose.orientation.w = transform_pose.transform.rotation.w;
+                pub_mobile_->publish(target_pose);
+                // Int8 1(reached) 2(failed) (topic: /goal_reached)
                 break;
 
             default:
@@ -549,6 +582,7 @@ class MainProgram : public rclcpp::Node
         rclcpp::TimerBase::SharedPtr timer_;
         size_t count_;
         int32_t sfc = 0;
+
         clock_t t_time1;
         clock_t t_time2;
         float tt;
@@ -565,7 +599,11 @@ class MainProgram : public rclcpp::Node
 
 
         // mobile robot movement
-        geometry_msgs::msg::PoseStamped mobile_pose;
+        geometry_msgs::msg::PoseStamped target_pose;
+        geometry_msgs::msg::TransformStamped transform_pose;
+        std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
+        std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
+        rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pub_mobile_;
 };
 
 int main(int argc, char **argv)
