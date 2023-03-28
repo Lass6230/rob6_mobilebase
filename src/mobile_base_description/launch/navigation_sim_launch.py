@@ -81,7 +81,7 @@ def generate_launch_description():
 
     declare_slam_cmd = DeclareLaunchArgument(
         'slam',
-        default_value='True', #False
+        default_value='False', #False
         description='Whether run a SLAM')
 
     declare_map_yaml_cmd = DeclareLaunchArgument(
