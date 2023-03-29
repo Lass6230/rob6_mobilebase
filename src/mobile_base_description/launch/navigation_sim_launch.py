@@ -86,7 +86,7 @@ def generate_launch_description():
     declare_map_yaml_cmd = DeclareLaunchArgument(
         'map',
         default_value=os.path.join(
-            mobile_base_dir, 'maps/sim', 'map.yaml'),
+            mobile_base_dir, 'maps/sim', 'map_sim.yaml'),
         description='Full path to map file to load')
     
 
