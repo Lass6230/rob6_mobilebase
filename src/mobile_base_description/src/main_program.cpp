@@ -19,6 +19,12 @@
 #include "crust_msgs/msg/robot_cmd_msg.hpp"
 #include <time.h>
 #include <geometry_msgs/msg/pose_stamped.hpp>
+#include <tf2/LinearMath/Quaternion.h>
+#include "tf2/exceptions.h"
+#include "tf2_ros/transform_listener.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+#include "tf2_ros/buffer.h"
+
 using std::placeholders::_1;
 using std::placeholders::_2;
 
@@ -30,6 +36,9 @@ class MainProgram : public rclcpp::Node
     public:
         MainProgram() : Node("MainProgram")
         {   
+            tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
+            // Listen to the buffer of transforms
+            tf_listener_ = std::make_unique<tf2_ros::TransformListener>(*tf_buffer_);
             m_clock = std::make_shared< rclcpp::Clock >(RCL_SYSTEM_TIME);
             callback_group_subscriber1_ = this->create_callback_group(
                     rclcpp::CallbackGroupType::MutuallyExclusive);
@@ -53,6 +62,7 @@ class MainProgram : public rclcpp::Node
             sub_camera_ball_ = this->create_subscription<std_msgs::msg::Int8>("/status_ball",10,std::bind(&MainProgram::subBallStatus, this, _1), sub1_opt);
             pub_camera_aruco_ = this->create_publisher<std_msgs::msg::Bool>("/search_aruco",10);
             pub_camera_ball_ = this->create_publisher<std_msgs::msg::Bool>("/search_golfball",10);
+            pub_mobile_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/goal",10);
             //MainProgram::main_program();
         }
     
@@ -102,7 +112,7 @@ class MainProgram : public rclcpp::Node
                 t_time1 = clock();
                 m_lastTime1 = m_clock->now().seconds();
                 
-                sfc = 155;
+                sfc = 155;//1100;
 
                 break;
             case 10:
@@ -249,7 +259,7 @@ class MainProgram : public rclcpp::Node
                 break;
 
             
-            case 155:
+            case 155:/// start test af gripper
                 robot_msg.cmd = 18; // set gripper off
                 robot_msg.pose = {0.37336,-0.007814,0.24958,0.0,1.57,0.0};
                 pub_robot_->publish(robot_msg); // send to robot to set gripper off
@@ -382,6 +392,8 @@ class MainProgram : public rclcpp::Node
                 robot_msg.cmd = 18; // set gripper off
                 robot_msg.pose = {0.37336,-0.007814,0.24958,0.0,1.57,0.0};
                 pub_robot_->publish(robot_msg); // send to robot to set gripper off
+
+                
                 sfc = 212;
                 break;
             
@@ -430,6 +442,633 @@ class MainProgram : public rclcpp::Node
                 pub_vac_->publish(vac_msg);
                 break;
 
+
+
+
+
+            /// look ball move mobile platform
+            case 1100: // Open gripper and set both detectors off
+                robot_msg.cmd = 19; // set gripper off
+                robot_msg.pose = {0.37336,-0.007814,0.24958,0.0,1.57,0.0};
+                pub_robot_->publish(robot_msg); // send to robot to set gripper off
+                
+                aruco_msg.data = false; // setting both detectots off
+                pub_camera_aruco_->publish(aruco_msg); // setting both detectots off
+                ball_msg.data = false; // setting both detectots off
+                pub_camera_ball_->publish(aruco_msg); // setting both detectots off
+                status_aruco = 0; // setting detecttor status to 0
+                status_ball = 0; // setting detecttor status to 0
+
+                sfc = 1110;
+                break;
+
+            case 1110: // Wait for gripper to be open
+                if(robot_status == 1){// Wait for gripper to be open
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 1120;
+                }
+                break;
+            
+            case 1120: // give command for robot to go to position
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.34,0.0,0.13129,0.0,1.4,0.0};//{0.37336,-0.007814,0.24958,0.0,1.57,0.0};
+                pub_robot_->publish(robot_msg);// make the robot go to the defalut pos
+                m_lastTime1 = m_clock->now().seconds();
+                sfc = 1130;
+                break;
+
+            case 1130: // waitting for robot to go to position
+                 m_lastTime2 = m_clock->now().seconds();
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 1140;
+                }
+                if((m_lastTime2-m_lastTime1) >15.0){
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    sfc = 1120;
+                    if(robot_attempts == 5){
+                        sfc = 1000;
+                    }
+                }
+                break;
+
+            case 1140: // give command to ball detector to begin
+                ball_msg.data = true;
+                pub_camera_ball_->publish(ball_msg);
+                sfc = 1150;
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+                break;
+            
+            case 1150: // Waitting for ball detetor to detect
+                if(status_ball == 1)
+                {
+                    status_ball = 0;
+                    sfc = 1160;
+                }
+                m_lastTime2 = m_clock->now().seconds();
+                if((m_lastTime2-m_lastTime1) >3.0){
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    
+                    sfc = 1000;
+                    
+                }
+                break;
+
+            case 1160:
+                transform_pose = tf_buffer_->lookupTransform(
+                    "workspace_center", "ball",
+                    tf2::TimePointZero);
+                sfc = 1170;
+                break;
+
+            case 1170:
+                if(sqrt(pow(transform_pose.transform.translation.x,2)+pow(transform_pose.transform.translation.y,2))<0.1){
+                    // the ball are in range
+                }
+                else{
+                    sfc = 1180;
+                }
+                break;
+            
+            case 1180:
+                target_pose.pose.position.x = transform_pose.transform.translation.x;
+                target_pose.pose.position.y = transform_pose.transform.translation.y;
+                target_pose.pose.orientation.x = transform_pose.transform.rotation.x;
+                target_pose.pose.orientation.y = transform_pose.transform.rotation.y;
+                target_pose.pose.orientation.z = transform_pose.transform.rotation.z;
+                target_pose.pose.orientation.w = transform_pose.transform.rotation.w;
+                pub_mobile_->publish(target_pose);
+                // Int8 1(reached) 2(failed) (topic: /goal_reached)
+                break;
+            
+
+
+            //////////////////BEGINING TASK 13 from case 6000-6999 /////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            case 6000:
+                sfc = 6010;
+                break;
+            
+            case 6010: // Open Gripper
+
+                robot_msg.cmd = 19; // set gripper off and setting the cameras off
+                robot_msg.pose = {0.37336,-0.007814,0.24958,0.0,1.57,0.0}; // pos do not matter
+                pub_robot_->publish(robot_msg); // send to robot to set gripper off
+
+                aruco_msg.data = false; 
+                pub_camera_aruco_->publish(aruco_msg); // setting the aruco camera off
+                ball_msg.data = false;
+                pub_camera_ball_->publish(aruco_msg); // setting the ball camera off
+                status_aruco = 0;
+                status_ball = 0;
+
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+                sfc = 6020;
+                break;
+            
+            case 6020: // Wait for gripper to be open
+                if(robot_status == 1){// Wait for gripper to be open
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 6030;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    
+                    sfc = 6010; // go back and resend the robot cmd
+                    
+                }
+
+                break;
+            
+            case 6030: // put the robot in sharch pose
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.34,0.0,0.13129,0.0,1.4,0.0};
+                pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+
+                sfc = 6040;
+                break;
+            
+            case 6040: // waitting for robot to go to pose
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 6050;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    
+                    sfc = 6030; // go back and resend the robot cmd
+                    if(robot_attempts == 5){
+                       // sfc = 6030;
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                }
+
+                break;
+            
+            case 6050: // start the aruco camera
+                aruco_msg.data = true;
+                pub_camera_aruco_->publish(aruco_msg);
+
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+                sfc = 6060;
+
+                break;
+            
+            case 6060: // waitting for camera to detect aruco code
+                if(status_aruco == 5|| status_aruco == 6 || status_aruco == 20) // check if aruco code is found for rød or green or yellow
+                {
+                    // the color code is store in the variable status_aruco
+                    sfc = 6070;
+                }
+               
+                if((m_lastTime2-m_lastTime1) >5.0){ // check if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out, no aruco code found");
+                    
+                    
+                }
+
+                break;
+            
+            case 6070: // move robot to aruco code
+                robot_msg.cmd = 15; // go to aruco
+                robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};
+                pub_robot_->publish(robot_msg);
+
+                aruco_msg.data = false;
+                pub_camera_aruco_->publish(aruco_msg); // send to camera to stop
+
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+
+                sfc = 6080;
+                break;
+            
+            case 6080: // waitting for robot to go to pose
+                if(robot_status == 1){ // check if robot is done
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 6090;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    
+                    sfc = 6070; // go back and resend the robot cmd
+                    if(robot_attempts == 5){
+                       // sfc = 6030;
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                }
+
+                break;
+            
+            case 6090: // close gripper
+                robot_msg.cmd = 18; // close gripper
+                robot_msg.pose = {0.37336,-0.007814,0.24958,0.0,1.57,0.0};
+                pub_robot_->publish(robot_msg); // send to robot to set gripper close
+
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+
+                sfc = 6100;
+
+                break;
+            
+            case 6100: // waitting for gripper to close
+                if(robot_status == 1){ // check if robot is done
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 6110;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    
+                    sfc = 6090; // go back and resend the robot cmd
+                    if(robot_attempts == 5){
+                       // sfc = 6030;
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                }
+
+                break;
+            
+            case 6110: // move robot to pose to deapproch pose
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.34,0.0,0.13129,0.0,1.4,0.0}; 
+                pub_robot_->publish(robot_msg);
+
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+
+                sfc = 6120;
+
+                break;
+            
+            case 6120: // waitting for robot to move to pose
+                if(robot_status == 1){ // check if robot is done
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 6130;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    
+                    sfc = 6110; // go back and resend the robot cmd
+                    if(robot_attempts == 5){
+                       // sfc = 6030;
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                }
+
+                break;
+            
+            case 6130: // move robot to drop of aruco box pose
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.56395,0.0,0.2027,0.0,0.0,0.0}; 
+                pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+
+                sfc = 6140;
+
+                break;
+            
+            case 6140:
+                if(robot_status == 1){ // check if robot is done
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 6150;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    
+                    sfc = 6130; // go back and resend the robot cmd
+                    if(robot_attempts == 5){
+                       // sfc = 6030;
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                }
+
+                break;
+
+            case 6150: // open the gripper 
+                robot_msg.cmd = 19; // set gripper off
+                robot_msg.pose = {0.37336,-0.007814,0.24958,0.0,1.57,0.0}; // pos do not matter
+                pub_robot_->publish(robot_msg); // send to robot to set gripper off
+
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+                sfc = 6160;
+                break;
+            
+            case 6160: // waitting for gripper to open
+
+                if(robot_status == 1){// Wait for gripper to be open
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 6170;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    
+                    sfc = 6150; // go back and resend the robot cmd
+                    
+                }
+
+                break;
+            
+            case 6170: // move robot to sheach pose for golfball
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.34,0.0,0.13129,0.0,1.4,0.0};
+                pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+
+                sfc = 6180;
+
+
+                break;
+            
+            case 6180: // waitting for robot go to pose
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 6190;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    
+                    robot_attempts ++;
+                    
+                    
+                    if(robot_attempts == 5){
+                       // sfc = 6030;
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                    sfc = 6170; // go back and resend the robot cmd
+                    
+                }
+
+
+                break;
+            
+            case 6190:  // start camera to sharch for golfball
+                ball_msg.data = false;
+                pub_camera_ball_->publish(ball_msg); // setting the ball camera off
+                status_ball = 0;
+
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+                
+                sfc = 6200;
+
+                break;
+            
+            case 6200: // waitting for camera to find ball or timeout
+                if(status_ball == 1)
+                {
+                    status_ball = 0;
+                    sfc = 6210;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out, No golfball found");
+                    
+                    
+                    
+                }
+
+                break;
+
+            case 6210: // move robot to ball pose
+                robot_msg.cmd = 16; // go to aruco
+                robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};
+                pub_robot_->publish(robot_msg);
+                ball_msg.data = false;
+                pub_camera_ball_->publish(aruco_msg);
+                status_ball = 0;
+
+                m_lastTime1 = m_clock->now().seconds();
+                sfc = 6220;
+
+                break;
+            
+            case 6220: // waitting for robot to go to pose
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 6230;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    
+                    sfc = 6210; // go back and resend the robot cmd
+                    
+                }
+                break;
+            
+            case 6230: // close gripper
+                robot_msg.cmd = 18; // close gripper
+                robot_msg.pose = {0.37336,-0.007814,0.24958,0.0,1.57,0.0};
+                pub_robot_->publish(robot_msg); // send to robot to set gripper close
+
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+
+                sfc = 6240;
+
+                break;
+            
+            case 6235: // waitting for gripper to close
+                if(robot_status == 1){ // check if robot is done
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 6240;
+                }
+                break;
+
+            case 6240: // robot move to deapproch pose
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.34,0.0,0.13129,0.0,1.4,0.0};
+                pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+
+                sfc = 6250;
+                break;
+
+            case 6250: // waittting for robot to go to pose
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 6260;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    
+                    robot_attempts ++;
+                    
+                    
+                    if(robot_attempts == 5){
+                       // sfc = 6030;
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                    sfc = 6240; // go back and resend the robot cmd
+                    
+                }
+                break;
+            
+            case 6260: // make mobile base move to acuco code drop off point
+
+                break;
+            
+            case 6270: // waitting for mobile robot to drive to point
+
+                break;
+            
+            case 6280: // move robot to the floor (to drop of ball)
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.28,0.0,0.0,0.0,1.57,0.0};
+                pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+
+                sfc = 6250;
+                break;
+            
+            case 6290: // waitting for robot to go to pose
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 6300;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    
+                    robot_attempts ++;
+                    
+                    
+                    if(robot_attempts == 5){
+                       // sfc = 6030;
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                    sfc = 6280; // go back and resend the robot cmd
+                    
+                }
+                break;
+            
+            case 6300: // open gripper
+                robot_msg.cmd = 19; // set gripper off
+                robot_msg.pose = {0.37336,-0.007814,0.24958,0.0,1.57,0.0}; // pos do not matter
+                pub_robot_->publish(robot_msg); // send to robot to set gripper off
+
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+                sfc = 6310;
+
+                break;
+            
+            case 6310: // waitting for gripper to open
+                 if(robot_status == 1){ // check if robot is done
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 6240;
+                }
+
+                break;
+            
+            case 6320: // move robot to shearch pose
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.34,0.0,0.13129,0.0,1.4,0.0};
+                pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+
+                sfc = 6330;
+                break;
+            
+            case 6330: // waitiing for robot to go to pose
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 6335;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    
+                    robot_attempts ++;
+                    
+                    
+                    if(robot_attempts == 5){
+                       // sfc = 6030;
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                    sfc = 6320; // go back and resend the robot cmd
+                    
+                }
+                break;
+            
+            case 6335: // add one to packages count
+                package_count ++;
+                break;
+
+            case 6340: // make mobile robot to go back to next pose at "pakkeleveringen"
+                
+                if(package_count == 3){
+                    sfc = 6999;
+                }
+                else{
+                    // move to pose
+                }
+                break;
+             
+            case 6350: // waiiting for mobile robot to go to pose
+
+                break;
+            
+            case 6360: // repeat for next package
+                sfc = 6010;
+                break;
+            
+            
+            
+            case 6999: // tasl 13 done
+
+                 break;
+
+            //////////////////END TASK 13 from case 6000-6999 ///////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
             default:
                 break;
             }
@@ -470,6 +1109,7 @@ class MainProgram : public rclcpp::Node
         rclcpp::TimerBase::SharedPtr timer_;
         size_t count_;
         int32_t sfc = 0;
+
         clock_t t_time1;
         clock_t t_time2;
         float tt;
@@ -483,10 +1123,19 @@ class MainProgram : public rclcpp::Node
         int8_t robot_status = 0;
         crust_msgs::msg::RobotCmdMsg robot_msg;
         int8_t robot_attempts = 0;
+        int8_t package_count = 0;
 
 
         // mobile robot movement
-        geometry_msgs::msg::PoseStamped mobile_pose;
+        geometry_msgs::msg::PoseStamped target_pose;
+        geometry_msgs::msg::TransformStamped transform_pose;
+        std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
+        std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
+        rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pub_mobile_;
+
+        /// the 3 packages trolly pose, make as vector
+
+        /// the 3 house pose, make as vector
 };
 
 int main(int argc, char **argv)

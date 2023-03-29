@@ -85,4 +85,14 @@
     <disable_collisions link1="flange_link" link2="gripper_link" reason="Naver"/>
     <disable_collisions link1="finger1_link" link2="finger2_link" reason="Adjacent"/>
     <disable_collisions link1="finger1_link" link2="finger2_link" reason="Naver"/>
+    <disable_collisions link1="crust_base_link" link2="base_link" reason="Adjacent"/>
+    <disable_collisions link1="crust_base_link" link2="base_link" reason="Naver"/>
+    <disable_collisions link1="crust_base_link1" link2="crust_base_link" reason="Adjacent"/>
+    <disable_collisions link1="crust_base_link1" link2="crust_base_link" reason="Naver"/>
+    <disable_collisions link1="base_link" link2="scan" reason="Adjacent"/>
+    <disable_collisions link1="base_link" link2="scan" reason="Naver"/>
+    <disable_collisions link1="base_link" link2="left_wheel" reason="Adjacent"/>
+    <disable_collisions link1="base_link" link2="left_wheel" reason="Naver"/>
+    <disable_collisions link1="base_link" link2="right_wheel" reason="Adjacent"/>
+    <disable_collisions link1="base_link" link2="right_wheel" reason="Naver"/>
 </robot>
