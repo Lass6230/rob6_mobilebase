@@ -1,3 +1,6 @@
+#true footprint "[ [0.3, 0.06], [0.3, -0.14], [0.13, -0.17], [-0.43, -0.17], [-0.43, 0.17], [0.13, 0.17], [0.2, 0.17] ]"
+
+
 amcl: #
   ros__parameters:
     use_sim_time: True
@@ -58,6 +61,8 @@ bt_navigator:
     enable_groot_monitoring: True
     groot_zmq_publisher_port: 1666
     groot_zmq_server_port: 1667
+    transform_tolerance: 0.1
+    goal_reached_tol: 0.25
     # 'default_nav_through_poses_bt_xml' and 'default_nav_to_pose_bt_xml' are use defaults:
     # nav2_bt_navigator/navigate_to_pose_w_replanning_and_recovery.xml
     # nav2_bt_navigator/navigate_through_poses_w_replanning_and_recovery.xml
@@ -158,13 +163,12 @@ controller_server:
       trans_stopped_velocity: 0.25
       short_circuit_trajectory_evaluation: True
       stateful: True
-      critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
-      BaseObstacle.scale: 0.02 #0.02
-      PathAlign.scale: 32.0 #
-      PathAlign.forward_point_distance: 0.2 #0.325
+      critics: ["RotateToGoal", "Oscillation", "ObstacleFootprint", "GoalAlign", "PathAlign", "PathDist", "GoalDist"] #"BaseObstacle"
+      PathAlign.scale: 64.0 #32.0 
+      PathAlign.forward_point_distance: 0.1 
       GoalAlign.scale: 24.0
       GoalAlign.forward_point_distance: 0.1
-      PathDist.scale: 32.0
+      PathDist.scale: 64.0 #32.0
       GoalDist.scale: 24.0
       RotateToGoal.scale: 32.0
       RotateToGoal.slowing_factor: 5.0
@@ -186,13 +190,12 @@ local_costmap:
       width: 4
       height: 4
       resolution: 0.02
-      #robot_radius: 0.22
-      footprint: "[ [0.3, 0.18], [0.3, -0.18],[-0.5, -0.18],[-0.5, 0.18] ]"
+      footprint: "[ [0.3, 0.06], [0.3, -0.14], [0.13, -0.17], [-0.43, -0.17], [-0.43, 0.17], [0.13, 0.17], [0.2, 0.17] ]"
       plugins: ["voxel_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.45 #0.55
+        inflation_radius: 0.65 
       voxel_layer:
         plugin: "nav2_costmap_2d::VoxelLayer"
         enabled: True
@@ -231,8 +234,7 @@ global_costmap:
       global_frame: map
       robot_base_frame: base_footprint
       use_sim_time: True
-      robot_radius: 0.15 #0.18
-      #footprint: "[ [0.3, 0.15], [0.3, -0.15],[-0.5, -0.15],[-0.5, 0.15] ]" #"[ [0.3, 0.17], [0.3, -0.17],[-0.5, -0.17],[-0.5, 0.17] ]"
+      footprint: "[ [0.3, 0.06], [0.3, -0.14], [0.13, -0.17], [-0.43, -0.17], [-0.43, 0.17], [0.13, 0.17], [0.2, 0.17] ]"
       resolution: 0.05
       track_unknown_space: true
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
@@ -256,7 +258,7 @@ global_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.40 #0.60
+        inflation_radius: 0.65
       always_send_full_costmap: True
   global_costmap_client:
     ros__parameters:
@@ -268,7 +270,7 @@ global_costmap:
 map_server:
   ros__parameters:
     use_sim_time: True
-    yaml_filename: "hall.yaml"
+    yaml_filename: "map.yaml"
 
 map_saver:
   ros__parameters:
@@ -278,18 +280,18 @@ map_saver:
     occupied_thresh_default: 0.65
     map_subscribe_transient_local: True
 
-# planner_server:
+# planner_server: #hates turning on the spot on startup otherwise nice
 #   ros__parameters:
 #     expected_planner_frequency: 20.0
 #     use_sim_time: True
 #     planner_plugins: ["GridBased"]
 #     GridBased:
-#       plugin: "nav2_navfn_planner/NavfnPlanner"
-#       tolerance: 0.5
-#       use_astar: True
+#       plugin: "nav2_navfn_planner/NavfnPlanner" 
+#       tolerance: 0.2
+#       use_astar: False
 #       allow_unknown: True
 
-# planner_server:
+# planner_server: #gets stuck  ALOT
 #   ros__parameters:
 #     planner_plugins: ["GridBased"]
 #     use_sim_time: True
@@ -308,17 +310,17 @@ map_saver:
 #       analytic_expansion_ratio: 3.5       # The ratio to attempt analytic expansions during search for final approach.
 #       analytic_expansion_max_length: 3.0 #3.0  # For Hybrid/Lattice nodes: The maximum length of the analytic expansion to be considered valid to prevent unsafe shortcutting
 #       minimum_turning_radius: 0.1        # minimum turning radius in m of path / vehicle
-#       reverse_penalty: 1.0 #2.0                # Penalty to apply if motion is reversing, must be => 1
+#       reverse_penalty: 1.2 #2.0                # Penalty to apply if motion is reversing, must be => 1
 #       change_penalty: 0.0                 # Penalty to apply if motion is changing directions (L to R), must be >= 0
-#       non_straight_penalty: 1.0           # Penalty to apply if motion is non-straight, must be => 1
-#       cost_penalty: 10.0 #3.5                   # Penalty to apply to higher cost areas when adding into the obstacle map dynamic programming distance expansion heuristic. This drives the robot more towards the center of passages. A value between 1.3 - 3.5 is reasonable.
+#       non_straight_penalty: 1.2           # Penalty to apply if motion is non-straight, must be => 1
+#       cost_penalty: 10.0 #3.0                   # Penalty to apply to higher cost areas when adding into the obstacle map dynamic programming distance expansion heuristic. This drives the robot more towards the center of passages. A value between 1.3 - 3.5 is reasonable.
 #       retrospective_penalty: 0.015
 #       lookup_table_size: 20.0             # Size of the dubin/reeds-sheep distance window to cache, in meters.
-#       cache_obstacle_heuristic: True     # Cache the obstacle map dynamic programming distance expansion heuristic between subsiquent replannings of the same goal location. Dramatically speeds up replanning performance (40x) if costmap is largely static.
-#       smooth_path: True #True                   # If true, does a simple and quick smoothing post-processing to the path
+#       cache_obstacle_heuristic: True      # Cache the obstacle map dynamic programming distance expansion heuristic between subsiquent replannings of the same goal location. Dramatically speeds up replanning performance (40x) if costmap is largely static.
+#       smooth_path: True                   # If true, does a simple and quick smoothing post-processing to the path
 
 #       smoother:
-#         max_iterations: 500 #1000
+#         max_iterations: 1000
 #         w_smooth: 0.3
 #         w_data: 0.2
 #         tolerance: 1.0e-10
@@ -326,39 +328,48 @@ map_saver:
 #         refinement_num: 2
 
 
-planner_server:
-  ros__parameters:
-    planner_plugins: ["GridBased"]
-    use_sim_time: True
+# planner_server: #the holy grail but is not implemented in galactic :(((
+#   ros__parameters:
+#     planner_plugins: ["GridBased"]
+#     use_sim_time: True
 
-    GridBased:
-      plugin: "nav2_smac_planner/SmacPlannerLattice"
-      allow_unknown: true                 # Allow traveling in unknown space
-      tolerance: 0.25                     # dist-to-goal heuristic cost (distance) for valid tolerance endpoints if exact goal cannot be found.
-      max_iterations: 1000000             # Maximum total iterations to search for before failing (in case unreachable), set to -1 to disable
-      max_on_approach_iterations: 1000    # Maximum number of iterations after within tolerances to continue to try to find exact solution
-      max_planning_time: 5.0              # Max time in s for planner to plan, smooth
-      analytic_expansion_ratio: 3.5       # The ratio to attempt analytic expansions during search for final approach.
-      analytic_expansion_max_length: 3.0  # For Hybrid/Lattice nodes: The maximum length of the analytic expansion to be considered valid to prevent unsafe shortcutting
-      reverse_penalty: 2.0                # Penalty to apply if motion is reversing, must be => 1
-      change_penalty: 0.05                # Penalty to apply if motion is changing directions (L to R), must be >= 0
-      non_straight_penalty: 1.05          # Penalty to apply if motion is non-straight, must be => 1
-      cost_penalty: 2.0                   # Penalty to apply to higher cost areas when adding into the obstacle map dynamic programming distance expansion heuristic. This drives the robot more towards the center of passages. A value between 1.3 - 3.5 is reasonable.
-      rotation_penalty: 5.0               # Penalty to apply to in-place rotations, if minimum control set contains them
-      retrospective_penalty: 0.015
-      lattice_filepath: ""                # The filepath to the state lattice graph
-      lookup_table_size: 20.0             # Size of the dubin/reeds-sheep distance window to cache, in meters.
-      cache_obstacle_heuristic: false     # Cache the obstacle map dynamic programming distance expansion heuristic between subsiquent replannings of the same goal location. Dramatically speeds up replanning performance (40x) if costmap is largely static.
-      allow_reverse_expansion: false      # If true, allows the robot to use the primitives to expand in the mirrored opposite direction of the current robot's orientation (to reverse).
-      smooth_path: True                   # If true, does a simple and quick smoothing post-processing to the path
+#     GridBased:
+#       plugin: "nav2_smac_planner/SmacPlannerLattice" 
+#       allow_unknown: true                 # Allow traveling in unknown space
+#       tolerance: 0.25                     # dist-to-goal heuristic cost (distance) for valid tolerance endpoints if exact goal cannot be found.
+#       max_iterations: 1000000             # Maximum total iterations to search for before failing (in case unreachable), set to -1 to disable
+#       max_on_approach_iterations: 1000    # Maximum number of iterations after within tolerances to continue to try to find exact solution
+#       max_planning_time: 5.0              # Max time in s for planner to plan, smooth
+#       analytic_expansion_ratio: 3.5       # The ratio to attempt analytic expansions during search for final approach.
+#       analytic_expansion_max_length: 3.0  # For Hybrid/Lattice nodes: The maximum length of the analytic expansion to be considered valid to prevent unsafe shortcutting
+#       reverse_penalty: 2.0                # Penalty to apply if motion is reversing, must be => 1
+#       change_penalty: 0.05                # Penalty to apply if motion is changing directions (L to R), must be >= 0
+#       non_straight_penalty: 1.05          # Penalty to apply if motion is non-straight, must be => 1
+#       cost_penalty: 2.0                   # Penalty to apply to higher cost areas when adding into the obstacle map dynamic programming distance expansion heuristic. This drives the robot more towards the center of passages. A value between 1.3 - 3.5 is reasonable.
+#       rotation_penalty: 5.0               # Penalty to apply to in-place rotations, if minimum control set contains them
+#       retrospective_penalty: 0.015
+#       lattice_filepath: ""                # The filepath to the state lattice graph
+#       lookup_table_size: 20.0             # Size of the dubin/reeds-sheep distance window to cache, in meters.
+#       cache_obstacle_heuristic: false     # Cache the obstacle map dynamic programming distance expansion heuristic between subsiquent replannings of the same goal location. Dramatically speeds up replanning performance (40x) if costmap is largely static.
+#       allow_reverse_expansion: false      # If true, allows the robot to use the primitives to expand in the mirrored opposite direction of the current robot's orientation (to reverse).
+#       smooth_path: True                   # If true, does a simple and quick smoothing post-processing to the path
       
-      smoother:
-        max_iterations: 1000
-        w_smooth: 0.3
-        w_data: 0.2
-        tolerance: 1.0e-10
-        do_refinement: true
-        refinement_num: 2
+#       smoother:
+#         max_iterations: 1000
+#         w_smooth: 0.3
+#         w_data: 0.2
+#         tolerance: 1.0e-10
+#         do_refinement: true
+#         refinement_num: 2
+
+planner_server: #gets stuck a bit but seems reliable
+  ros__parameters:
+    planner_plugin_types: ["nav2_theta_star_planner/ThetaStarPlanner"] 
+    planner_plugin_ids: ["GridBased"]
+    GridBased:
+      how_many_corners: 8
+      w_euc_cost: 1.0
+      w_traversal_cost: 2.0
 
 planner_server_rclcpp_node:
   ros__parameters:
@@ -376,14 +387,14 @@ recoveries_server:
       plugin: "nav2_recoveries/BackUp"
     wait:
       plugin: "nav2_recoveries/Wait"
-    global_frame: odom
+    global_frame: map #odom #untested with map
     robot_base_frame: base_link
     transform_timeout: 0.1
     use_sim_time: true
     simulate_ahead_time: 2.0
-    max_rotational_vel: 0.5 #1.0
+    max_rotational_vel: 0.5 
     min_rotational_vel: 0.1
-    rotational_acc_lim: 0.1 #3.2
+    rotational_acc_lim: 0.1 
 
 robot_state_publisher:
   ros__parameters:

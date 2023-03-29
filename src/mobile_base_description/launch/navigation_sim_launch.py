@@ -38,8 +38,7 @@ def generate_launch_description():
     pkg_gazebo_ros = get_package_share_directory('gazebo_ros')
 
     x_pose = LaunchConfiguration('x_pose', default='-2.0')
-    y_pose = LaunchConfiguration('y_pose', default='-0.5')
-
+    y_pose = LaunchConfiguration('y_pose', default='1.0')
 
 
     # Create the launch configuration variables
