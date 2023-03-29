@@ -29,20 +29,20 @@ def load_yaml(package_name, file_path):
 def generate_launch_description():
     
     kinematics_yaml = load_yaml(
-        "crust_arm_moveit_config", "config/kinematics.yaml"
+        "crust_arm_moveit_config", "config/kinematics_gripper.yaml"
     )
 
     robot_description_config = xacro.process_file(
         os.path.join(
             get_package_share_directory("crust_arm_moveit_config"),
             "config",
-            "crust_fake.xacro",
+            "crust_real_gripper.xacro",
         )
     )
     robot_description = {"robot_description": robot_description_config.toxml()}
 
     robot_description_semantic_config = load_file(
-        "crust_arm_moveit_config", "config/crust_arm_mobile.srdf"
+        "crust_arm_moveit_config", "config/crust_arm_mobile_gripper.srdf"
     )
     robot_description_semantic = {
         "robot_description_semantic": robot_description_semantic_config
