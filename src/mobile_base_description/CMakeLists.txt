@@ -37,21 +37,9 @@ ament_target_dependencies(
   nav_msgs
 )
 
-add_executable(ticks_to_odom src/ticks_to_odom.cpp)
-ament_target_dependencies(
-  ticks_to_odom
-  rclcpp
-  nav_msgs
-  tf2
-  geometry_msgs
-  std_msgs
-  message_filters
-)
-
 
 install(TARGETS
   odom_rebroadcaster
-  ticks_to_odom
   main_program
   DESTINATION lib/${PROJECT_NAME})
 
