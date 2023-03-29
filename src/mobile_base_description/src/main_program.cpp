@@ -112,7 +112,7 @@ class MainProgram : public rclcpp::Node
                 t_time1 = clock();
                 m_lastTime1 = m_clock->now().seconds();
                 
-                sfc = 155;//1100;
+                sfc = 6000;//155;//1100;
 
                 break;
             case 10:
