@@ -86,13 +86,13 @@ def generate_launch_description():
 
     declare_slam_cmd = DeclareLaunchArgument(
         'slam',
-        default_value='False', #False
+        default_value='True', #False
         description='Whether run a SLAM')
 
     declare_map_yaml_cmd = DeclareLaunchArgument(
         'map',
         default_value=os.path.join(
-            mobile_base_dir, 'maps/sim', 'map_sim.yaml'),
+            mobile_base_dir, 'maps/sim', 'sim_map.yaml'),
         description='Full path to map file to load')
     
 
@@ -100,11 +100,6 @@ def generate_launch_description():
         'use_sim_time',
         default_value='True',
         description='Use simulation (Gazebo) clock if true')
-
-    # declare_params_file_cmd = DeclareLaunchArgument(
-    #     'params_file',
-    #     default_value=os.path.join(bringup_dir, 'params', 'nav2_params.yaml'),
-    #     description='Full path to the ROS2 parameters file to use for all launched nodes')
     
     declare_params_file_cmd = DeclareLaunchArgument(
         'params_file',
@@ -118,7 +113,7 @@ def generate_launch_description():
     
     declare_mask_yaml_file_cmd = DeclareLaunchArgument(
             'mask',
-            default_value=os.path.join(mobile_base_dir, 'maps/sim', 'map_sim_keepout2.yaml'),
+            default_value=os.path.join(mobile_base_dir, 'maps/sim', 'sim_map_keepout.yaml'),
             description='Full path to filter mask yaml file to load')
 
     declare_autostart_cmd = DeclareLaunchArgument(

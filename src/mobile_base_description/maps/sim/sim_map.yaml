@@ -1,0 +1,7 @@
+image: /home/simon/galactic_ws/src/rob6_mobilebase/src/mobile_base_description/maps/sim/sim_map.pgm
+mode: trinary
+resolution: 0.02
+origin: [-7.39, -5.18, 0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.25
