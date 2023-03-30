@@ -24,6 +24,7 @@
 #include "tf2_ros/transform_listener.h"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include "tf2_ros/buffer.h"
+#include <vector>
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -643,7 +644,7 @@ class MainProgram : public rclcpp::Node
             
             case 6070: // move robot to aruco code
                 robot_msg.cmd = 15; // go to aruco
-                robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};
+                robot_msg.pose = {-0.02,0.0,0.0,0.0,0.0,0.0};
                 pub_robot_->publish(robot_msg);
 
                 aruco_msg.data = false;
@@ -678,7 +679,7 @@ class MainProgram : public rclcpp::Node
             
             case 6090: // close gripper
                 robot_msg.cmd = 18; // close gripper
-                robot_msg.pose = {0.37336,-0.007814,0.24958,0.0,1.57,0.0};
+                robot_msg.pose = {-0.3,-0.3};
                 pub_robot_->publish(robot_msg); // send to robot to set gripper close
 
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
@@ -775,8 +776,8 @@ class MainProgram : public rclcpp::Node
                 break;
 
             case 6150: // open the gripper 
-                robot_msg.cmd = 19; // set gripper off
-                robot_msg.pose = {0.37336,-0.007814,0.24958,0.0,1.57,0.0}; // pos do not matter
+                robot_msg.cmd = 20; // set gripper off
+                robot_msg.pose = {-0.3,-0.3}; // pos do not matter
                 pub_robot_->publish(robot_msg); // send to robot to set gripper off
 
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
@@ -791,7 +792,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6170;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >7.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
                     sfc = 6150; // go back and resend the robot cmd
@@ -818,7 +819,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6190;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
                     robot_attempts ++;
@@ -838,7 +839,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 6190:  // start camera to sharch for golfball
-                ball_msg.data = false;
+                ball_msg.data = true;
                 pub_camera_ball_->publish(ball_msg); // setting the ball camera off
                 status_ball = 0;
 
@@ -865,7 +866,7 @@ class MainProgram : public rclcpp::Node
                 break;
 
             case 6210: // move robot to ball pose
-                robot_msg.cmd = 16; // go to aruco
+                robot_msg.cmd = 16; // go to ball
                 robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};
                 pub_robot_->publish(robot_msg);
                 ball_msg.data = false;
@@ -1126,7 +1127,7 @@ class MainProgram : public rclcpp::Node
         int8_t package_count = 0;
 
 
-        // mobile robot movement
+        // mobile robot movement abs topic: /goal_pose
         geometry_msgs::msg::PoseStamped target_pose;
         geometry_msgs::msg::TransformStamped transform_pose;
         std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
@@ -1134,8 +1135,10 @@ class MainProgram : public rclcpp::Node
         rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pub_mobile_;
 
         /// the 3 packages trolly pose, make as vector
-
+        std::vector<geometry_msgs::msg::PoseStamped> trolly_pose; 
         /// the 3 house pose, make as vector
+        std::vector<geometry_msgs::msg::PoseStamped> house_pose; // red 0 // yelllow 1 // green 2
+
 };
 
 int main(int argc, char **argv)
