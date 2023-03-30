@@ -219,9 +219,10 @@ class ImageSubscriberNode(Node):
         x_angle = (center_x - x) / cv_image.shape[1] * 69
         y_angle = (center_y - y) / cv_image.shape[0] * 42
         z_angle = (np.sqrt(np.square((center_x - x)) + np.square((center_y - y))) / np.sqrt(np.square(cv_image.shape[1]) + np.square(cv_image.shape[0]))) *40.39#* 77#42#80.78
-        self.get_logger().info('angle x: "%f"' % x_angle)
-        self.get_logger().info('angle y: "%f"' % y_angle)
-        self.get_logger().info('angle z: "%f"' % z_angle)
+        #self.get_logger().info('angle x: "%f"' % x_angle)
+        #self.get_logger().info('angle y: "%f"' % y_angle)
+        #self.get_logger().info('angle z: "%f"' % z_angle)
+        
         #calculate cartesian coordinates in m
         cartesian_x = np.sin(np.deg2rad(x_angle)) * z / 1000
         cartesian_y = np.sin(np.deg2rad(y_angle)) * z / 1000

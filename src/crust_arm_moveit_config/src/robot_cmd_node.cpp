@@ -276,7 +276,7 @@ class RobotHandler : public rclcpp::Node
         const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
         auto const LOGGER = rclcpp::get_logger("gripper Off");
         moveit::planning_interface::MoveGroupInterface::Plan my_plan;
-        std::vector<double> joints = {-0.55, -0.55};
+        std::vector<double> joints = {-0.40, -0.40};
         std::vector<std::string> joint_names = {"finger1_joint", "finger2_joint"};
         move_group.setJointValueTarget(joint_names,joints);
         //move_group.setJointValueTarget(joints);
@@ -396,10 +396,21 @@ class RobotHandler : public rclcpp::Node
           RCLCPP_INFO(LOGGER,"y: %f", target_pose.transform.rotation.y);
           RCLCPP_INFO(LOGGER,"z: %f", target_pose.transform.rotation.z);
           RCLCPP_INFO(LOGGER,"x: %f", target_pose.transform.rotation.w);
-          bool i = RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z+0.1,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.3);
+          tf2::Quaternion quat_tf;
+          
+          tf2::fromMsg(target_pose.transform.rotation, quat_tf);
+          double rot_r{}, rot_p{}, rot_y{};
+          tf2::Matrix3x3 m(quat_tf);
+          m.getRPY(rot_r, rot_p, rot_y);
+          quat_tf.setRPY(0.0,1.44,rot_y);
+          RCLCPP_INFO(LOGGER,"R: %f", rot_r);
+          RCLCPP_INFO(LOGGER,"P: %f", rot_p);
+          RCLCPP_INFO(LOGGER,"Y: %f", rot_y);
+          target_pose.transform.rotation = tf2::toMsg(quat_tf);
+          bool i = RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z+0.1,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.7);
           if(i == 1){
 
-            return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z -0.03,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.05);
+            return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z-0.02,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.05);
           }
           else{
             return false;
@@ -429,23 +440,22 @@ class RobotHandler : public rclcpp::Node
           RCLCPP_INFO(LOGGER,"y: %f", target_pose.transform.rotation.y);
           RCLCPP_INFO(LOGGER,"z: %f", target_pose.transform.rotation.z);
           RCLCPP_INFO(LOGGER,"x: %f", target_pose.transform.rotation.w);
-          //tf2::Quaternion tf2_quat;
-          //tf2::convert(tf2_quat,target_pose.transform.rotation);
-          //tf2::Vector3 rot_rpy = tf2_quat.getAxis();
+          
           tf2::Quaternion quat_tf;
-          //geometry_msgs::msg::Quaternion quat_msg = pose.pose.orientation;
+          
           tf2::fromMsg(target_pose.transform.rotation, quat_tf);
           double rot_r{}, rot_p{}, rot_y{};
           tf2::Matrix3x3 m(quat_tf);
           m.getRPY(rot_r, rot_p, rot_y);
-          quat_tf.setRPY(0.0,1.57,rot_y);
+          quat_tf.setRPY(0.0,1.44,rot_y);
           RCLCPP_INFO(LOGGER,"R: %f", rot_r);
           RCLCPP_INFO(LOGGER,"P: %f", rot_p);
           RCLCPP_INFO(LOGGER,"Y: %f", rot_y);
           target_pose.transform.rotation = tf2::toMsg(quat_tf);
+
           //return RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.4);
           //return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.5);
-          bool i = RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z+0.1,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.2);
+          bool i = RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z+0.1,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.6);
           if(i == 1){
 
             return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z -0.03,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.05);

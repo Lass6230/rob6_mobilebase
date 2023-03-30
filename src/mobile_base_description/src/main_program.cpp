@@ -113,7 +113,7 @@ class MainProgram : public rclcpp::Node
                 t_time1 = clock();
                 m_lastTime1 = m_clock->now().seconds();
                 
-                sfc = 6000;//155;//1100;
+                sfc = 4000;//155;//1100;
 
                 break;
             case 10:
@@ -547,6 +547,440 @@ class MainProgram : public rclcpp::Node
             
 
 
+            //////////////////BEGINING TASK 12 from case 6000-6999 /////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            case 4000:
+                sfc = 4010;
+                break;
+
+            case 4010: // open gripper
+                robot_msg.cmd = 19; // set gripper off and setting the cameras off
+                robot_msg.pose = {0.37336,-0.007814,0.24958,0.0,1.57,0.0}; // pos do not matter
+                pub_robot_->publish(robot_msg); // send to robot to set gripper off
+
+                aruco_msg.data = false; 
+                pub_camera_aruco_->publish(aruco_msg); // setting the aruco camera off
+                ball_msg.data = false;
+                pub_camera_ball_->publish(aruco_msg); // setting the ball camera off
+                status_aruco = 0;
+                status_ball = 0;
+
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+                sfc = 4020;
+
+                break;
+            
+            case 4020: // waitting for gripper to open
+                if(robot_status == 1){// Wait for gripper to be open
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 4030;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    
+                    sfc = 4030; // go back and resend the robot cmd
+                    
+                }
+                break;
+
+            case 4030: // set pose for robot søg ned lige foran
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.34,0.0,0.168,0.0,1.45,0.0};
+                pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+
+                sfc = 4040;
+
+                break;
+
+            case 4040: // waitting for robot to go to pose
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 4050;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    
+                    sfc = 4030; // go back and resend the robot cmd
+                    if(robot_attempts == 5){
+                       // sfc = 6030;
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                }
+                break;
+            
+            case 4050: // start søgning
+                ball_msg.data = true;
+                pub_camera_ball_->publish(ball_msg); // setting the ball camera off
+                status_ball = 0;
+
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+                
+                sfc = 4060;
+                break;
+
+            case 4060: // waiiting for ball  IF timeout jump to 4500
+                if(status_ball == 1)
+                {
+                    status_ball = 0;
+                    sfc = 4500;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out, No golfball found");
+                    ball_msg.data = false;
+                    pub_camera_ball_->publish(aruco_msg); // setting the ball camera off
+                   
+                    status_ball = 0;
+                    
+                    sfc = 4070;
+                    
+                }
+
+                break;
+            
+            case 4070: // send to robot to go to pose right looking down
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.23319,-0.24479,0.15955,0.0,1.45,-0.785398};
+                pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+
+                sfc = 4080;
+                break;
+
+            case 4080:
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 4090;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    
+                    sfc = 4070; // go back and resend the robot cmd
+                    if(robot_attempts == 5){
+                       // sfc = 6030;
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                }
+                break;
+            
+            case 4090:// start søgning
+                ball_msg.data = true;
+                pub_camera_ball_->publish(ball_msg); // setting the ball camera off
+                status_ball = 0;
+                sfc = 4100;
+
+                break;
+            
+            case 4100: // søgning       if found jump to 4500
+                if(status_ball == 1)
+                {
+                    status_ball = 0;
+                    sfc = 4500;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out, No golfball found");
+                    ball_msg.data = false;
+                    pub_camera_ball_->publish(aruco_msg); // setting the ball camera off
+                   
+                    status_ball = 0;
+                    
+                    sfc = 4110;
+                    
+                }
+
+                break;
+            
+            case 4110: // set robot pose to look down left
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.23319,0.24479,0.15955,0.0,1.45,0.785398};
+                pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+
+                sfc = 4120;
+
+                break;
+            
+            case 4120: // waiting for robot to move to pose
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 4130;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    
+                    sfc = 4110; // go back and resend the robot cmd
+                    if(robot_attempts == 5){
+                       // sfc = 6030;
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                }
+
+                break;
+
+            case 4130: // start søgning
+                ball_msg.data = true;
+                pub_camera_ball_->publish(ball_msg); // setting the ball camera off
+                status_ball = 0;
+
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+                
+                sfc = 4140;
+                break;
+            
+            case 4140: // søgning
+                if(status_ball == 1)
+                {
+                    status_ball = 0;
+                    sfc = 4500;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out, No golfball found");
+                    ball_msg.data = false;
+                    pub_camera_ball_->publish(aruco_msg); // setting the ball camera off
+                   
+                    status_ball = 0;
+                    
+                    sfc = 4150;
+                    
+                }
+        
+                break;
+
+            case 4150: // send command to robot to look long midt
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.23319,0.24479,0.15955,0.0,0.785398,0.0};
+                pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+
+                sfc = 4160;
+                break;  
+            
+            case 4160: // waitting for robot to go to pose
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 4170;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    
+                    sfc = 4150; // go back and resend the robot cmd
+                    if(robot_attempts == 5){
+                       // sfc = 6030;
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                }
+
+                break;
+
+            case 4170:
+                ball_msg.data = true;
+                pub_camera_ball_->publish(ball_msg); // setting the ball camera off
+                status_ball = 0;
+
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+                
+                sfc = 4180;
+
+                break;
+            
+            case 4180:
+                if(status_ball == 1)
+                {
+                    status_ball = 0;
+                    sfc = 4500;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out, No golfball found");
+                    ball_msg.data = false;
+                    pub_camera_ball_->publish(aruco_msg); // setting the ball camera off
+                   
+                    status_ball = 0;
+                    
+                    sfc = 4190;
+                    
+                }
+
+                break;
+
+            case 4190:// robot go to look long right
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.23319,0.24479,0.15955,0.0,0.785398,-0.785398};
+                pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+
+                sfc = 4200;
+
+                break;
+            
+            case 4200: // waitting for robot to go to pose
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 4210;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    
+                    sfc = 4190; // go back and resend the robot cmd
+                    if(robot_attempts == 5){
+                       // sfc = 6030;
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                }
+                break;
+            
+            case 4210: // send command to søg
+                ball_msg.data = true;
+                pub_camera_ball_->publish(ball_msg); // setting the ball camera off
+                status_ball = 0;
+
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+                
+                sfc = 4230;
+                break;
+                
+            case 4230: // søgning
+                if(status_ball == 1)
+                {
+                    status_ball = 0;
+                    sfc = 4500;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out, No golfball found");
+                    ball_msg.data = false;
+                    pub_camera_ball_->publish(aruco_msg); // setting the ball camera off
+                   
+                    status_ball = 0;
+                    
+                    sfc = 4240;
+                    
+                }
+                break;
+            
+            case 4240: // robot to go to pose look long left
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.23319,0.24479,0.15955,0.0,0.785398,0.785398};
+                pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+
+                sfc = 4250;
+
+
+                break;
+            
+            case 4250: // waitting for robot to go to pose
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 4260;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    
+                    sfc = 4240; // go back and resend the robot cmd
+                    if(robot_attempts == 5){
+                       // sfc = 6030;
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                }
+
+                break;
+            
+            case 4260: // send command to søg
+                ball_msg.data = true;
+                pub_camera_ball_->publish(ball_msg); // setting the ball camera off
+                status_ball = 0;
+
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+                
+                sfc = 4270;
+                break;
+            
+            case 4270:
+                if(status_ball == 1)
+                {
+                    status_ball = 0;
+                    sfc = 4500;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out, No golfball found");
+                    ball_msg.data = false;
+                    pub_camera_ball_->publish(aruco_msg); // setting the ball camera off
+                   
+                    status_ball = 0;
+                    
+                    sfc = 4260;
+                    
+                }
+
+                break;
+            
+            case 4280:
+
+                break;
+
+            case 4290:
+
+                break;
+            
+            case 4300:
+
+                break;
+
+
+            case 4500: // ball found
+
+                 break;
+
+
+
+
+            //////////////////END TASK 12 from case 6000-6999 /////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
             //////////////////BEGINING TASK 13 from case 6000-6999 /////////////////////////////////////////////////////////////////
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -589,7 +1023,7 @@ class MainProgram : public rclcpp::Node
             
             case 6030: // put the robot in sharch pose
                 robot_msg.cmd = 6;
-                robot_msg.pose = {0.34,0.0,0.13129,0.0,1.4,0.0};
+                robot_msg.pose = {0.34,0.0,0.168,0.0,1.45,0.0};
                 pub_robot_->publish(robot_msg);
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
 
@@ -777,7 +1211,7 @@ class MainProgram : public rclcpp::Node
 
             case 6150: // open the gripper 
                 robot_msg.cmd = 20; // set gripper off
-                robot_msg.pose = {-0.3,-0.3}; // pos do not matter
+                robot_msg.pose = {-0.25,-0.25}; // pos do not matter
                 pub_robot_->publish(robot_msg); // send to robot to set gripper off
 
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
@@ -803,7 +1237,7 @@ class MainProgram : public rclcpp::Node
             
             case 6170: // move robot to sheach pose for golfball
                 robot_msg.cmd = 6;
-                robot_msg.pose = {0.34,0.0,0.13129,0.0,1.4,0.0};
+                robot_msg.pose = {0.34,0.0,0.168,0.0,1.45,0.0};
                 pub_robot_->publish(robot_msg);
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
 

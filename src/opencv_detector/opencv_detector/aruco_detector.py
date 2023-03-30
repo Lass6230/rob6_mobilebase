@@ -95,7 +95,7 @@ class ImageSubscriberNode(Node):
             #calculate angle from center
             x_angle = (center_x - x) / cv_image.shape[1] * 69
             y_angle = (center_y - y) / cv_image.shape[0] * 42
-            z_angle = np.sqrt(np.square((center_x - x)) + np.square((center_y - y))) / np.sqrt(np.square(cv_image.shape[1]) + np.square(cv_image.shape[0])) * 80.78
+            z_angle = np.sqrt(np.square((center_x - x)) + np.square((center_y - y))) / np.sqrt(np.square(cv_image.shape[1]) + np.square(cv_image.shape[0])) *40.39#* 80.78
 
             #calculate cartesian coordinates in m
             cartesian_x = np.sin(np.deg2rad(x_angle)) * z / 1000
@@ -117,20 +117,24 @@ class ImageSubscriberNode(Node):
         tf.header.frame_id = 'camera_link'
         tf.child_frame_id = 'aruco'
         tf.transform.translation.x = float(z) #z
-        tf.transform.translation.y = float(x) +0.025
+        tf.transform.translation.y = float(x) +0.02
         tf.transform.translation.z = float(y) #x
         tf.transform.rotation.x = 0.0
         tf.transform.rotation.y = 0.0
         tf.transform.rotation.z = 0.0
         tf.transform.rotation.w = 1.0
-
         self.tf_broadcaster.sendTransform(tf)
         self.found_aruco_counter += 1
-        if self.found_aruco_counter == 5 and int(id) != 53:
-            msg = Int8()
-            msg.data = int(id)
-            self.status_publisher.publish(msg)
-            self.found_aruco_counter = 0
+        
+        try:
+            if self.found_aruco_counter == 10 and int(id[0]) != 53:
+                msg = Int8()
+                msg.data = int(id[0])
+                self.status_publisher.publish(msg)
+                self.found_aruco_counter = 0
+        except:
+            self.get_logger().info("exception with ids")
+
 
 
 
