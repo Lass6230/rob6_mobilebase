@@ -3,7 +3,7 @@ This is the repository for AAU Robotics bachelor project. This project aims to c
 
 ## Install dependencies
 ```
-sudo apt install ros- galactic-slam-toolbox ros-galactic-ros2-control ros-galactic-ros2-controllers ros-galactic-xacro ros-galactic-joint-state-publisher-gui ros-galactic-twist-mux ros-galactic-sick-safetyscanners-base ros-galactic-sick-safetyscanners2-interfaces
+sudo apt install ros-galactic-slam-toolbox ros-galactic-ros2-control ros-galactic-ros2-controllers ros-galactic-xacro ros-galactic-joint-state-publisher-gui ros-galactic-twist-mux ros-galactic-sick-safetyscanners-base ros-galactic-sick-safetyscanners2-interfaces ros-galactic-dynamixel-workbench-toolbox ros-galactic-moveit ros-galactic-bondcpp ros-galactic-behaviortree-cpp-v3
 
 pip install opencv-python
 ```
@@ -14,11 +14,10 @@ In a ros2 workspace build navigation2, dynamixel_interface and sicksafety_scanne
 mkdir -p ~/ros2_ws/src
 cd ros2_ws/src
 git clone https://github.com/ros-planning/navigation2 -b galactic
-git clone https://github.com/dynamixel-community/dynamixel_hardware -b galactic
 git clone https://github.com/SICKAG/sick_safetyscanners2.git 
 cd ..
 rosdep install -y -r -q --from-paths src --ignore-src --rosdistro galactic
-colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+colcon build --symlink-install
 # remember to source the workspace !
 ```
 
@@ -28,8 +27,10 @@ Since you are likely going to edit the source code for this at some point we rec
 mkdir -p ~/galactic/src
 cd ~/galactic/src
 git clone https://github.com/Lass6230/rob6_mobilebase
+git clone https://github.com/dynamixel-community/dynamixel_hardware -b galactic
 cd ..
-colcon build --symlink-install
+rosdep install -y -r -q --from-paths src --ignore-src --rosdistro galactic
+colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 # remember to source the workspace!
 ```
 
