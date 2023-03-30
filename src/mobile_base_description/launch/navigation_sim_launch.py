@@ -24,6 +24,7 @@ from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch_ros.actions import Node
+from nav2_common.launch import RewrittenYaml
 
 
 def generate_launch_description():
@@ -37,6 +38,8 @@ def generate_launch_description():
     launch_file_dir = os.path.join(get_package_share_directory('turtlebot3_gazebo'), 'launch')
     pkg_gazebo_ros = get_package_share_directory('gazebo_ros')
 
+    lifecycle_nodes = ['filter_mask_server', 'costmap_filter_info_server']
+
     x_pose = LaunchConfiguration('x_pose', default='-2.0')
     y_pose = LaunchConfiguration('y_pose', default='1.0')
 
@@ -46,8 +49,10 @@ def generate_launch_description():
     namespace = LaunchConfiguration('namespace')
     use_namespace = LaunchConfiguration('use_namespace')
     map_yaml_file = LaunchConfiguration('map')
+    mask_yaml_file = LaunchConfiguration('mask')
     use_sim_time = LaunchConfiguration('use_sim_time')
     params_file = LaunchConfiguration('params_file')
+    keepout_params_file = LaunchConfiguration('keepout_params_file')
     autostart = LaunchConfiguration('autostart')
 
     # Launch configuration variables specific to simulation
@@ -57,6 +62,7 @@ def generate_launch_description():
     use_rviz = LaunchConfiguration('use_rviz')
     headless = LaunchConfiguration('headless')
     world = LaunchConfiguration('world')
+    
 
     # Map fully qualified names to relative ones so the node's namespace can be prepended.
     # In case of the transforms (tf), currently, there doesn't seem to be a better alternative
@@ -80,13 +86,13 @@ def generate_launch_description():
 
     declare_slam_cmd = DeclareLaunchArgument(
         'slam',
-        default_value='False', #False
+        default_value='True', #False
         description='Whether run a SLAM')
 
     declare_map_yaml_cmd = DeclareLaunchArgument(
         'map',
         default_value=os.path.join(
-            mobile_base_dir, 'maps/sim', 'map_sim.yaml'),
+            mobile_base_dir, 'maps/sim', 'sim_map.yaml'),
         description='Full path to map file to load')
     
 
@@ -94,16 +100,21 @@ def generate_launch_description():
         'use_sim_time',
         default_value='True',
         description='Use simulation (Gazebo) clock if true')
-
-    # declare_params_file_cmd = DeclareLaunchArgument(
-    #     'params_file',
-    #     default_value=os.path.join(bringup_dir, 'params', 'nav2_params.yaml'),
-    #     description='Full path to the ROS2 parameters file to use for all launched nodes')
     
     declare_params_file_cmd = DeclareLaunchArgument(
         'params_file',
         default_value=os.path.join(mobile_base_dir, 'config', 'nav2_params.yaml'),
         description='Full path to the ROS2 parameters file to use for all launched nodes')
+    
+    declare_keepout_params_file_cmd = DeclareLaunchArgument(
+            'keepout_params_file',
+            default_value=os.path.join(mobile_base_dir, 'config', 'keepout_params.yaml'),
+            description='Full path to the ROS 2 parameters file to use')
+    
+    declare_mask_yaml_file_cmd = DeclareLaunchArgument(
+            'mask',
+            default_value=os.path.join(mobile_base_dir, 'maps/sim', 'sim_map_keepout.yaml'),
+            description='Full path to filter mask yaml file to load')
 
     declare_autostart_cmd = DeclareLaunchArgument(
         'autostart', default_value='true',
@@ -146,6 +157,45 @@ def generate_launch_description():
             'worlds',
             'turtlebot3_house.world'),
         description='Full path to world model file to load')
+    
+    param_substitutions = {
+        'use_sim_time': use_sim_time,
+        'yaml_filename': mask_yaml_file}
+    
+    configured_params = RewrittenYaml(
+        source_file=keepout_params_file,
+        root_key=namespace,
+        param_rewrites=param_substitutions,
+        convert_types=True)
+    
+    start_lifecycle_manager_cmd = Node(
+            package='nav2_lifecycle_manager',
+            executable='lifecycle_manager',
+            name='lifecycle_manager_costmap_filters',
+            namespace=namespace,
+            output='screen',
+            emulate_tty=True,  # https://github.com/ros2/launch/issues/188
+            parameters=[{'use_sim_time': use_sim_time},
+                        {'autostart': autostart},
+                        {'node_names': lifecycle_nodes}])
+
+    start_map_server_cmd = Node(
+            package='nav2_map_server',
+            executable='map_server',
+            name='filter_mask_server',
+            namespace=namespace,
+            output='screen',
+            emulate_tty=True,  # https://github.com/ros2/launch/issues/188
+            parameters=[configured_params])
+
+    start_costmap_filter_info_server_cmd = Node(
+            package='nav2_map_server',
+            executable='costmap_filter_info_server',
+            name='costmap_filter_info_server',
+            namespace=namespace,
+            output='screen',
+            emulate_tty=True,  # https://github.com/ros2/launch/issues/188
+            parameters=[configured_params])
 
     # Specify the actions
     start_gazebo_server_cmd = ExecuteProcess(
@@ -231,5 +281,12 @@ def generate_launch_description():
     ld.add_action(bringup_cmd)
 
     ld.add_action(spawn_turtlebot_cmd)
+
+    ld.add_action(declare_keepout_params_file_cmd)
+    ld.add_action(declare_mask_yaml_file_cmd)
+
+    ld.add_action(start_lifecycle_manager_cmd)
+    ld.add_action(start_map_server_cmd)
+    ld.add_action(start_costmap_filter_info_server_cmd)
 
     return ld

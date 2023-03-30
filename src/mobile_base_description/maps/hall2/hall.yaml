@@ -1,4 +1,4 @@
-image: /home/simon/Desktop/hall.pgm
+image: /home/simon/galactic_ws/src/rob6_mobilebase/src/mobile_base_description/maps/hall2/hall.pgm
 mode: trinary
 resolution: 0.02
 origin: [-6.07, -8.22, 0]
