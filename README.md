@@ -1,10 +1,9 @@
 # rob6_mobilebase
-
+This is the repository for AAU Robotics bachelor project. This project aims to compete in DTUs annual competition RoboCup, using a custom mobile robotic platform, with a crustcrawler manipulator. This repository has all the code for the industrial pc running ubuntu server and ROS2 galactic. The PLC code can be found here: https://github.com/Rlilholt99/ROB6_brdkAGV_PLC  
 
 ## Install dependencies
 ```
-sudo apt install ros-galactic-ros2-control ros-galactic-ros2-controllers ros-galactic-xacro ros-galactic-joint-state-publisher-gui ros-galactic-twist-mux ros-galactic-sick-safetyscanners-base ros-galactic-sick-safetyscanners2-interfaces
-
+sudo apt install ros- galactic-slam-toolbox ros-galactic-ros2-control ros-galactic-ros2-controllers ros-galactic-xacro ros-galactic-joint-state-publisher-gui ros-galactic-twist-mux ros-galactic-sick-safetyscanners-base ros-galactic-sick-safetyscanners2-interfaces
 
 pip install opencv-python
 ```
@@ -23,7 +22,7 @@ colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 # remember to source the workspace !
 ```
 
-## Install this repo
+## Install this repository
 Since you are likely going to edit the source code for this at some point we recommend that it is built in a separate workspace.
 ```
 mkdir -p ~/galactic/src
