@@ -7,6 +7,7 @@
 //#include <crust_msgs/msg/robot_cmd_msg.h>
 //#include <crust_msgs/srv/robot_cmd_srv.h>
 #include <memory>
+#include <vector>
 
 #include <moveit/move_group_interface/move_group_interface.h>
 
@@ -428,9 +429,23 @@ class RobotHandler : public rclcpp::Node
           RCLCPP_INFO(LOGGER,"y: %f", target_pose.transform.rotation.y);
           RCLCPP_INFO(LOGGER,"z: %f", target_pose.transform.rotation.z);
           RCLCPP_INFO(LOGGER,"x: %f", target_pose.transform.rotation.w);
+          //tf2::Quaternion tf2_quat;
+          //tf2::convert(tf2_quat,target_pose.transform.rotation);
+          //tf2::Vector3 rot_rpy = tf2_quat.getAxis();
+          tf2::Quaternion quat_tf;
+          //geometry_msgs::msg::Quaternion quat_msg = pose.pose.orientation;
+          tf2::fromMsg(target_pose.transform.rotation, quat_tf);
+          double rot_r{}, rot_p{}, rot_y{};
+          tf2::Matrix3x3 m(quat_tf);
+          m.getRPY(rot_r, rot_p, rot_y);
+          quat_tf.setRPY(0.0,1.57,rot_y);
+          RCLCPP_INFO(LOGGER,"R: %f", rot_r);
+          RCLCPP_INFO(LOGGER,"P: %f", rot_p);
+          RCLCPP_INFO(LOGGER,"Y: %f", rot_y);
+          target_pose.transform.rotation = tf2::toMsg(quat_tf);
           //return RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.4);
           //return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.5);
-          bool i = RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z+0.1,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.3);
+          bool i = RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z+0.1,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.2);
           if(i == 1){
 
             return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z -0.03,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.05);
