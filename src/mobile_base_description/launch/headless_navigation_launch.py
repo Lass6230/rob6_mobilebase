@@ -49,8 +49,6 @@ def generate_launch_description():
     launch_dir = os.path.join(bringup_dir, 'launch')
 
 
-    x_pose = LaunchConfiguration('x_pose', default='-2.0')
-    y_pose = LaunchConfiguration('y_pose', default='1.0')
 
     lifecycle_nodes = ['filter_mask_server', 'costmap_filter_info_server']
 
@@ -128,10 +126,33 @@ def generate_launch_description():
         'autostart', default_value='true',
         description='Automatically startup the nav2 stack')
 
+    declare_rviz_config_file_cmd = DeclareLaunchArgument(
+        'rviz_config_file',
+        default_value=os.path.join(
+            mobile_base_dir, 'config', 'default.rviz'),
+        description='Full path to the RVIZ config file to use')
+
+    declare_use_simulator_cmd = DeclareLaunchArgument(
+        'use_simulator',
+        default_value='False',
+        description='Whether to start the simulator')
+
     declare_use_robot_state_pub_cmd = DeclareLaunchArgument(
         'use_robot_state_pub',
         default_value='False',
         description='Whether to start the robot state publisher')
+
+    declare_use_rviz_cmd = DeclareLaunchArgument(
+        'use_rviz',
+        default_value='False',
+        description='Whether to start RVIZ')
+
+    declare_simulator_cmd = DeclareLaunchArgument(
+        'headless',
+        default_value='False',
+        description='Whether to execute gzclient)')
+
+
     
     param_substitutions = {
         'use_sim_time': use_sim_time,
@@ -193,6 +214,14 @@ def generate_launch_description():
         parameters=[robot_description],
     )
 
+    # Publish arbitrary joint angles
+    joint_state_publisher_node = launch_ros.actions.Node(
+        package='joint_state_publisher',
+        executable='joint_state_publisher',
+        name='joint_state_publisher',
+        #condition=launch.conditions.UnlessCondition(LaunchConfiguration('gui'))
+    )
+
 
     odomZOH = Node(
         package='mobile_base_description',
@@ -201,18 +230,16 @@ def generate_launch_description():
         output='screen'
     )
 
-    urdf = os.path.join(bringup_dir, 'urdf', 'turtlebot3_waffle.urdf')
+   
 
-    start_robot_state_publisher_cmd = Node(
-        condition=IfCondition(use_robot_state_pub),
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        name='robot_state_publisher',
-        namespace=namespace,
-        output='screen',
-        parameters=[{'use_sim_time': use_sim_time}],
-        remappings=remappings,
-        arguments=[urdf])
+
+    rviz_cmd = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(launch_dir, 'rviz_launch.py')),
+        condition=IfCondition(use_rviz),
+        launch_arguments={'namespace': '',
+                          'use_namespace': 'False',
+                          'rviz_config': rviz_config_file}.items())
 
     bringup_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -226,8 +253,7 @@ def generate_launch_description():
                           'autostart': autostart}.items())
     
 
-    
-
+ 
 
     
 
@@ -243,10 +269,13 @@ def generate_launch_description():
     ld.add_action(declare_params_file_cmd)
     ld.add_action(declare_autostart_cmd)
 
+    ld.add_action(declare_rviz_config_file_cmd)
+    ld.add_action(declare_use_simulator_cmd)
     ld.add_action(declare_use_robot_state_pub_cmd)
-
-    # Add the actions to launch all of the navigation nodes
-    ld.add_action(start_robot_state_publisher_cmd)
+    ld.add_action(declare_use_rviz_cmd)
+    ld.add_action(declare_simulator_cmd)
+    
+    ld.add_action(rviz_cmd)
     ld.add_action(bringup_cmd)
 
     ld.add_action(robot_state_publisher)
