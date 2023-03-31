@@ -93,6 +93,7 @@ class ImageSubscriberNode(Node):
                 #cv2.imwrite("circled_frame.png", cv2.resize(cv_image, (int(height / 2), int(width / 2))))
                 cv2.circle(cv_image, center, 5, (0, 0, 255), -1)
                 radius_i = int(radius)
+                self.get_logger().info("radius_i: %i" %radius_i)
                 x, y = center
                 count = 0
                 sum = 0
@@ -100,35 +101,35 @@ class ImageSubscriberNode(Node):
                 # for k in blur[0,:]:
                 #     for j in blur[:,k]:
                 #         count +=1
+                if radius_i < 80 and radius_i >36:
+                    if radius_i + y < 480 and radius_i + x < 640:
 
-                if radius_i + y < 480 and radius_i + x < 640:
+                        for k in range(radius_i):
+                            for j in range(radius_i):
+                                count +=1
+                                sum += cv_depth[y+j,x+k]
+                        for k in range(-radius_i):
+                            for j in range(-radius_i):
+                                count +=1
+                                sum += cv_depth[y+j,x+k]
+                        
+                        range2 = sum/count
 
-                    for k in range(radius_i):
-                        for j in range(radius_i):
-                            count +=1
-                            sum += cv_depth[y+j,x+k]
-                    for k in range(-radius_i):
-                        for j in range(-radius_i):
-                            count +=1
-                            sum += cv_depth[y+j,x+k]
-                    
-                    range2 = sum/count
+                    self.get_logger().info("range: %f" %range2)
 
-                self.get_logger().info("range: %f" %range2)
+                    z = range2+0.03
 
-                z = range2+0.03
+                    if z < 2000:
+                        # circle center
+                        #cv2.circle(cv_image, center, 1, (0, 100, 100), 3)
+                        # circle outline
+                        #radius = i[2]
+                        #cv2.circle(cv_image, center, radius, (255, 0, 255), 3)
 
-                if z < 2000:
-                    # circle center
-                    #cv2.circle(cv_image, center, 1, (0, 100, 100), 3)
-                    # circle outline
-                    #radius = i[2]
-                    #cv2.circle(cv_image, center, radius, (255, 0, 255), 3)
+                        self.calculate_cartesian(x, y, z, cv_image,range2)
 
-                    self.calculate_cartesian(x, y, z, cv_image,range2)
-
-                else:
-                    print("ball rejected: >2m")
+                    else:
+                        print("ball rejected: >2m")
                     # circle center
                     #cv2.circle(cv_image, center, 1, (0, 255, 255), 3)
                     # circle outline

@@ -113,7 +113,7 @@ class MainProgram : public rclcpp::Node
                 t_time1 = clock();
                 m_lastTime1 = m_clock->now().seconds();
                 
-                sfc = 4000;//155;//1100;
+                sfc = 6000;//4000;//155;//1100;
 
                 break;
             case 10:
@@ -770,7 +770,7 @@ class MainProgram : public rclcpp::Node
 
             case 4150: // send command to robot to look long midt
                 robot_msg.cmd = 6;
-                robot_msg.pose = {0.23319,0.24479,0.15955,0.0,0.785398,0.0};
+                robot_msg.pose = {0.3430,0.0,0.15955,0.0,0.785398,0.0};
                 pub_robot_->publish(robot_msg);
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
 
@@ -831,8 +831,8 @@ class MainProgram : public rclcpp::Node
                 break;
 
             case 4190:// robot go to look long right
-                robot_msg.cmd = 6;
-                robot_msg.pose = {0.23319,0.24479,0.15955,0.0,0.785398,-0.785398};
+                robot_msg.cmd = 21;
+                robot_msg.pose = {-0.785398,0.0,0.0,0.0};
                 pub_robot_->publish(robot_msg);
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
 
@@ -891,8 +891,8 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 4240: // robot to go to pose look long left
-                robot_msg.cmd = 6;
-                robot_msg.pose = {0.23319,0.24479,0.15955,0.0,0.785398,0.785398};
+                robot_msg.cmd = 21;
+                robot_msg.pose = {1.57,0.0,0.0,0.0};
                 pub_robot_->publish(robot_msg);
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
 
@@ -1078,7 +1078,7 @@ class MainProgram : public rclcpp::Node
             
             case 6070: // move robot to aruco code
                 robot_msg.cmd = 15; // go to aruco
-                robot_msg.pose = {-0.02,0.0,0.0,0.0,0.0,0.0};
+                robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};
                 pub_robot_->publish(robot_msg);
 
                 aruco_msg.data = false;
