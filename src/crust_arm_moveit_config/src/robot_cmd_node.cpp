@@ -566,9 +566,9 @@ class RobotHandler : public rclcpp::Node
 
     bool packDownRobot(){
       double j1 = 0.0;
-      double j2 = -1.5;
-      double j3 = 0.1;
-      double j4 = 1.5;
+      double j2 = 1.57;
+      double j3 = 0.785398163;
+      double j4 = -1.57;
       return RobotHandler::jointMovement(j1, j2, j3, j4);
     }
     bool defaultPose(){

@@ -10,6 +10,7 @@
 #include <future>
 
 //#include "std_msgs/int8.hpp"
+#include <std_msgs/msg/int32.hpp>
 #include <std_msgs/msg/int8.hpp>
 #include <std_msgs/msg/bool.hpp>
 #include <thread>
@@ -63,11 +64,54 @@ class MainProgram : public rclcpp::Node
             sub_camera_ball_ = this->create_subscription<std_msgs::msg::Int8>("/status_ball",10,std::bind(&MainProgram::subBallStatus, this, _1), sub1_opt);
             pub_camera_aruco_ = this->create_publisher<std_msgs::msg::Bool>("/search_aruco",10);
             pub_camera_ball_ = this->create_publisher<std_msgs::msg::Bool>("/search_golfball",10);
+
             pub_mobile_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/goal",10);
-            //MainProgram::main_program();
+            sub_mobile_ = this->create_subscription<std_msgs::msg::Int32>("/goal_feedback", 10,std::bind(&MainProgram::subMobileStatus, this, _1), sub1_opt);
+            
+
+
+            
+
+            // INIT poseStamped values for
+            tf2::Quaternion quat_trolly[3];
+
+            quat_trolly[0].setRPY(0.0, 0.0, 0.0);
+            trolly_pose[0].pose.position.x = 0.0;
+            trolly_pose[0].pose.position.y = 0.0;
+            trolly_pose[0].pose.orientation = tf2::toMsg(quat_trolly[0]);
+
+            quat_trolly[1].setRPY(0.0, 0.0, 0.0);
+            trolly_pose[1].pose.position.x = 0.0;
+            trolly_pose[1].pose.position.y = 0.0;
+            trolly_pose[1].pose.orientation = tf2::toMsg(quat_trolly[1]);
+
+            quat_trolly[2].setRPY(0.0, 0.0, 0.0);
+            trolly_pose[2].pose.position.x = 0.0;
+            trolly_pose[2].pose.position.y = 0.0;
+            trolly_pose[2].pose.orientation = tf2::toMsg(quat_trolly[2]);
+
+            tf2::Quaternion quat_house[3];
+
+            quat_house[0].setRPY(0.0, 0.0, 0.0);
+            house_pose[0].pose.position.x = 0.0;
+            house_pose[0].pose.position.y = 0.0;
+            house_pose[0].pose.orientation = tf2::toMsg(quat_house[0]);
+
+            quat_house[1].setRPY(0.0, 0.0, 0.0);
+            house_pose[1].pose.position.x = 0.0;
+            house_pose[1].pose.position.y = 0.0;
+            house_pose[1].pose.orientation = tf2::toMsg(quat_house[1]);
+
+            quat_house[2].setRPY(0.0, 0.0, 0.0);
+            house_pose[2].pose.position.x = 0.0;
+            house_pose[2].pose.position.y = 0.0;
+            house_pose[2].pose.orientation = tf2::toMsg(quat_house[2]);
         }
     
     private:
+        void subMobileStatus(const std_msgs::msg::Int32 & msg){
+            status_mobile = msg.data;
+        }
 
         void subArucoStatus(const std_msgs::msg::Int8 & msg){
             status_aruco = msg.data;
@@ -113,7 +157,7 @@ class MainProgram : public rclcpp::Node
                 t_time1 = clock();
                 m_lastTime1 = m_clock->now().seconds();
                 
-                sfc = 6000;//4000;//155;//1100;
+                sfc = 6000;//6000;//4000;//155;//1100;
 
                 break;
             case 10:
@@ -545,6 +589,144 @@ class MainProgram : public rclcpp::Node
                 // Int8 1(reached) 2(failed) (topic: /goal_reached)
                 break;
             
+
+            //////////////////BEGINING Start first gate (3) from case 2000-2999 /////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            case 2000:
+                sfc = 2010;
+                break;
+            
+            case 2010: // close gripper
+                robot_msg.cmd = 18; // close gripper
+                robot_msg.pose = {-0.3,-0.3};
+                pub_robot_->publish(robot_msg); // send to robot to set gripper close
+
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+                sfc = 2020;
+                break;
+
+            case 2020: // waitting for gripper to close
+                if(robot_status == 1){ // check if robot is done
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 2030;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    
+                    sfc = 2010; // go back and resend the robot cmd
+                    if(robot_attempts == 5){
+                       
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                }
+                break;
+            
+            case 2030: // send command to pack down robot
+                robot_msg.cmd = 3;
+                robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};
+                pub_robot_->publish(robot_msg);
+                sfc = 2040;
+                break;
+            
+            case 2040: // wait for robot to be packed down
+                if(robot_status == 1){ // check if robot is done
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 2050;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    
+                    sfc = 2030; // go back and resend the robot cmd
+                    if(robot_attempts == 5){
+                       
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                }
+                break;
+            
+            case 2050: // start line follower
+
+                break;
+            
+            case 2060: // waitting for line follower to be done
+
+                break;
+            
+            case 2070: // set robot down in front of the mobile base ready for the ball releaser
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.29200,0.0,-0.12,0.0,1.45,0.0};
+                pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+
+                sfc = 2080;
+                break;
+            
+            case 2080: // waitting for robot to go to pose
+                if(robot_status == 1){ // check if robot is done
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 2090;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    
+                    sfc = 2070; // go back and resend the robot cmd
+                    if(robot_attempts == 5){
+                       
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                }
+                break;
+            
+            case 2090:
+
+                break;
+            
+            case 2100:
+
+                break;
+            
+            case 2110:
+
+                break;
+            
+            case 2120:
+
+                break;
+            
+            case 2130:
+
+                break;
+
+            case 2140:
+
+                break;
+            
+            case 2150:
+
+                break;
+
+            //////////////////END Start first gate (3) from case 2000-2999 /////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 
             //////////////////BEGINING TASK 12 from case 6000-6999 /////////////////////////////////////////////////////////////////
@@ -981,6 +1163,22 @@ class MainProgram : public rclcpp::Node
 
 
 
+            //////////////////BEGINING Drive to  13 from case 5000-5999 ////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+            //////////////////END Drive to  13 from case 5000-5999 ////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+            
+
             //////////////////BEGINING TASK 13 from case 6000-6999 /////////////////////////////////////////////////////////////////
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1100,7 +1298,7 @@ class MainProgram : public rclcpp::Node
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
-                    sfc = 6070; // go back and resend the robot cmd
+                    sfc = 6050; // go back and resend the robot cmd
                     if(robot_attempts == 5){
                        // sfc = 6030;
                        RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
@@ -1322,7 +1520,7 @@ class MainProgram : public rclcpp::Node
                 if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
-                    sfc = 6210; // go back and resend the robot cmd
+                    sfc = 6190; // go back and resend the robot cmd
                     
                 }
                 break;
@@ -1381,9 +1579,26 @@ class MainProgram : public rclcpp::Node
             
             case 6260: // make mobile base move to acuco code drop off point
 
+                if(status_aruco == 5){ // aruco code green
+                    pub_mobile_->publish(house_pose[0]);
+                    sfc = 6270;
+                }
+                else if( status_aruco == 20){ // aruco code yellow
+                    pub_mobile_->publish(house_pose[1]);
+                    sfc = 6270;
+                }
+                else if( status_aruco == 6){ // aruco code red
+                    pub_mobile_->publish(house_pose[2]);
+                    sfc = 6270;
+                }
+
                 break;
             
             case 6270: // waitting for mobile robot to drive to point
+                if(status_mobile == 1){
+                    status_mobile = 0;
+                    sfc = 6280;
+                }
 
                 break;
             
@@ -1482,12 +1697,16 @@ class MainProgram : public rclcpp::Node
                     sfc = 6999;
                 }
                 else{
-                    // move to pose
+                    pub_mobile_->publish(trolly_pose[package_count]);
+                    sfc = 6350;
                 }
                 break;
              
             case 6350: // waiiting for mobile robot to go to pose
-
+                if(status_mobile == 1){
+                    status_mobile = 0;
+                    sfc = 6360;
+                }
                 break;
             
             case 6360: // repeat for next package
@@ -1567,11 +1786,14 @@ class MainProgram : public rclcpp::Node
         std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
         std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
         rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pub_mobile_;
+        rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr sub_mobile_;
+        
+        int32_t status_mobile = 0;
 
         /// the 3 packages trolly pose, make as vector
-        std::vector<geometry_msgs::msg::PoseStamped> trolly_pose; 
+        geometry_msgs::msg::PoseStamped trolly_pose[3]; 
         /// the 3 house pose, make as vector
-        std::vector<geometry_msgs::msg::PoseStamped> house_pose; // red 0 // yelllow 1 // green 2
+        geometry_msgs::msg::PoseStamped house_pose[3]; // red 0 // yelllow 1 // green 2
 
 };
 
