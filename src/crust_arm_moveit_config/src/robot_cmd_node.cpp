@@ -100,6 +100,7 @@ class RobotHandler : public rclcpp::Node
         18: gripper On
         19: gripper off
         20: gripper set joint value
+        21: relative joint
 
     */
     void cmdCaseMsg(const crust_msgs::msg::RobotCmdMsg::SharedPtr msg){
@@ -185,6 +186,10 @@ class RobotHandler : public rclcpp::Node
 
               case 20:
                 status_msg.data = RobotHandler::gripperSetValue(robot_msg.pose[0],robot_msg.pose[1]);
+                break;
+              
+              case 21:
+                status_msg.data = RobotHandler::RealativeJointMovement(robot_msg.pose[0],robot_msg.pose[1],robot_msg.pose[2],robot_msg.pose[3]);
                 break;
 
               default:
@@ -276,7 +281,7 @@ class RobotHandler : public rclcpp::Node
         const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
         auto const LOGGER = rclcpp::get_logger("gripper Off");
         moveit::planning_interface::MoveGroupInterface::Plan my_plan;
-        std::vector<double> joints = {-0.55, -0.55};
+        std::vector<double> joints = {-0.40, -0.40};
         std::vector<std::string> joint_names = {"finger1_joint", "finger2_joint"};
         move_group.setJointValueTarget(joint_names,joints);
         //move_group.setJointValueTarget(joints);
@@ -396,10 +401,21 @@ class RobotHandler : public rclcpp::Node
           RCLCPP_INFO(LOGGER,"y: %f", target_pose.transform.rotation.y);
           RCLCPP_INFO(LOGGER,"z: %f", target_pose.transform.rotation.z);
           RCLCPP_INFO(LOGGER,"x: %f", target_pose.transform.rotation.w);
-          bool i = RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z+0.1,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.3);
+          tf2::Quaternion quat_tf;
+          
+          tf2::fromMsg(target_pose.transform.rotation, quat_tf);
+          double rot_r{}, rot_p{}, rot_y{};
+          tf2::Matrix3x3 m(quat_tf);
+          m.getRPY(rot_r, rot_p, rot_y);
+          quat_tf.setRPY(0.0,1.44,rot_y);
+          RCLCPP_INFO(LOGGER,"R: %f", rot_r);
+          RCLCPP_INFO(LOGGER,"P: %f", rot_p);
+          RCLCPP_INFO(LOGGER,"Y: %f", rot_y);
+          target_pose.transform.rotation = tf2::toMsg(quat_tf);
+          bool i = RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z+0.1,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.7);
           if(i == 1){
 
-            return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z -0.03,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.05);
+            return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z-0.02,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.05);
           }
           else{
             return false;
@@ -429,23 +445,22 @@ class RobotHandler : public rclcpp::Node
           RCLCPP_INFO(LOGGER,"y: %f", target_pose.transform.rotation.y);
           RCLCPP_INFO(LOGGER,"z: %f", target_pose.transform.rotation.z);
           RCLCPP_INFO(LOGGER,"x: %f", target_pose.transform.rotation.w);
-          //tf2::Quaternion tf2_quat;
-          //tf2::convert(tf2_quat,target_pose.transform.rotation);
-          //tf2::Vector3 rot_rpy = tf2_quat.getAxis();
+          
           tf2::Quaternion quat_tf;
-          //geometry_msgs::msg::Quaternion quat_msg = pose.pose.orientation;
+          
           tf2::fromMsg(target_pose.transform.rotation, quat_tf);
           double rot_r{}, rot_p{}, rot_y{};
           tf2::Matrix3x3 m(quat_tf);
           m.getRPY(rot_r, rot_p, rot_y);
-          quat_tf.setRPY(0.0,1.57,rot_y);
+          quat_tf.setRPY(0.0,1.44,rot_y);
           RCLCPP_INFO(LOGGER,"R: %f", rot_r);
           RCLCPP_INFO(LOGGER,"P: %f", rot_p);
           RCLCPP_INFO(LOGGER,"Y: %f", rot_y);
           target_pose.transform.rotation = tf2::toMsg(quat_tf);
+
           //return RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.4);
           //return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.5);
-          bool i = RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z+0.1,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.2);
+          bool i = RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z+0.1,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.6);
           if(i == 1){
 
             return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z -0.03,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.05);
@@ -583,6 +598,45 @@ class RobotHandler : public rclcpp::Node
               moveit::planning_interface::MoveGroupInterface::Plan my_plan;
               auto const LOGGER = rclcpp::get_logger("absoluteMovementQuadCrustbase");
               std::vector<double> joints = {joint1, joint2, joint3, joint4};
+              move_group.setJointValueTarget(joints);
+              bool success = static_cast<bool>(move_group.plan(my_plan));
+              RCLCPP_INFO(LOGGER, " (joint movement) %s", success ? "" : "FAILED");
+              if(success == true){
+                  //move_group.move();
+                  move_group.execute(my_plan);
+                  status = true;
+
+                  
+              }
+              else
+              {
+                  status = false;
+              }
+              executor.cancel();
+              return status;
+    }
+
+    bool RealativeJointMovement(double joint1, double joint2, double joint3, double joint4){
+              bool status;
+              rclcpp::NodeOptions node_options;
+              node_options.automatically_declare_parameters_from_overrides(true);
+              auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
+              rclcpp::executors::MultiThreadedExecutor executor;
+              executor.add_node(move_group_node);
+              std::thread([&executor]() { executor.spin(); }).detach();
+              static const std::string PLANNING_GROUP = "manipulator";
+              moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
+              moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+              const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+              moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+              auto const LOGGER = rclcpp::get_logger("realative joint");
+              std::vector<double> joints = {joint1, joint2, joint3, joint4};
+              moveit::core::RobotStatePtr current_state = move_group.getCurrentState(10);
+              current_state->copyJointGroupPositions(joint_model_group, joints);
+              joints[0] += joint1;
+              joints[1] += joint2;
+              joints[2] += joint3;
+              joints[3] += joint4;
               move_group.setJointValueTarget(joints);
               bool success = static_cast<bool>(move_group.plan(my_plan));
               RCLCPP_INFO(LOGGER, " (baseRelativeMovementQuad) %s", success ? "" : "FAILED");
