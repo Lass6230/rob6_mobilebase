@@ -1,6 +1,3 @@
-#true footprint "[ [0.3, 0.06], [0.3, -0.14], [0.13, -0.17], [-0.43, -0.17], [-0.43, 0.17], [0.13, 0.17], [0.2, 0.17] ]"
-
-
 amcl: #
   ros__parameters:
     use_sim_time: True
@@ -21,7 +18,7 @@ amcl: #
     laser_min_range: 0.1
     laser_model_type: "likelihood_field" #likelihood_field_prob this should incorporate beamskip
     max_beams: 60
-    max_particles: 5000 #2000
+    max_particles: 2000 #2000
     min_particles: 500
     odom_frame_id: "odom"
     pf_err: 0.05

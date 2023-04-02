@@ -26,7 +26,8 @@ setup(
             'aruco_detector = opencv_detector.aruco_detector:main',
             'golfball_detector = opencv_detector.golfball_detector:main',
             'goal_transformer = opencv_detector.goal_pose_transformer:main',
-            'golfhole_detector = opencv_detector.golfhole_detector:main'
+            'golfhole_detector = opencv_detector.golfhole_detector:main',
+            'simple_commander = opencv_detector.simple_commander:main',
         ],
     },
 )

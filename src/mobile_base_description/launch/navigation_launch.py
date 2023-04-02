@@ -56,7 +56,7 @@ def generate_launch_description():
     x_pose = LaunchConfiguration('x_pose', default='-2.0')
     y_pose = LaunchConfiguration('y_pose', default='1.0')
 
-    lifecycle_nodes = ['filter_mask_server', 'costmap_filter_info_server']
+    lifecycle_nodes = ['filter_mask_server', 'costmap_filter_info_server', 'simple_commander']
 
     # Create the launch configuration variables
     slam = LaunchConfiguration('slam')
@@ -83,6 +83,9 @@ def generate_launch_description():
     # https://github.com/ros/robot_state_publisher/pull/30
     # TODO(orduno) Substitute with `PushNodeRemapping`
     #              https://github.com/ros2/launch_ros/issues/56
+
+
+
     remappings = [('/tf', 'tf'),
                   ('/tf_static', 'tf_static')]
 
@@ -302,6 +305,12 @@ def generate_launch_description():
         }.items()
     )
 
+    demo_cmd = Node( ##
+        package='opencv_detector',
+        executable='simple_commander',
+        emulate_tty=True, #True
+        output='screen')
+
 
     
 
@@ -333,7 +342,7 @@ def generate_launch_description():
     ld.add_action(rviz_cmd)
     ld.add_action(bringup_cmd)
 
-    ld.add_action(spawn_turtlebot_cmd)
+    #ld.add_action(spawn_turtlebot_cmd)
     ld.add_action(robot_state_publisher)
     ld.add_action(odomZOH)
 
@@ -343,6 +352,9 @@ def generate_launch_description():
     ld.add_action(start_lifecycle_manager_cmd)
     ld.add_action(start_map_server_cmd)
     ld.add_action(start_costmap_filter_info_server_cmd)
+
+
+    #ld.add_action(demo_cmd) ##
 
     return ld
 
