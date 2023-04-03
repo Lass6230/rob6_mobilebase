@@ -88,6 +88,8 @@ class ImageSubscriberNode(Node):
 
             # self.get_logger().info('z aruco: "%f"' % z)
             z = range2+0.02
+
+            self.get_logger().info("range: %f" %range2)
             ######################
 
             center_x, center_y = cv_image.shape[1]/2, cv_image.shape[0]/2

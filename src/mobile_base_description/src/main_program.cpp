@@ -66,6 +66,7 @@ class MainProgram : public rclcpp::Node
             pub_camera_ball_ = this->create_publisher<std_msgs::msg::Bool>("/search_golfball",10);
 
             pub_mobile_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/goal",10);
+            pub_mobile_relative_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/goal_relative",10);
             sub_mobile_ = this->create_subscription<std_msgs::msg::Int32>("/goal_feedback", 10,std::bind(&MainProgram::subMobileStatus, this, _1), sub1_opt);
             
             sub_linefollow_ = this->create_subscription<std_msgs::msg::Int32>("/lineStatus", 10,std::bind(&MainProgram::subLineStatus, this, _1), sub1_opt);
@@ -671,9 +672,14 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 2050: // start line follower
+<<<<<<< HEAD
                 lineFollow_msg.data = 1;
                 pub_linefollow_->publish(linefollow_msg);
                 sfc= 2060;
+=======
+
+
+>>>>>>> 10bcc6d66380eeab95c4c1968df0bb66e8df6e7c
                 break;
             
             case 2060: // waitting for line follower to be done
@@ -2140,6 +2146,7 @@ class MainProgram : public rclcpp::Node
         std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
         std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
         rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pub_mobile_;
+        rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pub_mobile_relative_;
         rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr sub_mobile_;
         
         int32_t status_mobile = 0;
@@ -2161,8 +2168,13 @@ class MainProgram : public rclcpp::Node
         rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr sub_linefollow_;
         rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr pub_linefollow_;
         int32_t status_linefollow = 0;
+<<<<<<< HEAD
         std_msgs::msg::Int32 linefollow_msg;
 
+=======
+        std_msgs::msg::Int32 lineFollow_msg;
+        
+>>>>>>> 10bcc6d66380eeab95c4c1968df0bb66e8df6e7c
 
 };
 
