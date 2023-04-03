@@ -69,8 +69,8 @@ class MainProgram : public rclcpp::Node
             sub_mobile_ = this->create_subscription<std_msgs::msg::Int32>("/goal_feedback", 10,std::bind(&MainProgram::subMobileStatus, this, _1), sub1_opt);
             
             sub_linefollow_ = this->create_subscription<std_msgs::msg::Int32>("/lineStatus", 10,std::bind(&MainProgram::subLineStatus, this, _1), sub1_opt);
-            pub_linefollow_ = this->create_publisher<std_msgs::msg::Int32>("/cmd_lineFollow",10);
-
+            
+            pub_linefollow_ = this->create_publisher<std_msgs::msg::Int32>("/cmd_lineFollow", 10);
             
 
             // INIT poseStamped values for
@@ -2136,7 +2136,7 @@ class MainProgram : public rclcpp::Node
 
         // line follow
         rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr sub_linefollow_;
-        rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr pub_linefollow_;
+        rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr pub_linefollow_;
         int32_t status_linefollow = 0;
 
 };
