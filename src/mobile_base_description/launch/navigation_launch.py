@@ -56,8 +56,8 @@ def generate_launch_description():
     x_pose = LaunchConfiguration('x_pose', default='-2.0')
     y_pose = LaunchConfiguration('y_pose', default='1.0')
 
-    lifecycle_nodes = ['filter_mask_server', 'costmap_filter_info_server', 'simple_commander']
-
+    #lifecycle_nodes = ['filter_mask_server', 'costmap_filter_info_server', 'simple_commander']
+    lifecycle_nodes = ['filter_mask_server', 'costmap_filter_info_server']
     # Create the launch configuration variables
     slam = LaunchConfiguration('slam')
     namespace = LaunchConfiguration('namespace')
@@ -108,12 +108,12 @@ def generate_launch_description():
     declare_map_yaml_cmd = DeclareLaunchArgument(
         'map',
         default_value=os.path.join(
-            mobile_base_dir, 'maps/hall2', 'map3.yaml'),
+            mobile_base_dir, 'maps/0_04res', 'map.yaml'),
         description='Full path to map file to load')
     
     declare_mask_yaml_file_cmd = DeclareLaunchArgument(
         'mask',
-        default_value=os.path.join(mobile_base_dir, 'maps/hall2', 'map3_keepout.yaml'),
+        default_value=os.path.join(mobile_base_dir, 'maps/0_04res', 'map_keepout.yaml'),
         description='Full path to filter mask yaml file to load')
     
     declare_use_sim_time_cmd = DeclareLaunchArgument(
@@ -231,6 +231,8 @@ def generate_launch_description():
         name="robot_state_publisher",
         output="both",
         parameters=[robot_description],
+        remappings=remappings,
+
     )
 
     # Publish arbitrary joint angles
@@ -262,18 +264,18 @@ def generate_launch_description():
         cmd=['gzclient'],
         cwd=[launch_dir], output='screen')
 
-    urdf = os.path.join(bringup_dir, 'urdf', 'turtlebot3_waffle.urdf')
+    # urdf = os.path.join(bringup_dir, 'urdf', 'turtlebot3_waffle.urdf')
 
-    start_robot_state_publisher_cmd = Node(
-        condition=IfCondition(use_robot_state_pub),
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        name='robot_state_publisher',
-        namespace=namespace,
-        output='screen',
-        parameters=[{'use_sim_time': use_sim_time}],
-        remappings=remappings,
-        arguments=[urdf])
+    # start_robot_state_publisher_cmd = Node(
+    #     condition=IfCondition(use_robot_state_pub),
+    #     package='robot_state_publisher',
+    #     executable='robot_state_publisher',
+    #     name='robot_state_publisher',
+    #     namespace=namespace,
+    #     output='screen',
+    #     parameters=[{'use_sim_time': use_sim_time}],
+    #     remappings=remappings,
+    #     arguments=[urdf])
 
     rviz_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -317,6 +319,7 @@ def generate_launch_description():
     # Create the launch description and populate
     ld = LaunchDescription()
 
+    
     # Declare the launch options
     ld.add_action(declare_namespace_cmd)
     ld.add_action(declare_use_namespace_cmd)
@@ -333,18 +336,20 @@ def generate_launch_description():
     ld.add_action(declare_simulator_cmd)
     ld.add_action(declare_world_cmd)
 
+    
+    ld.add_action(odomZOH)
+    ld.add_action(robot_state_publisher)
     # Add any conditioned actions
     ld.add_action(start_gazebo_server_cmd)
     ld.add_action(start_gazebo_client_cmd)
 
     # Add the actions to launch all of the navigation nodes
-    ld.add_action(start_robot_state_publisher_cmd)
+    #ld.add_action(start_robot_state_publisher_cmd)
     ld.add_action(rviz_cmd)
     ld.add_action(bringup_cmd)
 
     #ld.add_action(spawn_turtlebot_cmd)
-    ld.add_action(robot_state_publisher)
-    ld.add_action(odomZOH)
+    
 
     ld.add_action(declare_keepout_params_file_cmd)
     ld.add_action(declare_mask_yaml_file_cmd)
