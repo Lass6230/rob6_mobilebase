@@ -28,7 +28,7 @@
         <state_interface name="effort"/>
         <param name="Position_P_Gain">850</param>
         <!--<param name="Position_I_Gain">5</param>-->
-        <param name="Position_D_Gain">100</param>
+        <!--<param name="Position_D_Gain">100</param>-->
       </joint>
       <joint name="joint_3">
         <param name="id">3</param>
@@ -39,7 +39,7 @@
         <state_interface name="effort"/>
         <param name="Position_P_Gain">1200</param>
         <!--<param name="Position_I_Gain">5</param>-->
-        <param name="Position_D_Gain">100</param>
+        <!--<param name="Position_D_Gain">100</param>-->
       </joint>
       <joint name="joint_4">
         <param name="id">5</param>

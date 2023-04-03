@@ -10,6 +10,7 @@
 #include <future>
 
 //#include "std_msgs/int8.hpp"
+#include <std_msgs/msg/int32.hpp>
 #include <std_msgs/msg/int8.hpp>
 #include <std_msgs/msg/bool.hpp>
 #include <thread>
@@ -63,11 +64,117 @@ class MainProgram : public rclcpp::Node
             sub_camera_ball_ = this->create_subscription<std_msgs::msg::Int8>("/status_ball",10,std::bind(&MainProgram::subBallStatus, this, _1), sub1_opt);
             pub_camera_aruco_ = this->create_publisher<std_msgs::msg::Bool>("/search_aruco",10);
             pub_camera_ball_ = this->create_publisher<std_msgs::msg::Bool>("/search_golfball",10);
+
             pub_mobile_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/goal",10);
-            //MainProgram::main_program();
+            pub_mobile_relative_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/goal_relative",10);
+            sub_mobile_ = this->create_subscription<std_msgs::msg::Int32>("/goal_feedback", 10,std::bind(&MainProgram::subMobileStatus, this, _1), sub1_opt);
+            
+            sub_linefollow_ = this->create_subscription<std_msgs::msg::Int32>("/lineStatus", 10,std::bind(&MainProgram::subLineStatus, this, _1), sub1_opt);
+            pub_linefollow_ = this->create_publisher<std_msgs::msg::Int32>("/cmd_lineFollow", 10);
+            ///////////// Line status og cmd koder ////////////////////////////
+
+                //STATUS MED KOMMANDO NØDVENDIG
+                // 20: robotten har fundet en sammenfletning og venter på en kommando
+                // 30: Robotten har fundet et skarpt sving og venter på en komando
+
+                //STATUS UDEN KOMMANDO NØDVENDIG
+                // 90: Robotten har mistet linjen
+                
+                // Robottens status kode når den bare kører uden problemer
+                // de forskellige parameter bliver lagt sammen til en enkel kode alt efter hvad er aktiveret
+                // hvis linemode er aktiveret så vil statuskoden være et ulige tal
+                //
+                // 1: linefollowing aktiveret
+                // 10: forsæt fremad efter mistet linje aktiveret
+                // 12: Skarp sving aktiveret
+                // 14: Sammenfletning aktiveret
+                // 2: Kør til højre i sammenfeltning aktiveret
+                // 90: tabt linen
+
+                // Eksempel Kode:
+                // linefollowing aktiveret med sammenfletning og kør til højre aktiveret
+                // kode: 17
+                
+                // linefollowing aktiveret med sammenfletning og kør til venstre
+                // kode: 15
+
+                // linefollowing deaktiveret men sammenfletning og kør til venstre aktiveret 
+                // kode: 14
+
+
+
+                //CMD
+                // 0: Slå linefollowing fra
+                // 1: Aktiver linefollowing uden nogen skarpt sving og sammenfletning
+                // 2: Aktiver linefollowing hvor robotten fortsætter fremad efter den mister linjen istedet for at finde linjen igen
+                // 3: Aktiver linefollowing hvor robotten i en sammenfletning kører til højre
+                // 4: Aktiver linefollowing hvor robotten laver et skarpt sving
+                // 5: Aktiver linefollowing hvor robotten i en sammenfletning kører til venstre
+                // 6: Sæt robotten igang når den venter på kommando
+
+
+             ///////////// Line status og cmd koder ////////////////////////////
+            
+
+            // INIT poseStamped values for
+            tf2::Quaternion quat_trolly[3];
+
+            quat_trolly[0].setRPY(0.0, 0.0, 0.0);
+            trolly_pose[0].pose.position.x = 0.0;
+            trolly_pose[0].pose.position.y = 0.0;
+            trolly_pose[0].pose.orientation = tf2::toMsg(quat_trolly[0]);
+
+            quat_trolly[1].setRPY(0.0, 0.0, 0.0);
+            trolly_pose[1].pose.position.x = 0.0;
+            trolly_pose[1].pose.position.y = 0.0;
+            trolly_pose[1].pose.orientation = tf2::toMsg(quat_trolly[1]);
+
+            quat_trolly[2].setRPY(0.0, 0.0, 0.0);
+            trolly_pose[2].pose.position.x = 0.0;
+            trolly_pose[2].pose.position.y = 0.0;
+            trolly_pose[2].pose.orientation = tf2::toMsg(quat_trolly[2]);
+
+            tf2::Quaternion quat_house[3];
+
+            quat_house[0].setRPY(0.0, 0.0, 0.0);
+            house_pose[0].pose.position.x = 0.0;
+            house_pose[0].pose.position.y = 0.0;
+            house_pose[0].pose.orientation = tf2::toMsg(quat_house[0]);
+
+            quat_house[1].setRPY(0.0, 0.0, 0.0);
+            house_pose[1].pose.position.x = 0.0;
+            house_pose[1].pose.position.y = 0.0;
+            house_pose[1].pose.orientation = tf2::toMsg(quat_house[1]);
+
+            quat_house[2].setRPY(0.0, 0.0, 0.0);
+            house_pose[2].pose.position.x = 0.0;
+            house_pose[2].pose.position.y = 0.0;
+            house_pose[2].pose.orientation = tf2::toMsg(quat_house[2]);
+
+
+            // init task_10_pose
+            tf2::Quaternion quat_task10;
+            quat_task10.setRPY(0.0, 0.0, 0.0);
+            task_10_pose.pose.position.x = 0.0;
+            task_10_pose.pose.position.y = 0.0;
+            task_10_pose.pose.orientation = tf2::toMsg(quat_task10);
+
+            // init task_4_pose
+            tf2::Quaternion quat_task4;
+            quat_task4.setRPY(0.0, 0.0, 0.0);
+            task_4_pose.pose.position.x = 0.0;
+            task_4_pose.pose.position.y = 0.0;
+            task_4_pose.pose.orientation = tf2::toMsg(quat_task4);
         }
     
     private:
+        void subLineStatus(const std_msgs::msg::Int32 & msg){
+            status_linefollow = msg.data;
+        }
+
+        void subMobileStatus(const std_msgs::msg::Int32 & msg){
+            status_mobile = msg.data;
+        }
 
         void subArucoStatus(const std_msgs::msg::Int8 & msg){
             status_aruco = msg.data;
@@ -96,6 +203,7 @@ class MainProgram : public rclcpp::Node
             }
 
         }
+
         void timer_callback(){
             //auto message = std_msgs::msg::String();
             //message.data = "Hello, world! " + std::to_string(count_++);
@@ -113,7 +221,7 @@ class MainProgram : public rclcpp::Node
                 t_time1 = clock();
                 m_lastTime1 = m_clock->now().seconds();
                 
-                sfc = 6000;//4000;//155;//1100;
+                sfc = 6000;//6000;//4000;//155;//1100;
 
                 break;
             case 10:
@@ -546,8 +654,171 @@ class MainProgram : public rclcpp::Node
                 break;
             
 
+            //////////////////BEGINING Start first gate (3) from case 2000-2999 /////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            //////////////////BEGINING TASK 12 from case 6000-6999 /////////////////////////////////////////////////////////////////
+            case 2000:
+                sfc = 2010;
+                break;
+            
+            case 2010: // close gripper
+                robot_msg.cmd = 18; // close gripper
+                robot_msg.pose = {-0.3,-0.3};
+                pub_robot_->publish(robot_msg); // send to robot to set gripper close
+
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+                sfc = 2020;
+                break;
+
+            case 2020: // waitting for gripper to close
+                if(robot_status == 1){ // check if robot is done
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 2030;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    
+                    sfc = 2010; // go back and resend the robot cmd
+                    if(robot_attempts == 5){
+                       
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                }
+                break;
+            
+            case 2030: // send command to pack down robot
+                robot_msg.cmd = 3;
+                robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};
+                pub_robot_->publish(robot_msg);
+                sfc = 2040;
+                break;
+            
+            case 2040: // wait for robot to be packed down
+                if(robot_status == 1){ // check if robot is done
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 2050;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    
+                    sfc = 2030; // go back and resend the robot cmd
+                    if(robot_attempts == 5){
+                       
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                }
+                break;
+            
+            case 2050: // start line follower
+                linefollow_msg.data = 1;
+                pub_linefollow_->publish(linefollow_msg);
+                sfc= 2060;
+                break;
+            
+            case 2060: // waitting for line follower to be done
+                if (status_linefollow == 20){ //line following har fundet en sammenfletning eller skarpt sving og venter på en svar fra ros
+                    status_linefollow = 0;
+                    sfc = 2070;
+                }
+                m_lastTime2 = m_clock->now().seconds();
+                if ((m_lastTime2-m_lastTime1)> 15.0){
+                    RCLCPP_INFO(this->get_logger(),"timed out");
+                }
+                break;
+            
+            case 2070: // set robot down in front of the mobile base ready for the ball releaser
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.29200,0.0,-0.12,0.0,1.45,0.0};
+                pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+
+                sfc = 2080;
+                break;
+            
+            case 2080: // waitting for robot to go to pose
+                if(robot_status == 1){ // check if robot is done
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 2090;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    
+                    sfc = 2070; // go back and resend the robot cmd
+                    if(robot_attempts == 5){
+                       
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                }
+                break;
+            
+            case 2090: // start line following igen vi vil gerne have den til at køre til venstre i sammenfletningen
+                linefollow_msg.data = 5; // set linefollowing til og kør til venstre i sammenfletning
+                pub_linefollow_->publish(linefollow_msg);
+                sfc = 2100;
+
+                break;
+            
+            case 2100:
+                if (status_linefollow == 20) { //se hvornår linefollow rammer sammenfletning / skarp sving
+                    status_linefollow = 0;
+                    sfc = 2110;
+                }
+
+                break;
+            
+            case 2110:
+                linefollow_msg.data = 4;
+                pub_linefollow_->publish(linefollow_msg);
+                sfc = 2120;
+
+                break;
+            
+            case 2120:
+                if (status_linefollow == 20){ // når vi ser det næste cross burde vi være ved opgaven
+                    status_linefollow = 0;
+                    sfc = 2130; 
+                }
+
+                break;
+            
+            case 2130:
+                linefollow_msg.data = 0; // sluk for line following så vi kan begynde at bruge navigation
+                pub_linefollow_->publish(linefollow_msg);
+
+                break;
+
+            case 2140:
+
+                break;
+            
+            case 2150:
+
+                break;
+
+            //////////////////END Start first gate (3) from case 2000-2999 /////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+            //////////////////BEGINING TASK 12 from case 4000-4999 /////////////////////////////////////////////////////////////////
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -981,6 +1252,69 @@ class MainProgram : public rclcpp::Node
 
 
 
+            //////////////////BEGINING Drive to  13 from case 5000-5999 ////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            case 5000:
+                sfc = 5010;
+                break;
+            
+            case 5010:
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.34,0.0,0.168,0.0,1.45,0.0};
+                pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+
+                sfc = 5020;
+                break;
+            
+            case 5020:
+                if(robot_status == 1){// Wait for gripper to be open
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 5030;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    
+                    sfc = 5010; // go back and resend the robot cmd
+                    
+                }
+                break;
+            
+            case 5030: // send command to drive to trolly 1
+                pub_mobile_->publish(trolly_pose[0]);
+                sfc = 5040;
+
+                break;
+            
+            case 5040: // waitting for driveing to trolly 1
+                if(status_mobile == 1){
+                    status_mobile = 0;
+                    sfc = 5050;
+                }
+                break;
+            
+            case 5050:
+                sfc = 5999;
+                break;
+            
+            case 5999:
+                sfc = 6000;
+                break;
+
+
+            //////////////////END Drive to  13 from case 5000-5999 ////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
             //////////////////BEGINING TASK 13 from case 6000-6999 /////////////////////////////////////////////////////////////////
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1100,7 +1434,7 @@ class MainProgram : public rclcpp::Node
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
-                    sfc = 6070; // go back and resend the robot cmd
+                    sfc = 6050; // go back and resend the robot cmd
                     if(robot_attempts == 5){
                        // sfc = 6030;
                        RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
@@ -1322,7 +1656,7 @@ class MainProgram : public rclcpp::Node
                 if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
-                    sfc = 6210; // go back and resend the robot cmd
+                    sfc = 6190; // go back and resend the robot cmd
                     
                 }
                 break;
@@ -1381,9 +1715,26 @@ class MainProgram : public rclcpp::Node
             
             case 6260: // make mobile base move to acuco code drop off point
 
+                if(status_aruco == 5){ // aruco code green
+                    pub_mobile_->publish(house_pose[0]);
+                    sfc = 6270;
+                }
+                else if( status_aruco == 20){ // aruco code yellow
+                    pub_mobile_->publish(house_pose[1]);
+                    sfc = 6270;
+                }
+                else if( status_aruco == 6){ // aruco code red
+                    pub_mobile_->publish(house_pose[2]);
+                    sfc = 6270;
+                }
+
                 break;
             
             case 6270: // waitting for mobile robot to drive to point
+                if(status_mobile == 1){
+                    status_mobile = 0;
+                    sfc = 6280;
+                }
 
                 break;
             
@@ -1482,12 +1833,16 @@ class MainProgram : public rclcpp::Node
                     sfc = 6999;
                 }
                 else{
-                    // move to pose
+                    pub_mobile_->publish(trolly_pose[package_count]);
+                    sfc = 6350;
                 }
                 break;
              
             case 6350: // waiiting for mobile robot to go to pose
-
+                if(status_mobile == 1){
+                    status_mobile = 0;
+                    sfc = 6360;
+                }
                 break;
             
             case 6360: // repeat for next package
@@ -1504,11 +1859,520 @@ class MainProgram : public rclcpp::Node
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+            //////////////////Drive to task 10 from case 7000-7999 ///////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            case 7000:
+                sfc = 7010;
+                break;
+            
+            case 7010:
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.34,0.0,0.168,0.0,1.45,0.0};
+                pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+
+                sfc = 7020;
+                break;
+            
+            case 7020:
+                if(robot_status == 1){// Wait for gripper to be open
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 7010;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    
+                    sfc = 7030; // go back and resend the robot cmd
+                }
+                break;  
+
+            case 7030:
+                pub_mobile_->publish(task_10_pose);
+                sfc = 7040;
+                break;
+            
+            case 7040:
+                if(status_mobile == 1){
+                    status_mobile = 0;
+                    sfc = 7050;
+                }
+
+                break;
+
+            case 7050:
+                sfc = 7999;
+                break;
+
+            case 7060:
+
+                break;
+            
+            case 7070:
+
+                break;
+            
+            case 7080:
+
+                break;
+            
+            case 7090:
+
+                break;
+            
+            case 7100:
+
+                break;
+            
+            
+
+
+
+
+            case 7999:
+
+                break;
+
+            //////////////////END Drive to task 10 from case 7000-7999 ///////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+            //////////////////BEGIN Task 10 from case 8000-8999 ///////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            case 8000: // bruger vi lidaren til at se hvornår vi kan køre?
+                sfc = 8010;
+                break;
+            
+            case 8010: // start line follow
+                linefollow_msg.data = 2; // Start line following hvor den forsætter efter den mister linje
+                pub_linefollow_->publish(linefollow_msg);
+                sfc = 8020;
+                break;
+            
+            case 8020: // wait for line follow to be done
+                if (status_linefollow == 11){ // vent på at robotten ser linjen igen
+                status_linefollow = 0;
+                sfc = 8030;
+
+                }
+                break;
+            
+            case 8030: // måske tilføje en måde at bestemme hvilken vej vi drejer i tilfælde af linjen er horizontal som den ville være i dette tilfælde
+                linefollow_msg.data = 1; // her slår vi normal line mode til igen så den vil prøve at finde linjen igen 
+                pub_linefollow_->publish(linefollow_msg);
+                break;
+
+            case 8040:
+
+                break;
+
+
+
+            case 8999:
+                sfc = 9000;
+                break;
+            //////////////////END Task 10 from case 8000-8999 ///////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+            //////////////////Begin  case 9000-9999 ///////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            case 9000:
+                sfc = 9010;
+                break;
+
+            case 9010: 
+
+                break;
+            
+            case 9020:// muligvis også lav en mode hvor robotten ikke laver error correction når den mister linjen hvis den kan følge linjen godt nok
+                linefollow_msg.data = 1; // tilføj en mpde hvor der kører fast af og ændre den her værdi accordingly
+                pub_linefollow_->publish(linefollow_msg);
+                sfc = 9020;
+                break;
+            
+            case 9030:
+
+                break;
+            
+            case 9040:
+
+                break;
+            
+            case 9050:
+
+                break;
+            
+            case 9060:
+
+                break;
+            
+            case 9070:
+
+                break;
+
+            //////////////////END case 9000-9999 ///////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            
+
+
+
+
+            //////////////////Begin task 9 case 10000-10999 ///////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            case 10000:
+
+                break;
+            
+            case 10010:
+
+                break;
+            
+            case 10020:
+
+                break;
+            
+            case 10030:
+
+                break;
+            
+            case 10040:
+
+                break;
+            
+            case 10050:
+
+                break;
+
+
+
+            //////////////////END task 9 case 10000-10999 ///////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            
+
+
+            //////////////////Begin drive to task 8 case 11000-11999 ///////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            case 11000:
+
+                break;
+            
+            case 11010:
+
+                break;
+            
+            case 11020:
+
+                break;
+            
+            case 11030:
+
+                break;
+            
+            case 11040:
+
+                break;
+            
+            case 11050:
+
+                break;
+            
+            case 11060:
+
+                break;
+        
+            case 11999:
+
+                break;
+
+            //////////////////END drive to task 8 case 11000-11999 ///////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+            /// maybe ///
+            //////////////////Begin task 8 case 12000-12999 ///////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+            //////////////////END task 8 case 12000-12999 ///////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+            /// maybe ///
+            //////////////////Begin take ball from plato case 13000-13999 ///////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+            //////////////////END take ball from plato case 13000-13999 ///////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+            ////////////////// BEGIN Drive with navigation to task 4 case 14000-14999 ///////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            case 14000:
+                sfc = 14010;
+                break;
+            
+            case 14010:
+                pub_mobile_->publish(task_4_pose);
+
+                sfc = 14020;
+                
+                break;
+            
+            case 14020:
+                if(status_mobile == 1){
+                    status_mobile = 0;
+                    sfc = 14999;
+                }
+
+                break;
+            
+            case 14030:
+
+                break;
+            
+            case 14040:
+
+                break;
+            
+            case 14050:
+
+                break;
+            
+            case 14060:
+
+                break;
+            
+            case 14070:
+
+                break;
+            
+            
+
+            case 14999:
+                sfc = 15000;
+                break;
+
+            //////////////////END Drive with navigation to task 4 case 14000-14999 //////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+            ////////////////// BEGIN  task 4 case 15000-15999 ///////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            case 15000:
+                sfc = 15010;
+                break;
+            
+            case 15010:// start the line follower
+                linefollow_msg.data = 1;
+                pub_linefollow_->publish(linefollow_msg);
+                sfc= 15020;
+                break;
+            
+            case 15020: // waitting for robot to detect udflætningen tæt på task 5
+                if (status_linefollow == 20){ //line following har fundet en sammenfletning eller skarpt sving og venter på en svar fra ros
+                    status_linefollow = 0;
+                    linefollow_msg.data = 0;
+                    pub_linefollow_->publish(linefollow_msg);
+                    sfc = 15030;
+                }
+                m_lastTime2 = m_clock->now().seconds();
+                if ((m_lastTime2-m_lastTime1)> 90.0){
+                    RCLCPP_INFO(this->get_logger(),"timed out");
+                }
+                break;
+            
+            case 15030: 
+                sfc = 15999;
+                break;
+            
+            case 15040:
+
+                break;
+            
+
+
+            case 15999:
+                sfc = 16000;
+                break;
+            ////////////////// END task 4 case 15000-15999 ///////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            /// MAYBE 
+            ////////////////// BEGIN  task 5 case 16000-16999 ///////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            case 16000:
+                sfc = 16999;
+                break;
+            
+            case 16010:
+                
+                break;
+            
+            case 16020:
+
+                break;
+
+            case 16999:
+                sfc = 17000;
+                break;
+            /// MAYBE
+            ////////////////// END  task 5 case 16000-16999 ///////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+            ////////////////// BEGIN drive down ramp case 17000-17999 ///////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            case 17000:
+                sfc = 17010;
+                break;
+            
+            case 17010: // send command to linefollower to begin driveing ige ud
+                linefollow_msg.data = 1;
+                pub_linefollow_->publish(linefollow_msg);
+                sfc= 17020;
+                break;
+            
+            case 17020: // waitting for the lige follower to detect the samflætningen before task 15
+                if (status_linefollow == 17){ 
+                    status_linefollow = 0;
+                    linefollow_msg.data = 0;
+                    pub_linefollow_->publish(linefollow_msg);
+                    sfc = 17030;
+                }
+                m_lastTime2 = m_clock->now().seconds();
+                if ((m_lastTime2-m_lastTime1)> 90.0){
+                    RCLCPP_INFO(this->get_logger(),"timed out");
+                }
+                break;
+            
+            case 17030:
+                sfc = 17999;
+                break;
+
+            case 17999:
+                sfc = 18000;
+                break;
+            ////////////////// END drive down ramp case 17000-17999 ///////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+             ////////////////// BEGIN task 15 case 18000-18999 ///////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            case 18000:
+                sfc = 18010;
+                break;
+
+            case 18010: // publish to robot arm to move its arm down to be able to touch buttom
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.29200,0.0,-0.12,0.0,1.45,0.0};
+                pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+                sfc = 18020;
+                break;
+            
+            case 18020: // waitting for robot to go to pose
+                if(robot_status == 1){ // check if robot is done
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 18020;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    
+                    sfc = 18010; // go back and resend the robot cmd
+                    if(robot_attempts == 5){
+                       
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                }
+                break;
+            
+            case 18030: // send to begin the linefollower
+                linefollow_msg.data = 1;
+                pub_linefollow_->publish(linefollow_msg);
+                sfc= 18040;
+                break;
+
+            case 18040: // waitting to line follower is done
+                if (status_linefollow == 20){ //line following har fundet en sammenfletning eller skarpt sving og venter på en svar fra ros
+                    status_linefollow = 0;
+                    linefollow_msg.data = 0;
+                    pub_linefollow_->publish(linefollow_msg);
+                    sfc = 18050;
+                }
+                m_lastTime2 = m_clock->now().seconds();
+                if ((m_lastTime2-m_lastTime1)> 90.0){
+                    RCLCPP_INFO(this->get_logger(),"timed out");
+                }
+                break;
+            
+            case 18050:
+                sfc = 18999;
+                break;
+            
+            
+            
+            case 18999: 
+                
+                break;
+            ////////////////// END task 15 case 18000-18999 ///////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
             default:
                 break;
             }
             RCLCPP_INFO(this->get_logger(), "sfc: %d",sfc);
         }
+        
 
         bool service_done_ = false;
 
@@ -1567,11 +2431,33 @@ class MainProgram : public rclcpp::Node
         std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
         std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
         rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pub_mobile_;
+        rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pub_mobile_relative_;
+        rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr sub_mobile_;
+        
+        int32_t status_mobile = 0;
 
         /// the 3 packages trolly pose, make as vector
-        std::vector<geometry_msgs::msg::PoseStamped> trolly_pose; 
+        geometry_msgs::msg::PoseStamped trolly_pose[3]; 
         /// the 3 house pose, make as vector
-        std::vector<geometry_msgs::msg::PoseStamped> house_pose; // red 0 // yelllow 1 // green 2
+        geometry_msgs::msg::PoseStamped house_pose[3]; // red 0 // yelllow 1 // green 2
+
+
+
+        // task 10 pose
+        geometry_msgs::msg::PoseStamped task_10_pose;
+
+
+        // task 4 pose
+        geometry_msgs::msg::PoseStamped task_4_pose;
+
+
+
+        // line follow
+        rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr sub_linefollow_;
+        rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr pub_linefollow_;
+        int32_t status_linefollow = 0;
+        std_msgs::msg::Int32 linefollow_msg;
+
 
 };
 
