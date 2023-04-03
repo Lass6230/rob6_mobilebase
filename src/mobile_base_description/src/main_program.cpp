@@ -671,12 +671,20 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 2050: // start line follower
-                
-
+                lineFollow_msg.data = 1;
+                pub_linefollow_->publish(linefollow_msg);
+                sfc= 2060;
                 break;
             
             case 2060: // waitting for line follower to be done
-
+                if (status_linefollow == 20){ //line following har fundet en sammenfletning eller skarpt sving og venter på en svar fra ros
+                    status_linefollow = 0;
+                    sfc = 2070;
+                }
+                m_lastTime2 = m_clock->now().seconds();
+                if ((m_lastTime2-m_lastTime1)> 15.0){
+                    RCLCPP_INFO(this->get_logger(),"timed out");
+                }
                 break;
             
             case 2070: // set robot down in front of the mobile base ready for the ball releaser
@@ -709,19 +717,33 @@ class MainProgram : public rclcpp::Node
                 }
                 break;
             
-            case 2090:
+            case 2090: // start line following igen vi vil gerne have den til at køre til venstre i sammenfletningen
+                linefollow_msg.data = 5; // set linefollowing til og kør til venstre i sammenfletning
+                pub_linefollow_->publish(linefollow_msg)
+                sfc = 2100;
 
                 break;
             
             case 2100:
+                if (status_linefollow == 20) { //se hvornår linefollow rammer sammenfletning / skarp sving
+                    status_linefollow = 0;
+                    sfc = 2110;
+                }
 
                 break;
             
             case 2110:
+                linefollow_msg.data = 4;
+                pub_linefollow_->publish(linefollow_msg);
+                sfc = 2120;
 
                 break;
             
             case 2120:
+                if (status_linefollow == 20){ // når vi ser det næste cross burde vi være ved opgaven
+                    status_linefollow = 0;
+                    sfc = 2130; 
+                }
 
                 break;
             
@@ -2139,7 +2161,7 @@ class MainProgram : public rclcpp::Node
         rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr sub_linefollow_;
         rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr pub_linefollow_;
         int32_t status_linefollow = 0;
-        std_msgs::msg::Int32 lineFollow_msg;
+        std_msgs::msg::Int32 linefollow_msg;
 
 
 };
