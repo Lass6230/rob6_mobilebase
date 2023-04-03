@@ -68,7 +68,8 @@ class MainProgram : public rclcpp::Node
             pub_mobile_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/goal",10);
             sub_mobile_ = this->create_subscription<std_msgs::msg::Int32>("/goal_feedback", 10,std::bind(&MainProgram::subMobileStatus, this, _1), sub1_opt);
             
-
+            sub_linefollow_ = this->create_subscription<std_msgs::msg::Int32>("/lineStatus", 10,std::bind(&MainProgram::subLineStatus, this, _1), sub1_opt);
+            pub_linefollow_ = this->create_publisher<std_msgs::msg::Int32>("/cmd_lineFollow",10);
 
             
 
@@ -117,6 +118,10 @@ class MainProgram : public rclcpp::Node
         }
     
     private:
+        void subLineStatus(const std_msgs::msg::Int32 & msg){
+            status_linefollow = msg.data;
+        }
+
         void subMobileStatus(const std_msgs::msg::Int32 & msg){
             status_mobile = msg.data;
         }
@@ -2125,6 +2130,14 @@ class MainProgram : public rclcpp::Node
 
         // task 10 pose
         geometry_msgs::msg::PoseStamped task_10_pose;
+
+
+
+
+        // line follow
+        rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr sub_linefollow_;
+        rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr pub_linefollow_;
+        int32_t status_linefollow = 0;
 
 };
 
