@@ -3,6 +3,9 @@
 #include "nav_msgs/msg/odometry.hpp"
 #include "tf2_ros/transform_broadcaster.h"
 #include <iostream>
+#include <memory>
+using std::placeholders::_1;
+
 
 class OdomToTfNode : public rclcpp::Node
 {
@@ -13,8 +16,11 @@ public:
   : Node("odom_to_tf"), tf_broadcaster_(this)
   {
     // Create a subscriber to the /odom topic
-    odom_sub_ = create_subscription<nav_msgs::msg::Odometry>(
-      "odom", 1, std::bind(&OdomToTfNode::odom_callback, this, std::placeholders::_1));
+    // odom_sub_ = create_subscription<nav_msgs::msg::Odometry>(
+    //   "/odom", 1, std::bind(&OdomToTfNode::odom_callback, this, std::placeholders::_1));
+
+    odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
+      "/odom", 1, std::bind(&OdomToTfNode::odom_callback, this, _1));
     // Create a timer to publish the transform at a fixed frequency
     //tf_timer_ = create_wall_timer(std::chrono::milliseconds(50), std::bind(&OdomToTfNode::tf_callback, this));
   }
@@ -76,12 +82,12 @@ private:
   // }
 
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
-  rclcpp::TimerBase::SharedPtr tf_timer_;
+  //rclcpp::TimerBase::SharedPtr tf_timer_;
   nav_msgs::msg::Odometry::ConstSharedPtr odom_;
   tf2_ros::TransformBroadcaster tf_broadcaster_;
 };
 
-int main(int argc, char** argv)
+int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<OdomToTfNode>());

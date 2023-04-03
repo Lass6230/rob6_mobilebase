@@ -50,7 +50,8 @@ class NavigationClient(Node):
 
         # self.goal_reached = True
         # self.count = 0
-        # self.goal_in_progress = False
+        self.goal_recieved = False
+        self.goal_in_progress = False
         
 
     
@@ -83,6 +84,7 @@ class NavigationClient(Node):
 
 
     def send_goal(self, pose):
+        self.goal_recieved = True
         goal_pose = PoseStamped()
         goal_pose.header.frame_id = 'map'
         goal_pose.header.stamp = self.navigator.get_clock().now().to_msg()
@@ -94,7 +96,7 @@ class NavigationClient(Node):
 
         # sanity check a valid path exists
         # path = navigator.getPath(initial_pose, goal_pose)
-
+        self.goal_in_progress = True
         self.navigator.goToPose(goal_pose)
 
     def timer_callback(self):
@@ -115,7 +117,7 @@ class NavigationClient(Node):
                 # if Duration.from_msg(feedback.navigation_time) > Duration(seconds=18.0):
                 #     self.goal_pose.pose.position.x = -3.0
                 #     self.navigator.goToPose(self.goal_pose)
-        else:     
+        elif self.goal_recieved:     
 
             # Do something depending on the return code
             result = self.navigator.getResult()
@@ -129,6 +131,8 @@ class NavigationClient(Node):
                 print('Goal failed!')
             else:
                 print('Goal has an invalid return status!')
+
+            self.goal_recieved = False
 
         #navigator.lifecycleShutdown()
 
