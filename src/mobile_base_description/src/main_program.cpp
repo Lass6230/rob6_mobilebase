@@ -109,6 +109,7 @@ class MainProgram : public rclcpp::Node
                 // 3: Aktiver linefollowing hvor robotten i en sammenfletning kører til højre
                 // 4: Aktiver linefollowing hvor robotten laver et skarpt sving
                 // 5: Aktiver linefollowing hvor robotten i en sammenfletning kører til venstre
+                // 6: Sæt robotten igang når den venter på kommando
 
 
              ///////////// Line status og cmd koder ////////////////////////////
@@ -789,6 +790,8 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 2130:
+                linefollow_msg.data = 0; // sluk for line following så vi kan begynde at bruge navigation
+                pub_linefollow_->publish(linefollow_msg);
 
                 break;
 
@@ -1936,20 +1939,27 @@ class MainProgram : public rclcpp::Node
             //////////////////BEGIN Task 10 from case 8000-8999 ///////////////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            case 8000:
+            case 8000: // bruger vi lidaren til at se hvornår vi kan køre?
                 sfc = 8010;
                 break;
             
             case 8010: // start line follow
-
+                linefollow_msg.data = 2; // Start line following hvor den forsætter efter den mister linje
+                pub_linefollow_->publish(linefollow_msg);
+                sfc = 8020;
                 break;
             
             case 8020: // wait for line follow to be done
+                if (status_linefollow == 11){ // vent på at robotten ser linjen igen
+                status_linefollow = 0;
+                sfc = 8030;
 
+                }
                 break;
             
-            case 8030:
-
+            case 8030: // måske tilføje en måde at bestemme hvilken vej vi drejer i tilfælde af linjen er horizontal som den ville være i dette tilfælde
+                linefollow_msg.data = 1; // her slår vi normal line mode til igen så den vil prøve at finde linjen igen 
+                pub_linefollow_->publish(linefollow_msg);
                 break;
 
             case 8040:
@@ -1971,15 +1981,17 @@ class MainProgram : public rclcpp::Node
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             case 9000:
-
+                sfc = 9010;
                 break;
 
-            case 9010:
+            case 9010: 
 
                 break;
             
-            case 9020:
-
+            case 9020:// muligvis også lav en mode hvor robotten ikke laver error correction når den mister linjen hvis den kan følge linjen godt nok
+                linefollow_msg.data = 1; // tilføj en mpde hvor der kører fast af og ændre den her værdi accordingly
+                pub_linefollow_->publish(linefollow_msg);
+                sfc = 9020;
                 break;
             
             case 9030:
