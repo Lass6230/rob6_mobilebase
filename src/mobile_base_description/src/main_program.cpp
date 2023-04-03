@@ -671,6 +671,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 2050: // start line follower
+                
 
                 break;
             
@@ -2138,6 +2139,8 @@ class MainProgram : public rclcpp::Node
         rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr sub_linefollow_;
         rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr pub_linefollow_;
         int32_t status_linefollow = 0;
+        std_msgs::msg::Int32 lineFollow_msg;
+
 
 };
 
