@@ -70,8 +70,48 @@ class MainProgram : public rclcpp::Node
             sub_mobile_ = this->create_subscription<std_msgs::msg::Int32>("/goal_feedback", 10,std::bind(&MainProgram::subMobileStatus, this, _1), sub1_opt);
             
             sub_linefollow_ = this->create_subscription<std_msgs::msg::Int32>("/lineStatus", 10,std::bind(&MainProgram::subLineStatus, this, _1), sub1_opt);
-            
             pub_linefollow_ = this->create_publisher<std_msgs::msg::Int32>("/cmd_lineFollow", 10);
+            ///////////// Line status og cmd koder ////////////////////////////
+
+                //STATUS MED KOMMANDO NØDVENDIG
+                // 20: robotten har fundet en sammenfletning og venter på en kommando
+                // 30: Robotten har fundet et skarpt sving og venter på en komando
+
+                //STATUS UDEN KOMMANDO NØDVENDIG
+                // 90: Robotten har mistet linjen
+                
+                // Robottens status kode når den bare kører uden problemer
+                // de forskellige parameter bliver lagt sammen til en enkel kode alt efter hvad er aktiveret
+                // hvis linemode er aktiveret så vil statuskoden være et ulige tal
+                //
+                // 1: linefollowing aktiveret
+                // 10: forsæt fremad efter mistet linje aktiveret
+                // 12: Skarp sving aktiveret
+                // 14: Sammenfletning aktiveret
+                // 2: Kør til højre i sammenfeltning aktiveret
+
+                // Eksempel Kode:
+                // linefollowing aktiveret med sammenfletning og kør til højre aktiveret
+                // kode: 17
+                
+                // linefollowing aktiveret med sammenfletning og kør til venstre
+                // kode: 15
+
+                // linefollowing deaktiveret men sammenfletning og kør til venstre aktiveret 
+                // kode: 14
+
+
+
+                //CMD
+                // 0: Slå linefollowing fra
+                // 1: Aktiver linefollowing uden nogen skarpt sving og sammenfletning
+                // 2: Aktiver linefollowing hvor robotten fortsætter fremad efter den mister linjen istedet for at finde linjen igen
+                // 3: Aktiver linefollowing hvor robotten i en sammenfletning kører til højre
+                // 4: Aktiver linefollowing hvor robotten laver et skarpt sving
+                // 5: Aktiver linefollowing hvor robotten i en sammenfletning kører til venstre
+
+
+             ///////////// Line status og cmd koder ////////////////////////////
             
 
             // INIT poseStamped values for
