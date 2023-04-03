@@ -89,6 +89,7 @@ class MainProgram : public rclcpp::Node
                 // 12: Skarp sving aktiveret
                 // 14: Sammenfletning aktiveret
                 // 2: Kør til højre i sammenfeltning aktiveret
+                // 90: tabt linen
 
                 // Eksempel Kode:
                 // linefollowing aktiveret med sammenfletning og kør til højre aktiveret
@@ -157,6 +158,13 @@ class MainProgram : public rclcpp::Node
             task_10_pose.pose.position.x = 0.0;
             task_10_pose.pose.position.y = 0.0;
             task_10_pose.pose.orientation = tf2::toMsg(quat_task10);
+
+            // init task_4_pose
+            tf2::Quaternion quat_task4;
+            quat_task4.setRPY(0.0, 0.0, 0.0);
+            task_4_pose.pose.position.x = 0.0;
+            task_4_pose.pose.position.y = 0.0;
+            task_4_pose.pose.orientation = tf2::toMsg(quat_task4);
         }
     
     private:
@@ -713,7 +721,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 2050: // start line follower
-                lineFollow_msg.data = 1;
+                linefollow_msg.data = 1;
                 pub_linefollow_->publish(linefollow_msg);
                 sfc= 2060;
                 break;
@@ -761,7 +769,7 @@ class MainProgram : public rclcpp::Node
             
             case 2090: // start line following igen vi vil gerne have den til at køre til venstre i sammenfletningen
                 linefollow_msg.data = 5; // set linefollowing til og kør til venstre i sammenfletning
-                pub_linefollow_->publish(linefollow_msg)
+                pub_linefollow_->publish(linefollow_msg);
                 sfc = 2100;
 
                 break;
@@ -2180,6 +2188,185 @@ class MainProgram : public rclcpp::Node
             //////////////////END Drive with navigation to task 4 case 14000-14999 //////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+            ////////////////// BEGIN  task 4 case 15000-15999 ///////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            case 15000:
+                sfc = 15010;
+                break;
+            
+            case 15010:// start the line follower
+                linefollow_msg.data = 1;
+                pub_linefollow_->publish(linefollow_msg);
+                sfc= 15020;
+                break;
+            
+            case 15020: // waitting for robot to detect udflætningen tæt på task 5
+                if (status_linefollow == 20){ //line following har fundet en sammenfletning eller skarpt sving og venter på en svar fra ros
+                    status_linefollow = 0;
+                    linefollow_msg.data = 0;
+                    pub_linefollow_->publish(linefollow_msg);
+                    sfc = 15030;
+                }
+                m_lastTime2 = m_clock->now().seconds();
+                if ((m_lastTime2-m_lastTime1)> 90.0){
+                    RCLCPP_INFO(this->get_logger(),"timed out");
+                }
+                break;
+            
+            case 15030: 
+                sfc = 15999;
+                break;
+            
+            case 15040:
+
+                break;
+            
+
+
+            case 15999:
+                sfc = 16000;
+                break;
+            ////////////////// END task 4 case 15000-15999 ///////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            /// MAYBE 
+            ////////////////// BEGIN  task 5 case 16000-16999 ///////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            case 16000:
+                sfc = 16999;
+                break;
+            
+            case 16010:
+                
+                break;
+            
+            case 16020:
+
+                break;
+
+            case 16999:
+                sfc = 17000;
+                break;
+            /// MAYBE
+            ////////////////// END  task 5 case 16000-16999 ///////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+            ////////////////// BEGIN drive down ramp case 17000-17999 ///////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            case 17000:
+                sfc = 17010;
+                break;
+            
+            case 17010: // send command to linefollower to begin driveing ige ud
+                linefollow_msg.data = 1;
+                pub_linefollow_->publish(linefollow_msg);
+                sfc= 17020;
+                break;
+            
+            case 17020: // waitting for the lige follower to detect the samflætningen before task 15
+                if (status_linefollow == 17){ 
+                    status_linefollow = 0;
+                    linefollow_msg.data = 0;
+                    pub_linefollow_->publish(linefollow_msg);
+                    sfc = 17030;
+                }
+                m_lastTime2 = m_clock->now().seconds();
+                if ((m_lastTime2-m_lastTime1)> 90.0){
+                    RCLCPP_INFO(this->get_logger(),"timed out");
+                }
+                break;
+            
+            case 17030:
+                sfc = 17999;
+                break;
+
+            case 17999:
+                sfc = 18000;
+                break;
+            ////////////////// END drive down ramp case 17000-17999 ///////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+             ////////////////// BEGIN task 15 case 18000-18999 ///////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            case 18000:
+                sfc = 18010;
+                break;
+
+            case 18010: // publish to robot arm to move its arm down to be able to touch buttom
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.29200,0.0,-0.12,0.0,1.45,0.0};
+                pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+                sfc = 18020;
+                break;
+            
+            case 18020: // waitting for robot to go to pose
+                if(robot_status == 1){ // check if robot is done
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 18020;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    
+                    sfc = 18010; // go back and resend the robot cmd
+                    if(robot_attempts == 5){
+                       
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                }
+                break;
+            
+            case 18030: // send to begin the linefollower
+                linefollow_msg.data = 1;
+                pub_linefollow_->publish(linefollow_msg);
+                sfc= 18040;
+                break;
+
+            case 18040: // waitting to line follower is done
+                if (status_linefollow == 20){ //line following har fundet en sammenfletning eller skarpt sving og venter på en svar fra ros
+                    status_linefollow = 0;
+                    linefollow_msg.data = 0;
+                    pub_linefollow_->publish(linefollow_msg);
+                    sfc = 18050;
+                }
+                m_lastTime2 = m_clock->now().seconds();
+                if ((m_lastTime2-m_lastTime1)> 90.0){
+                    RCLCPP_INFO(this->get_logger(),"timed out");
+                }
+                break;
+            
+            case 18050:
+                sfc = 18999;
+                break;
+            
+            
+            
+            case 18999: 
+                
+                break;
+            ////////////////// END task 15 case 18000-18999 ///////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
             default:
                 break;
             }
