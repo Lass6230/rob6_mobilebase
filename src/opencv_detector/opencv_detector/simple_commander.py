@@ -32,6 +32,7 @@ class NavigationClient(Node):
         super().__init__('navigation_client')
         #self._action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
         self.navigator = BasicNavigator()
+        self.navigator.waitUntilNav2Active()
         self._goal_subscriber = self.create_subscription(
             PoseStamped,
             '/goal',
@@ -43,14 +44,14 @@ class NavigationClient(Node):
             '/navigation_feedback',
             10
         )
-        # timer_period = 0.5  # seconds
-        # self.timer = self.create_timer(timer_period, self.timer_callback)
-        # self.i = 0
+        timer_period = 0.5  # seconds
+        self.timer = self.create_timer(timer_period, self.timer_callback)
+        self.i = 0
 
         # self.goal_reached = True
         # self.count = 0
         # self.goal_in_progress = False
-        self.navigator.waitUntilNav2Active() #in custom robot_navigator it will wait for 10 secs for an init pose
+        
 
     
 
@@ -83,20 +84,23 @@ class NavigationClient(Node):
 
     def send_goal(self, pose):
         goal_pose = PoseStamped()
-        #goal_pose.header.frame_id = 'map'
-        #goal_pose.header.stamp = self.navigator.get_clock().now().to_msg()
-        goal_pose = pose
+        goal_pose.header.frame_id = 'map'
+        goal_pose.header.stamp = self.navigator.get_clock().now().to_msg()
+        goal_pose.pose = pose.pose
+      
         # goal_pose.pose.position.x = -2.0
         # goal_pose.pose.position.y = -0.5
         # goal_pose.pose.orientation.w = 1.0
 
         # sanity check a valid path exists
         # path = navigator.getPath(initial_pose, goal_pose)
-        self.navigator.goToPose(pose)
+
+        self.navigator.goToPose(goal_pose)
 
     def timer_callback(self):
+        i = 0
         if not self.navigator.isTaskComplete():
-            
+     
             feedback = self.navigator.getFeedback()
             
             print('Estimated time of arrival: ' + '{0:.0f}'.format(
@@ -107,18 +111,18 @@ class NavigationClient(Node):
             if Duration.from_msg(feedback.navigation_time) > Duration(seconds=600.0):
                 self.navigator.cancelTask()
 
-            # Some navigation request change to demo preemption
-            if Duration.from_msg(feedback.navigation_time) > Duration(seconds=18.0):
-                self.goal_pose.pose.position.x = -3.0
-                self.navigator.goToPose(self.goal_pose)
-            
-            
-            return
-        
-        else:
+                # Some navigation request change to demo preemption
+                # if Duration.from_msg(feedback.navigation_time) > Duration(seconds=18.0):
+                #     self.goal_pose.pose.position.x = -3.0
+                #     self.navigator.goToPose(self.goal_pose)
+        else:     
+
+            # Do something depending on the return code
             result = self.navigator.getResult()
+            
             if result == TaskResult.SUCCEEDED:
                 print('Goal succeeded!')
+                # self.feedback_publisher.publish(1)
             elif result == TaskResult.CANCELED:
                 print('Goal was canceled!')
             elif result == TaskResult.FAILED:
