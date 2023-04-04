@@ -63,7 +63,7 @@ class MainProgram : public rclcpp::Node
             sub_camera_aruco_ = this->create_subscription<std_msgs::msg::Int8>("/status_aruco",10,std::bind(&MainProgram::subArucoStatus, this, _1), sub1_opt);
             sub_camera_ball_ = this->create_subscription<std_msgs::msg::Int8>("/status_ball",10,std::bind(&MainProgram::subBallStatus, this, _1), sub1_opt);
             pub_camera_aruco_ = this->create_publisher<std_msgs::msg::Bool>("/search_aruco",10);
-            pub_camera_ball_ = this->create_publisher<std_msgs::msg::Bool>("/search_golfball",10);
+            pub_camera_ball_ = this->create_publisher<std_msgs::msg::Int8>("/search_golfball",10);
 
             pub_mobile_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/goal",10);
             pub_mobile_relative_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/goal_relative",10);
@@ -411,7 +411,7 @@ class MainProgram : public rclcpp::Node
                 aruco_msg.data = false;
                 pub_camera_aruco_->publish(aruco_msg);
                 ball_msg.data = false;
-                pub_camera_ball_->publish(aruco_msg);
+                pub_camera_ball_->publish(ball_msg);
                 status_aruco = 0;
                 status_ball = 0;
                 
@@ -470,7 +470,7 @@ class MainProgram : public rclcpp::Node
                 robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};
                 pub_robot_->publish(robot_msg);
                 ball_msg.data = false;
-                pub_camera_ball_->publish(aruco_msg);
+                pub_camera_ball_->publish(ball_msg);
                 aruco_msg.data = false;
                 pub_camera_aruco_->publish(aruco_msg);
                 status_ball = 0;
@@ -564,7 +564,7 @@ class MainProgram : public rclcpp::Node
                 aruco_msg.data = false; // setting both detectots off
                 pub_camera_aruco_->publish(aruco_msg); // setting both detectots off
                 ball_msg.data = false; // setting both detectots off
-                pub_camera_ball_->publish(aruco_msg); // setting both detectots off
+                pub_camera_ball_->publish(ball_msg); // setting both detectots off
                 status_aruco = 0; // setting detecttor status to 0
                 status_ball = 0; // setting detecttor status to 0
 
@@ -833,8 +833,8 @@ class MainProgram : public rclcpp::Node
 
                 aruco_msg.data = false; 
                 pub_camera_aruco_->publish(aruco_msg); // setting the aruco camera off
-                ball_msg.data = false;
-                pub_camera_ball_->publish(aruco_msg); // setting the ball camera off
+                ball_msg.data = 0;
+                pub_camera_ball_->publish(ball_msg); // setting the ball camera off
                 status_aruco = 0;
                 status_ball = 0;
 
@@ -890,7 +890,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 4050: // start søgning
-                ball_msg.data = true;
+                ball_msg.data = 2;
                 pub_camera_ball_->publish(ball_msg); // setting the ball camera off
                 status_ball = 0;
 
@@ -908,8 +908,8 @@ class MainProgram : public rclcpp::Node
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out, No golfball found");
-                    ball_msg.data = false;
-                    pub_camera_ball_->publish(aruco_msg); // setting the ball camera off
+                    ball_msg.data = 0;
+                    pub_camera_ball_->publish(ball_msg); // setting the ball camera off
                    
                     status_ball = 0;
                     
@@ -950,7 +950,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 4090:// start søgning
-                ball_msg.data = true;
+                ball_msg.data = 2;
                 pub_camera_ball_->publish(ball_msg); // setting the ball camera off
                 status_ball = 0;
                 sfc = 4100;
@@ -966,8 +966,8 @@ class MainProgram : public rclcpp::Node
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out, No golfball found");
-                    ball_msg.data = false;
-                    pub_camera_ball_->publish(aruco_msg); // setting the ball camera off
+                    ball_msg.data = 0;
+                    pub_camera_ball_->publish(ball_msg); // setting the ball camera off
                    
                     status_ball = 0;
                     
@@ -1010,7 +1010,7 @@ class MainProgram : public rclcpp::Node
                 break;
 
             case 4130: // start søgning
-                ball_msg.data = true;
+                ball_msg.data = 2;
                 pub_camera_ball_->publish(ball_msg); // setting the ball camera off
                 status_ball = 0;
 
@@ -1028,8 +1028,8 @@ class MainProgram : public rclcpp::Node
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out, No golfball found");
-                    ball_msg.data = false;
-                    pub_camera_ball_->publish(aruco_msg); // setting the ball camera off
+                    ball_msg.data = 0;
+                    pub_camera_ball_->publish(ball_msg); // setting the ball camera off
                    
                     status_ball = 0;
                     
@@ -1071,7 +1071,7 @@ class MainProgram : public rclcpp::Node
                 break;
 
             case 4170:
-                ball_msg.data = true;
+                ball_msg.data = 2;
                 pub_camera_ball_->publish(ball_msg); // setting the ball camera off
                 status_ball = 0;
 
@@ -1090,8 +1090,8 @@ class MainProgram : public rclcpp::Node
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out, No golfball found");
-                    ball_msg.data = false;
-                    pub_camera_ball_->publish(aruco_msg); // setting the ball camera off
+                    ball_msg.data = 0;
+                    pub_camera_ball_->publish(ball_msg); // setting the ball camera off
                    
                     status_ball = 0;
                     
@@ -1133,7 +1133,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 4210: // send command to søg
-                ball_msg.data = true;
+                ball_msg.data = 2;
                 pub_camera_ball_->publish(ball_msg); // setting the ball camera off
                 status_ball = 0;
 
@@ -1151,8 +1151,8 @@ class MainProgram : public rclcpp::Node
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out, No golfball found");
-                    ball_msg.data = false;
-                    pub_camera_ball_->publish(aruco_msg); // setting the ball camera off
+                    ball_msg.data = 0;
+                    pub_camera_ball_->publish(ball_msg); // setting the ball camera off
                    
                     status_ball = 0;
                     
@@ -1195,7 +1195,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 4260: // send command to søg
-                ball_msg.data = true;
+                ball_msg.data = 2;
                 pub_camera_ball_->publish(ball_msg); // setting the ball camera off
                 status_ball = 0;
 
@@ -1213,8 +1213,8 @@ class MainProgram : public rclcpp::Node
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out, No golfball found");
-                    ball_msg.data = false;
-                    pub_camera_ball_->publish(aruco_msg); // setting the ball camera off
+                    ball_msg.data = 0;
+                    pub_camera_ball_->publish(ball_msg); // setting the ball camera off
                    
                     status_ball = 0;
                     
@@ -1331,7 +1331,7 @@ class MainProgram : public rclcpp::Node
                 aruco_msg.data = false; 
                 pub_camera_aruco_->publish(aruco_msg); // setting the aruco camera off
                 ball_msg.data = false;
-                pub_camera_ball_->publish(aruco_msg); // setting the ball camera off
+                pub_camera_ball_->publish(ball_msg); // setting the ball camera off
                 status_aruco = 0;
                 status_ball = 0;
 
@@ -1638,7 +1638,7 @@ class MainProgram : public rclcpp::Node
                 robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};
                 pub_robot_->publish(robot_msg);
                 ball_msg.data = false;
-                pub_camera_ball_->publish(aruco_msg);
+                pub_camera_ball_->publish(ball_msg);
                 status_ball = 0;
 
                 m_lastTime1 = m_clock->now().seconds();
@@ -2398,11 +2398,11 @@ class MainProgram : public rclcpp::Node
         rclcpp::Subscription<std_msgs::msg::Int8>::SharedPtr sub_camera_aruco_;
         rclcpp::Subscription<std_msgs::msg::Int8>::SharedPtr sub_camera_ball_;
         rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr pub_camera_aruco_;
-        rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr pub_camera_ball_;
+        rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr pub_camera_ball_;
         int32_t status_aruco = 0;
         int32_t status_ball = 0;
         std_msgs::msg::Bool aruco_msg;
-        std_msgs::msg::Bool ball_msg;
+        std_msgs::msg::Int8 ball_msg;
 
 
         rclcpp::TimerBase::SharedPtr timer_;

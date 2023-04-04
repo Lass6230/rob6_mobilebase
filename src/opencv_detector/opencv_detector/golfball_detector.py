@@ -14,7 +14,7 @@ from tf2_ros import TransformBroadcaster
 
 class ImageSubscriberNode(Node):
     
-    search = True
+    search = 1
 
     def __init__(self):
         super().__init__('image_subscriber_node')
@@ -22,7 +22,7 @@ class ImageSubscriberNode(Node):
         self.image_sub = message_filters.Subscriber(self, Image,'/camera/color/image_raw')
         self.depth_sub = message_filters.Subscriber(self, Image,'/camera/aligned_depth_to_color/image_raw')
         self.tf_broadcaster = TransformBroadcaster(self)
-        self.subscription = self.create_subscription(Bool, '/search_golfball', self.start_callback, 10)
+        self.subscription = self.create_subscription(Int8, '/search_golfball', self.start_callback, 10)
         self.subscription
         self.status_publisher = self.create_publisher(Int8, '/status_ball',10)
         self.found_ball_counter = 0
@@ -38,7 +38,7 @@ class ImageSubscriberNode(Node):
 
 
     def image_callback(self, rgb_image, depth_image):
-        if self.search:
+        if self.search == 1 or self.search == 2:
             cv_image = self.bridge.imgmsg_to_cv2(rgb_image, desired_encoding='passthrough')
             cv_depth = self.bridge.imgmsg_to_cv2(depth_image, desired_encoding="passthrough")
             self.process_image(cv_image, cv_depth)
@@ -58,22 +58,43 @@ class ImageSubscriberNode(Node):
     def process_image(self, cv_image, cv_depth):
         cv_image = cv2.GaussianBlur(cv_image, (11, 11), 0)
         # # Blue
-        frame_HSV = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
+        
+        #frame_HSV = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
         #frame_threshold_blue = cv2.inRange(frame_HSV, (14, 148, 122), (23, 255, 255))
-        frame_threshold_blue = cv2.inRange(frame_HSV, (17, 156, 54), (255, 255, 255))#(14, 97, 77), (24, 255, 255)
+        #frame_threshold_blue = cv2.inRange(frame_HSV, (17, 156, 54), (255, 255, 255))#(14, 97, 77), (24, 255, 255)
         #cv2.imshow("blue", frame_threshold_blue)
          
-        # Green
-        frame_HSV = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
-        frame_threshold_green = cv2.inRange(frame_HSV, (0, 78, 0), (80, 255, 255)) #(35, 72, 89), (48, 255, 255)
+       
         #cv2.imshow("green", frame_threshold_green)
+        if self.search == 1:
+            # # Yellow
+            frame_HSV = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
+            frame_threshold_yellow = cv2.inRange(frame_HSV, (54, 41, 149), (94, 220, 255))
+            
+            # Green
+            frame_HSV = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
+            frame_threshold_green = cv2.inRange(frame_HSV, (0, 78, 0), (80, 255, 255))
+        
+            # red
+            frame_HSV = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
+            frame_threshold_red = cv2.inRange(frame_HSV, (104, 132, 184), (186, 255, 220))
 
-        # # Yellow
-        frame_HSV = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
-        frame_threshold_yellow = cv2.inRange(frame_HSV, (54, 41, 149), (94, 220, 255))
+            frame_all = frame_threshold_green + frame_threshold_yellow + frame_threshold_red# + frame_threshold_blue
+        elif self.search == 2:
+
+            # orange
+            frame_HSV = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
+            frame_threshold_orange = cv2.inRange(frame_HSV, (90, 158, 193), (255, 255, 255))
+
+            # pink
+            frame_HSV = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
+            frame_threshold_pink = cv2.inRange(frame_HSV, (113, 22, 129), (255, 110, 255))
+
+            frame_all = frame_threshold_pink + frame_threshold_orange
+        
         #cv2.imshow("yellow", frame_threshold_yellow)
 
-        frame_all = frame_threshold_green + frame_threshold_yellow + frame_threshold_blue
+        #frame_all = frame_threshold_green + frame_threshold_yellow + frame_threshold_blue
 
         blur = self.post_process(frame_all, "green")
 
@@ -101,7 +122,7 @@ class ImageSubscriberNode(Node):
                 # for k in blur[0,:]:
                 #     for j in blur[:,k]:
                 #         count +=1
-                if radius_i < 80 and radius_i >36:
+                if radius_i < 80 and radius_i >30:
                     if radius_i + y < 480 and radius_i + x < 640:
 
                         for k in range(radius_i):
