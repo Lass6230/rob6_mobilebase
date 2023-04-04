@@ -92,7 +92,7 @@ def generate_launch_description():
     # Declare the launch arguments
     declare_namespace_cmd = DeclareLaunchArgument(
         'namespace',
-        default_value='nav_stack', #''
+        default_value='', #''
         description='Top-level namespace')
 
     declare_use_namespace_cmd = DeclareLaunchArgument(
