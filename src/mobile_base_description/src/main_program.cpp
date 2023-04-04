@@ -1201,7 +1201,7 @@ class MainProgram : public rclcpp::Node
                     
                     sfc = 4240; // go back and resend the robot cmd
                     if(robot_attempts == 5){
-                       // sfc = 6030;
+                       
                        RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
 
                     }
@@ -1249,7 +1249,18 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 4300: // ball found long look
-
+                transform_pose = tf_buffer_->lookupTransform(
+                    "workspace_center", "ball",
+                    tf2::TimePointZero);
+                target_pose.pose.position.x = transform_pose.transform.translation.x;
+                target_pose.pose.position.y = transform_pose.transform.translation.y;
+                
+                tf2::fromMsg(transform_pose.transform.rotation, quat_tf_lookup);
+                
+                matrix.setRotation(quat_tf_lookup);
+                matrix.getRPY(rot_r_lookup, rot_p_lookup, rot_y_lookup);
+                quat_tf_lookup.setRPY(0.0,0.0,rot_y_lookup);
+                target_pose.pose.orientation = tf2::toMsg(quat_tf_lookup);
                 break;
 
 
@@ -1333,7 +1344,7 @@ class MainProgram : public rclcpp::Node
                 if(robot_status == 1){
                     robot_status = 0;
                     robot_attempts = 0;
-                    sfc = 4680;   //4660 /// husk sæt rigitgt
+                    sfc = 4660;   //4660 /// husk sæt rigitgt
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
@@ -2701,6 +2712,9 @@ class MainProgram : public rclcpp::Node
         rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr sub_mobile_;
         
         int32_t status_mobile = 0;
+        double rot_r_lookup{}, rot_p_lookup{}, rot_y_lookup{};
+        tf2::Quaternion quat_tf_lookup;
+        tf2::Matrix3x3 matrix;
 
         /// the 3 packages trolly pose, make as vector
         geometry_msgs::msg::PoseStamped trolly_pose[3]; 
