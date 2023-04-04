@@ -119,10 +119,15 @@ class MainProgram : public rclcpp::Node
             // INIT poseStamped values for
             tf2::Quaternion quat_trolly[3];
 
+            //gobal pose for the wall diretly outside group room in maps/0_04res/map.pgm
             quat_trolly[0].setRPY(0.0, 0.0, 0.0);
-            trolly_pose[0].pose.position.x = 0.0;
-            trolly_pose[0].pose.position.y = 0.0;
-            trolly_pose[0].pose.orientation = tf2::toMsg(quat_trolly[0]);
+            trolly_pose[0].pose.position.x = 0.88;
+            trolly_pose[0].pose.position.y = 1.13;
+            trolly_pose[0].pose.orientation.z = 0.77;
+            trolly_pose[0].pose.orientation.w = 0.62; //tf2::toMsg(quat_trolly[0]);
+
+            //gobal pose for the wall diretly outside group room in maps/0_04res/map.pgm
+
 
             quat_trolly[1].setRPY(0.0, 0.0, 0.0);
             trolly_pose[1].pose.position.x = 0.0;

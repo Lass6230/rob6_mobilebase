@@ -48,14 +48,7 @@ def generate_launch_description():
     mobile_base_dir = get_package_share_directory('mobile_base_description')
     launch_dir = os.path.join(bringup_dir, 'launch')
 
-
-    # launch_file_dir = os.path.join(get_package_share_directory('turtlebot3_gazebo'), 'launch')
-
-    x_pose = LaunchConfiguration('x_pose', default='-2.0')
-    y_pose = LaunchConfiguration('y_pose', default='1.0')
-
     lifecycle_nodes = ['filter_mask_server', 'costmap_filter_info_server']
-
     # Create the launch configuration variables
     slam = LaunchConfiguration('slam')
     namespace = LaunchConfiguration('namespace')
@@ -66,14 +59,8 @@ def generate_launch_description():
     params_file = LaunchConfiguration('params_file')
     keepout_params_file = LaunchConfiguration('keepout_params_file')
     autostart = LaunchConfiguration('autostart')
-
-    # Launch configuration variables specific to simulation
     rviz_config_file = LaunchConfiguration('rviz_config_file')
-    use_simulator = LaunchConfiguration('use_simulator')
-    use_robot_state_pub = LaunchConfiguration('use_robot_state_pub')
     use_rviz = LaunchConfiguration('use_rviz')
-    headless = LaunchConfiguration('headless')
-    world = LaunchConfiguration('world')
 
     # Map fully qualified names to relative ones so the node's namespace can be prepended.
     # In case of the transforms (tf), currently, there doesn't seem to be a better alternative
@@ -90,12 +77,12 @@ def generate_launch_description():
     # Declare the launch arguments
     declare_namespace_cmd = DeclareLaunchArgument(
         'namespace',
-        default_value='nav2_stack', #''
+        default_value='', #''
         description='Top-level namespace')
 
     declare_use_namespace_cmd = DeclareLaunchArgument(
         'use_namespace',
-        default_value='True', #true 
+        default_value='false', #true 
         description='Whether to apply a namespace to the navigation stack')
 
     declare_slam_cmd = DeclareLaunchArgument(
@@ -103,15 +90,25 @@ def generate_launch_description():
         default_value='False', #False
         description='Whether run a SLAM')
 
+    # declare_map_yaml_cmd = DeclareLaunchArgument(
+    #     'map',
+    #     default_value=os.path.join(
+    #         mobile_base_dir, 'maps/0_04res/headless', 'map.yaml'),
+    #     description='Full path to map file to load')
+    
+    # declare_mask_yaml_file_cmd = DeclareLaunchArgument(
+    #     'mask',
+    #     default_value=os.path.join(mobile_base_dir, 'maps/0_04res/headless', 'map_keepout.yaml'),
+    #     description='Full path to filter mask yaml file to load')
     declare_map_yaml_cmd = DeclareLaunchArgument(
         'map',
         default_value=os.path.join(
-            mobile_base_dir, 'maps/0_04res/headless', 'map.yaml'),
+            mobile_base_dir, 'maps/0_04res', 'map.yaml'),
         description='Full path to map file to load')
     
     declare_mask_yaml_file_cmd = DeclareLaunchArgument(
         'mask',
-        default_value=os.path.join(mobile_base_dir, 'maps/0_04res/headless', 'map_keepout.yaml'),
+        default_value=os.path.join(mobile_base_dir, 'maps/0_04res', 'map_keepout.yaml'),
         description='Full path to filter mask yaml file to load')
     
     declare_use_sim_time_cmd = DeclareLaunchArgument(
@@ -151,7 +148,7 @@ def generate_launch_description():
 
     declare_use_rviz_cmd = DeclareLaunchArgument(
         'use_rviz',
-        default_value='False',
+        default_value='True',
         description='Whether to start RVIZ')
 
     declare_simulator_cmd = DeclareLaunchArgument(
@@ -233,51 +230,13 @@ def generate_launch_description():
 
     )
 
-    # # Publish arbitrary joint angles
-    # joint_state_publisher_node = launch_ros.actions.Node(
-    #     package='joint_state_publisher',
-    #     executable='joint_state_publisher',
-    #     name='joint_state_publisher',
-    #     #condition=launch.conditions.UnlessCondition(LaunchConfiguration('gui'))
-    # )
 
 
-    odomZOH = Node(
-        package='mobile_base_description',
-        executable='odom_rebroadcaster',
-        name='odom_rebroadcaster',
-        output='screen'
-    )
 
-   
-    # # Specify the actions
-    # start_gazebo_server_cmd = ExecuteProcess(
-    #     condition=IfCondition(use_simulator),
-    #     cmd=['gzserver', '-s', 'libgazebo_ros_init.so',  '-s', 'libgazebo_ros_factory.so', world],
-    #     cwd=[launch_dir], output='screen')
-
-    # start_gazebo_client_cmd = ExecuteProcess(
-    #     condition=IfCondition(PythonExpression(
-    #         [use_simulator, ' and not ', headless])),
-    #     cmd=['gzclient'],
-    #     cwd=[launch_dir], output='screen')
-
-    urdf = os.path.join(bringup_dir, 'urdf', 'turtlebot3_waffle.urdf')
-
-    start_robot_state_publisher_cmd = Node(
-        condition=IfCondition(use_robot_state_pub),
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        name='robot_state_publisher',
-        namespace=namespace,
-        output='screen',
-        parameters=[{'use_sim_time': use_sim_time}],
-        remappings=remappings,
-        arguments=[urdf])
 
     rviz_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(launch_dir, 'rviz_launch.py')),
+            os.path.join(mobile_base_dir, 'launch/rviz_launch.py')),
         condition=IfCondition(use_rviz),
         launch_arguments={'namespace': '',
                           'use_namespace': 'False',
@@ -295,21 +254,20 @@ def generate_launch_description():
                           'autostart': autostart}.items())
     
 
-    # spawn_turtlebot_cmd = IncludeLaunchDescription(
-    #     PythonLaunchDescriptionSource(
-    #         os.path.join(launch_file_dir, 'spawn_turtlebot3.launch.py')
-    #     ),
-    #     launch_arguments={
-    #         'x_pose': x_pose,
-    #         'y_pose': y_pose
-    #     }.items()
-    # )
 
-    # demo_cmd = Node( ##
-    #     package='opencv_detector',
-    #     executable='simple_commander',
-    #     emulate_tty=True, #True
-    #     output='screen')
+
+    odomZOH = Node(
+        package='mobile_base_description',
+        executable='odom_rebroadcaster',
+        name='odom_rebroadcaster',
+        output='screen'
+    )
+
+    simple_commander = Node( ##
+        package='opencv_detector',
+        executable='simple_commander',
+        emulate_tty=True, #True
+        output='screen')
 
 
     
@@ -332,22 +290,13 @@ def generate_launch_description():
     ld.add_action(declare_use_robot_state_pub_cmd)
     ld.add_action(declare_use_rviz_cmd)
     ld.add_action(declare_simulator_cmd)
-    #ld.add_action(declare_world_cmd)
 
     
     ld.add_action(odomZOH)
     ld.add_action(robot_state_publisher)
-    # Add any conditioned actions
-    # ld.add_action(start_gazebo_server_cmd)
-    # ld.add_action(start_gazebo_client_cmd)
-
-    # Add the actions to launch all of the navigation nodes
-    #ld.add_action(start_robot_state_publisher_cmd)
-    ld.add_action(rviz_cmd)
+    #ld.add_action(rviz_cmd)
 
     ld.add_action(bringup_cmd)
-
-    #ld.add_action(spawn_turtlebot_cmd)
     
 
     ld.add_action(declare_keepout_params_file_cmd)
@@ -358,7 +307,7 @@ def generate_launch_description():
     ld.add_action(start_costmap_filter_info_server_cmd)
 
 
-    #ld.add_action(demo_cmd) ##
+    ld.add_action(simple_commander) 
 
     return ld
 

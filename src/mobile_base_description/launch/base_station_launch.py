@@ -85,7 +85,6 @@ def generate_launch_description():
     #              https://github.com/ros2/launch_ros/issues/56
 
 
-
     remappings = [('/tf', 'tf'),
                   ('/tf_static', 'tf_static')]
 
@@ -97,12 +96,12 @@ def generate_launch_description():
 
     declare_use_namespace_cmd = DeclareLaunchArgument(
         'use_namespace',
-        default_value='True', #true
+        default_value='True', 
         description='Whether to apply a namespace to the navigation stack')
 
     declare_slam_cmd = DeclareLaunchArgument(
         'slam',
-        default_value='False', #False
+        default_value='False', 
         description='Whether run a SLAM')
 
     declare_map_yaml_cmd = DeclareLaunchArgument(
@@ -161,17 +160,6 @@ def generate_launch_description():
         default_value='False',
         description='Whether to execute gzclient)')
 
-    # declare_world_cmd = DeclareLaunchArgument(
-    #     'world',
-    #     # TODO(orduno) Switch back once ROS argument passing has been fixed upstream
-    #     #              https://github.com/ROBOTIS-GIT/turtlebot3_simulations/issues/91
-    #     # default_value=os.path.join(get_package_share_directory('turtlebot3_gazebo'),
-    #     # worlds/turtlebot3_worlds/waffle.model')
-    #     default_value=os.path.join(
-    #         turtlebotgaz,
-    #         'worlds',
-    #         'turtlebot3_house.world'),
-    #     description='Full path to world model file to load')
     
     param_substitutions = {
         'use_sim_time': use_sim_time,
@@ -277,13 +265,6 @@ def generate_launch_description():
     #     remappings=remappings,
     #     arguments=[urdf])
 
-    rviz_cmd = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(launch_dir, 'rviz_launch.py')),
-        condition=IfCondition(use_rviz),
-        launch_arguments={'namespace': '',
-                          'use_namespace': 'False',
-                          'rviz_config': rviz_config_file}.items())
 
     bringup_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -313,6 +294,15 @@ def generate_launch_description():
         emulate_tty=True, #True
         output='screen')
 
+    rviz_cmd = IncludeLaunchDescription(
+    PythonLaunchDescriptionSource(
+        os.path.join(mobile_base_dir, 'launch/rviz_launch.py')),
+    condition=IfCondition(use_rviz),
+    launch_arguments={'namespace': '',
+                        'use_namespace': 'False',
+                        'rviz_config': rviz_config_file}.items()
+)
+
 
     
 
@@ -324,10 +314,10 @@ def generate_launch_description():
     ld.add_action(declare_namespace_cmd)
     ld.add_action(declare_use_namespace_cmd)
     # ld.add_action(declare_slam_cmd)
-    ld.add_action(declare_map_yaml_cmd)
+    #ld.add_action(declare_map_yaml_cmd)
     ld.add_action(declare_use_sim_time_cmd)
-    ld.add_action(declare_params_file_cmd)
-    ld.add_action(declare_autostart_cmd)
+    #ld.add_action(declare_params_file_cmd)
+    #ld.add_action(declare_autostart_cmd)
 
     ld.add_action(declare_rviz_config_file_cmd)
     # ld.add_action(declare_use_simulator_cmd)
@@ -351,12 +341,12 @@ def generate_launch_description():
     # #ld.add_action(spawn_turtlebot_cmd)
     
 
-    ld.add_action(declare_keepout_params_file_cmd)
-    ld.add_action(declare_mask_yaml_file_cmd)
+    # ld.add_action(declare_keepout_params_file_cmd)
+    # ld.add_action(declare_mask_yaml_file_cmd)
 
-    ld.add_action(start_lifecycle_manager_cmd)
-    ld.add_action(start_map_server_cmd)
-    ld.add_action(start_costmap_filter_info_server_cmd)
+    # ld.add_action(start_lifecycle_manager_cmd)
+    # ld.add_action(start_map_server_cmd)
+    # ld.add_action(start_costmap_filter_info_server_cmd)
 
 
     #ld.add_action(demo_cmd) ##
