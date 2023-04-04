@@ -22,7 +22,7 @@ class ImageSubscriberNode(Node):
         self.image_sub = message_filters.Subscriber(self, Image,'/camera/color/image_raw')
         self.depth_sub = message_filters.Subscriber(self, Image,'/camera/aligned_depth_to_color/image_raw')
         self.tf_broadcaster = TransformBroadcaster(self)
-        self.subscription = self.create_subscription(Bool, '/search_golfball', self.start_callback, 10)
+        self.subscription = self.create_subscription(Int8, '/search_golfball', self.start_callback, 10)
         self.subscription
         self.status_publisher = self.create_publisher(Int8, '/status_ball',10)
         self.found_ball_counter = 0
@@ -38,7 +38,7 @@ class ImageSubscriberNode(Node):
 
 
     def image_callback(self, rgb_image, depth_image):
-        if self.search:
+        if self.search == 1:
             cv_image = self.bridge.imgmsg_to_cv2(rgb_image, desired_encoding='passthrough')
             cv_depth = self.bridge.imgmsg_to_cv2(depth_image, desired_encoding="passthrough")
             self.process_image(cv_image, cv_depth)
@@ -67,6 +67,19 @@ class ImageSubscriberNode(Node):
         frame_HSV = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
         frame_threshold_green = cv2.inRange(frame_HSV, (0, 78, 0), (80, 255, 255)) #(35, 72, 89), (48, 255, 255)
         #cv2.imshow("green", frame_threshold_green)
+
+        # red
+        #frame_HSV = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
+        #frame_threshold_red = cv2.inRange(frame_HSV, (104, 132, 184), (186, 255, 220))
+        
+
+        # orange
+        #frame_HSV = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
+        #frame_threshold_orange = cv2.inRange(frame_HSV, (104, 107, 215), (173, 255, 255))
+
+        # pink
+        #frame_HSV = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
+        #frame_threshold_pink = cv2.inRange(frame_HSV, (0, 78, 0), (80, 255, 255))
 
         # # Yellow
         frame_HSV = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
