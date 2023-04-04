@@ -21,8 +21,8 @@ amcl: #
     max_particles: 2000 #2000
     min_particles: 500
     odom_frame_id: "odom"
-    # always_reset_initial_pose: true
-    # set_initial_pose: false
+    # always_reset_initial_pose: True
+    # set_initial_pose: True
     # initial_pose: {x:0.8, y:-1.5, z:0.5, yaw:0.8}
     pf_err: 0.05
     pf_z: 0.99
