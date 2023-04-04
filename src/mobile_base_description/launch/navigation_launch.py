@@ -92,7 +92,7 @@ def generate_launch_description():
     # Declare the launch arguments
     declare_namespace_cmd = DeclareLaunchArgument(
         'namespace',
-        default_value='nav_stack', #''
+        default_value='nav2_stack', #''
         description='Top-level namespace')
 
     declare_use_namespace_cmd = DeclareLaunchArgument(
@@ -235,14 +235,6 @@ def generate_launch_description():
 
     )
 
-    # Publish arbitrary joint angles
-    joint_state_publisher_node = launch_ros.actions.Node(
-        package='joint_state_publisher',
-        executable='joint_state_publisher',
-        name='joint_state_publisher',
-        #condition=launch.conditions.UnlessCondition(LaunchConfiguration('gui'))
-    )
-
 
     odomZOH = Node(
         package='mobile_base_description',
@@ -251,31 +243,7 @@ def generate_launch_description():
         output='screen'
     )
 
-   
-    # Specify the actions
-    start_gazebo_server_cmd = ExecuteProcess(
-        condition=IfCondition(use_simulator),
-        cmd=['gzserver', '-s', 'libgazebo_ros_init.so',  '-s', 'libgazebo_ros_factory.so', world],
-        cwd=[launch_dir], output='screen')
 
-    start_gazebo_client_cmd = ExecuteProcess(
-        condition=IfCondition(PythonExpression(
-            [use_simulator, ' and not ', headless])),
-        cmd=['gzclient'],
-        cwd=[launch_dir], output='screen')
-
-    # urdf = os.path.join(bringup_dir, 'urdf', 'turtlebot3_waffle.urdf')
-
-    # start_robot_state_publisher_cmd = Node(
-    #     condition=IfCondition(use_robot_state_pub),
-    #     package='robot_state_publisher',
-    #     executable='robot_state_publisher',
-    #     name='robot_state_publisher',
-    #     namespace=namespace,
-    #     output='screen',
-    #     parameters=[{'use_sim_time': use_sim_time}],
-    #     remappings=remappings,
-    #     arguments=[urdf])
 
     rviz_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(

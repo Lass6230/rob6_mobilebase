@@ -92,12 +92,12 @@ def generate_launch_description():
     # Declare the launch arguments
     declare_namespace_cmd = DeclareLaunchArgument(
         'namespace',
-        default_value='nav_stack', #''
+        default_value='nav2_stack', #''
         description='Top-level namespace')
 
     declare_use_namespace_cmd = DeclareLaunchArgument(
         'use_namespace',
-        default_value='True',
+        default_value='True', #true
         description='Whether to apply a namespace to the navigation stack')
 
     declare_slam_cmd = DeclareLaunchArgument(
@@ -326,8 +326,8 @@ def generate_launch_description():
     # ld.add_action(declare_slam_cmd)
     ld.add_action(declare_map_yaml_cmd)
     ld.add_action(declare_use_sim_time_cmd)
-    # ld.add_action(declare_params_file_cmd)
-    # ld.add_action(declare_autostart_cmd)
+    ld.add_action(declare_params_file_cmd)
+    ld.add_action(declare_autostart_cmd)
 
     ld.add_action(declare_rviz_config_file_cmd)
     # ld.add_action(declare_use_simulator_cmd)
@@ -351,12 +351,12 @@ def generate_launch_description():
     # #ld.add_action(spawn_turtlebot_cmd)
     
 
-    # ld.add_action(declare_keepout_params_file_cmd)
-    # ld.add_action(declare_mask_yaml_file_cmd)
+    ld.add_action(declare_keepout_params_file_cmd)
+    ld.add_action(declare_mask_yaml_file_cmd)
 
-    # ld.add_action(start_lifecycle_manager_cmd)
-    # ld.add_action(start_map_server_cmd)
-    # ld.add_action(start_costmap_filter_info_server_cmd)
+    ld.add_action(start_lifecycle_manager_cmd)
+    ld.add_action(start_map_server_cmd)
+    ld.add_action(start_costmap_filter_info_server_cmd)
 
 
     #ld.add_action(demo_cmd) ##
