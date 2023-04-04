@@ -90,12 +90,12 @@ def generate_launch_description():
     # Declare the launch arguments
     declare_namespace_cmd = DeclareLaunchArgument(
         'namespace',
-        default_value='nav_stack', #''
+        default_value='nav2_stack', #''
         description='Top-level namespace')
 
     declare_use_namespace_cmd = DeclareLaunchArgument(
         'use_namespace',
-        default_value='True', 
+        default_value='True', #true 
         description='Whether to apply a namespace to the navigation stack')
 
     declare_slam_cmd = DeclareLaunchArgument(
@@ -151,7 +151,7 @@ def generate_launch_description():
 
     declare_use_rviz_cmd = DeclareLaunchArgument(
         'use_rviz',
-        default_value='True',
+        default_value='False',
         description='Whether to start RVIZ')
 
     declare_simulator_cmd = DeclareLaunchArgument(
@@ -262,26 +262,26 @@ def generate_launch_description():
     #     cmd=['gzclient'],
     #     cwd=[launch_dir], output='screen')
 
-    # urdf = os.path.join(bringup_dir, 'urdf', 'turtlebot3_waffle.urdf')
+    urdf = os.path.join(bringup_dir, 'urdf', 'turtlebot3_waffle.urdf')
 
-    # start_robot_state_publisher_cmd = Node(
-    #     condition=IfCondition(use_robot_state_pub),
-    #     package='robot_state_publisher',
-    #     executable='robot_state_publisher',
-    #     name='robot_state_publisher',
-    #     namespace=namespace,
-    #     output='screen',
-    #     parameters=[{'use_sim_time': use_sim_time}],
-    #     remappings=remappings,
-    #     arguments=[urdf])
+    start_robot_state_publisher_cmd = Node(
+        condition=IfCondition(use_robot_state_pub),
+        package='robot_state_publisher',
+        executable='robot_state_publisher',
+        name='robot_state_publisher',
+        namespace=namespace,
+        output='screen',
+        parameters=[{'use_sim_time': use_sim_time}],
+        remappings=remappings,
+        arguments=[urdf])
 
-    # rviz_cmd = IncludeLaunchDescription(
-    #     PythonLaunchDescriptionSource(
-    #         os.path.join(launch_dir, 'rviz_launch.py')),
-    #     condition=IfCondition(use_rviz),
-    #     launch_arguments={'namespace': '',
-    #                       'use_namespace': 'False',
-    #                       'rviz_config': rviz_config_file}.items())
+    rviz_cmd = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(launch_dir, 'rviz_launch.py')),
+        condition=IfCondition(use_rviz),
+        launch_arguments={'namespace': '',
+                          'use_namespace': 'False',
+                          'rviz_config': rviz_config_file}.items())
 
     bringup_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -327,10 +327,10 @@ def generate_launch_description():
     ld.add_action(declare_params_file_cmd)
     ld.add_action(declare_autostart_cmd)
 
-    #ld.add_action(declare_rviz_config_file_cmd)
+    ld.add_action(declare_rviz_config_file_cmd)
     ld.add_action(declare_use_simulator_cmd)
     ld.add_action(declare_use_robot_state_pub_cmd)
-    #ld.add_action(declare_use_rviz_cmd)
+    ld.add_action(declare_use_rviz_cmd)
     ld.add_action(declare_simulator_cmd)
     #ld.add_action(declare_world_cmd)
 
@@ -343,7 +343,7 @@ def generate_launch_description():
 
     # Add the actions to launch all of the navigation nodes
     #ld.add_action(start_robot_state_publisher_cmd)
-    # ld.add_action(rviz_cmd)
+    ld.add_action(rviz_cmd)
 
     ld.add_action(bringup_cmd)
 
