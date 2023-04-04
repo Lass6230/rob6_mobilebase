@@ -170,6 +170,21 @@ class MainProgram : public rclcpp::Node
             task_4_pose.pose.position.x = 0.0;
             task_4_pose.pose.position.y = 0.0;
             task_4_pose.pose.orientation = tf2::toMsg(quat_task4);
+
+            // init golf_hole_pose
+            tf2::Quaternion quat_golf_hole;
+            quat_task4.setRPY(0.0, 0.0, 0.0);
+            golf_hole_pose.pose.position.x = 0.0;
+            golf_hole_pose.pose.position.y = 0.0;
+            golf_hole_pose.pose.orientation = tf2::toMsg(quat_golf_hole);
+
+            // init golfball_sheach_pose
+            tf2::Quaternion quat_golfball_sheach;
+            quat_task4.setRPY(0.0, 0.0, 0.0);
+            golfball_sheach_pose.pose.position.x = 0.0;
+            golfball_sheach_pose.pose.position.y = 0.0;
+            golfball_sheach_pose.pose.orientation = tf2::toMsg(quat_golfball_sheach);
+            
         }
     
     private:
@@ -222,11 +237,11 @@ class MainProgram : public rclcpp::Node
             {
             case 0:
                 // pack robot down
-                RCLCPP_INFO(this->get_logger(), "start timer");
-                t_time1 = clock();
-                m_lastTime1 = m_clock->now().seconds();
+                // RCLCPP_INFO(this->get_logger(), "start timer");
+                // t_time1 = clock();
+                // m_lastTime1 = m_clock->now().seconds();
                 
-                sfc = 6000;//6000;//4000;//155;//1100;
+                sfc = 4000;//6000;//4000;//155;//1100;
 
                 break;
             case 10:
@@ -904,11 +919,11 @@ class MainProgram : public rclcpp::Node
                 sfc = 4060;
                 break;
 
-            case 4060: // waiiting for ball  IF timeout jump to 4500
+            case 4060: // waiiting for ball  IF timeout jump to 4600
                 if(status_ball == 1)
                 {
                     status_ball = 0;
-                    sfc = 4500;
+                    sfc = 4600;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
@@ -958,15 +973,16 @@ class MainProgram : public rclcpp::Node
                 ball_msg.data = 2;
                 pub_camera_ball_->publish(ball_msg); // setting the ball camera off
                 status_ball = 0;
+                
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
                 sfc = 4100;
-
                 break;
             
-            case 4100: // søgning       if found jump to 4500
+            case 4100: // søgning       if found jump to 4600
                 if(status_ball == 1)
                 {
                     status_ball = 0;
-                    sfc = 4500;
+                    sfc = 4600;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
@@ -1028,10 +1044,10 @@ class MainProgram : public rclcpp::Node
                 if(status_ball == 1)
                 {
                     status_ball = 0;
-                    sfc = 4500;
+                    sfc = 4600;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >7.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out, No golfball found");
                     ball_msg.data = 0;
                     pub_camera_ball_->publish(ball_msg); // setting the ball camera off
@@ -1090,7 +1106,7 @@ class MainProgram : public rclcpp::Node
                 if(status_ball == 1)
                 {
                     status_ball = 0;
-                    sfc = 4500;
+                    sfc = 4300;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
@@ -1151,7 +1167,7 @@ class MainProgram : public rclcpp::Node
                 if(status_ball == 1)
                 {
                     status_ball = 0;
-                    sfc = 4500;
+                    sfc = 4300;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
@@ -1190,7 +1206,7 @@ class MainProgram : public rclcpp::Node
                     
                     sfc = 4240; // go back and resend the robot cmd
                     if(robot_attempts == 5){
-                       // sfc = 6030;
+                       
                        RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
 
                     }
@@ -1213,7 +1229,7 @@ class MainProgram : public rclcpp::Node
                 if(status_ball == 1)
                 {
                     status_ball = 0;
-                    sfc = 4500;
+                    sfc = 4300;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
@@ -1237,19 +1253,261 @@ class MainProgram : public rclcpp::Node
 
                 break;
             
-            case 4300:
-
+            case 4300: // ball found long look
+                transform_pose = tf_buffer_->lookupTransform(
+                    "workspace_center", "ball",
+                    tf2::TimePointZero);
+                target_pose.pose.position.x = transform_pose.transform.translation.x;
+                target_pose.pose.position.y = transform_pose.transform.translation.y;
+                
+                tf2::fromMsg(transform_pose.transform.rotation, quat_tf_lookup);
+                
+                matrix.setRotation(quat_tf_lookup);
+                matrix.getRPY(rot_r_lookup, rot_p_lookup, rot_y_lookup);
+                quat_tf_lookup.setRPY(0.0,0.0,rot_y_lookup);
+                target_pose.pose.orientation = tf2::toMsg(quat_tf_lookup);
                 break;
 
 
-            case 4500: // ball found
+            case 4600: // ball found, send command to go to ball
+                robot_msg.cmd = 16; // go to ball
+                robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};
+                pub_robot_->publish(robot_msg);
+                ball_msg.data = false;
+                pub_camera_ball_->publish(ball_msg);
+                status_ball = 0;
+
+                m_lastTime1 = m_clock->now().seconds();
+                sfc = 4610;
+
 
                  break;
 
+            case 4610:
+                if(robot_status == 1){ // check if robot is done
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 4620;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    
+                    sfc = 4260; // go back and resend the robot cmd
+                    if(robot_attempts == 5){
+                       // sfc = 6030;
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
 
+                    }
+                    
+                }
+                break;
+            
+            case 4620: // send command to close gripper
+                robot_msg.cmd = 18; // close gripper
+                robot_msg.pose = {-0.3,-0.3};
+                pub_robot_->publish(robot_msg); // send to robot to set gripper close
 
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
 
-            //////////////////END TASK 12 from case 6000-6999 /////////////////////////////////////////////////////////////////
+                sfc = 4630;
+                break;
+            
+            case 4630: // waitting for gripper to close
+                if(robot_status == 1){ // check if robot is done
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 4640;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    
+                    sfc = 4620; // go back and resend the robot cmd
+                    if(robot_attempts == 5){
+                       // sfc = 6030;
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                }
+
+                break;
+
+            case 4640: // send command for robot to go up agian
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.34,0.0,0.168,0.0,1.45,0.0};
+                pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+
+                sfc = 4650;
+                break;
+            
+            case 4650: // waitting for robot to go to pose
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 4660;   //4660 /// husk sæt rigitgt
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    
+                    robot_attempts ++;
+                    
+                    
+                    if(robot_attempts == 5){
+                       // sfc = 6030;
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                    sfc = 4640; // go back and resend the robot cmd
+                    
+                }
+                break;
+            
+            case 4660: // send command to go to golf hole
+                pub_mobile_->publish(golf_hole_pose);
+                sfc = 4670;
+                break;
+            
+            case 4670: // waitting for robot to go golf hole
+                if(status_mobile == 1){
+                    status_mobile = 0;
+                    sfc = 4680;
+                }
+                break;
+
+            case 4680: // send command for robot to move to to the floor
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.34,0.0,-0.08,0.0,1.30,0.0};
+                pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+
+                sfc = 4690;
+                break;
+            
+            case 4690: // waitting for robot to go to pose
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 4700;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    
+                    robot_attempts ++;
+                    
+                    
+                    if(robot_attempts == 5){
+                       // sfc = 6030;
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                    sfc = 4680; // go back and resend the robot cmd
+                    
+                }
+                break;
+            
+            case 4700: // open gripper
+                robot_msg.cmd = 19; // set gripper off and setting the cameras off
+                robot_msg.pose = {0.37336,-0.007814,0.24958,0.0,1.57,0.0}; // pos do not matter
+                pub_robot_->publish(robot_msg); // send to robot to set gripper off
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+                sfc = 4710;
+                break;
+            
+            case 4710: // waitting for gripper to open
+                if(robot_status == 1){// Wait for gripper to be open
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 4720;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    
+                    sfc = 4700; // go back and resend the robot cmd
+                    
+                }
+                break;
+            
+            case 4720: // send command to robot to go up from golf hole
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.34,0.0,0.168,0.0,1.45,0.0};
+                pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+
+                sfc = 4730;
+                break;
+            
+            case 4730: // waitting for robot to go up from golf hole
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 4740;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    
+                    sfc = 4720; // go back and resend the robot cmd
+                    if(robot_attempts == 5){
+                       // sfc = 6030;
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                }
+                break;
+
+            case 4740:
+                golfball_counter ++;
+                sfc = 4750;
+                break;
+            
+            case 4750:
+                if(golfball_counter == 4)
+                {
+                    sfc = 4999;
+                }
+                else
+                {
+                    sfc = 4760;
+                }
+
+                break;
+            
+            case 4760:
+                pub_mobile_->publish(golfball_sheach_pose);
+                sfc = 4770;
+
+                break;
+
+            case 4770:
+                if(status_mobile == 1){
+                    status_mobile = 0;
+                    sfc = 4780;
+                }
+
+                break;
+            
+            case 4780:
+                sfc = 4010;
+
+                break;
+
+            case 4999:
+
+                break;
+
+            //////////////////END TASK 12 from case 4000-4999 /////////////////////////////////////////////////////////////////
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1963,20 +2221,24 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 8020: // wait for line follow to be done
-                if (status_linefollow == 11){ // vent på at robotten ser linjen igen
+                if (status_linefollow == 90){ // vent på at robotten mister linjen
                 status_linefollow = 0;
                 sfc = 8030;
 
                 }
                 break;
             
-            case 8030: // måske tilføje en måde at bestemme hvilken vej vi drejer i tilfælde af linjen er horizontal som den ville være i dette tilfælde
-                linefollow_msg.data = 1; // her slår vi normal line mode til igen så den vil prøve at finde linjen igen 
-                pub_linefollow_->publish(linefollow_msg);
+            case 8030:
+                if (status_linefollow == 11){ // når robotten har mistet linjen vil vi gerne have den til at bare køre lige så stille frem for at finde linjen igen
+                    status_linefollow = 0;
+                    sfc = 8040;
+                }
                 break;
 
-            case 8040:
-
+            case 8040: // måske tilføje en måde at bestemme hvilken vej vi drejer i tilfælde af linjen er horizontal som den ville være i dette tilfælde
+                linefollow_msg.data = 1; // her slår vi normal line mode til igen så den vil prøve at finde linjen igen 
+                pub_linefollow_->publish(linefollow_msg);
+                sfc = 8999;
                 break;
 
 
@@ -1997,8 +2259,8 @@ class MainProgram : public rclcpp::Node
                 sfc = 9010;
                 break;
 
-            case 9010: 
-
+            case 9010: // ved ikke om armen er ned på dette tidspunkt har efterladt denne case i det tilfælde
+                sfc = 9020;
                 break;
             
             case 9020:// muligvis også lav en mode hvor robotten ikke laver error correction når den mister linjen hvis den kan følge linjen godt nok
@@ -2008,23 +2270,38 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 9030:
-
+                if (status_linefollow == 90){
+                    status_linefollow = 0;
+                    m_lastTime1 = m_clock->now().seconds();
+                    sfc = 9040;
+                }
                 break;
             
-            case 9040:
-
+            case 9040: // her vil vi gerne finde ud af hvornår vi er færdige med at køre banen
+                m_lastTime2 = m_clock->now().seconds(); // ideen er at robotten vil bruge lang tid på at finde linjen igen når den er færdig med 9
+                if (status_linefollow == 90 || (m_lastTime2 - m_lastTime1) > 5.0 ){  // derfor vil jeg tjekke om den har mistet linjen og om der er gået mere end 5 sekunder
+                    status_linefollow = 0;
+                    sfc = 9050;
+                }
+                // hvis den finder linjen igen så skal den bare gå tilbage til case 9030, der er en mulighed for at vi bare ender i et evigt loop så sikker os at det her virker
+                else if (status_linefollow == 1)
+                {
+                    status_linefollow = 0;
+                    sfc = 9030;
+                }
+                
                 break;
             
             case 9050:
-
+                sfc = 9999;
                 break;
             
             case 9060:
 
                 break;
             
-            case 9070:
-
+            case 9999:
+                sfc = 10000;
                 break;
 
             //////////////////END case 9000-9999 ///////////////////////////////////////////////////////////////////////////////////
@@ -2440,6 +2717,9 @@ class MainProgram : public rclcpp::Node
         rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr sub_mobile_;
         
         int32_t status_mobile = 0;
+        double rot_r_lookup{}, rot_p_lookup{}, rot_y_lookup{};
+        tf2::Quaternion quat_tf_lookup;
+        tf2::Matrix3x3 matrix;
 
         /// the 3 packages trolly pose, make as vector
         geometry_msgs::msg::PoseStamped trolly_pose[3]; 
@@ -2454,6 +2734,12 @@ class MainProgram : public rclcpp::Node
 
         // task 4 pose
         geometry_msgs::msg::PoseStamped task_4_pose;
+
+
+        // golfball Hole pose
+        geometry_msgs::msg::PoseStamped golfball_sheach_pose;
+        geometry_msgs::msg::PoseStamped golf_hole_pose;
+        int32_t golfball_counter = 0;
 
 
 

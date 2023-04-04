@@ -122,7 +122,7 @@ class ImageSubscriberNode(Node):
                 # for k in blur[0,:]:
                 #     for j in blur[:,k]:
                 #         count +=1
-                if radius_i < 80 and radius_i >30:
+                if radius_i < 80 and radius_i >23:
                     if radius_i + y < 480 and radius_i + x < 640:
 
                         for k in range(radius_i):
