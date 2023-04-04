@@ -2205,20 +2205,24 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 8020: // wait for line follow to be done
-                if (status_linefollow == 11){ // vent på at robotten ser linjen igen
+                if (status_linefollow == 90){ // vent på at robotten mister linjen
                 status_linefollow = 0;
                 sfc = 8030;
 
                 }
                 break;
             
-            case 8030: // måske tilføje en måde at bestemme hvilken vej vi drejer i tilfælde af linjen er horizontal som den ville være i dette tilfælde
-                linefollow_msg.data = 1; // her slår vi normal line mode til igen så den vil prøve at finde linjen igen 
-                pub_linefollow_->publish(linefollow_msg);
+            case 8030:
+                if (status_linefollow == 11){ // når robotten har mistet linjen vil vi gerne have den til at bare køre lige så stille frem for at finde linjen igen
+                    status_linefollow = 0;
+                    sfc = 8040;
+                }
                 break;
 
-            case 8040:
-
+            case 8040: // måske tilføje en måde at bestemme hvilken vej vi drejer i tilfælde af linjen er horizontal som den ville være i dette tilfælde
+                linefollow_msg.data = 1; // her slår vi normal line mode til igen så den vil prøve at finde linjen igen 
+                pub_linefollow_->publish(linefollow_msg);
+                sfc = 8999;
                 break;
 
 
@@ -2239,8 +2243,8 @@ class MainProgram : public rclcpp::Node
                 sfc = 9010;
                 break;
 
-            case 9010: 
-
+            case 9010: // ved ikke om armen er ned på dette tidspunkt har efterladt denne case i det tilfælde
+                sfc = 9020;
                 break;
             
             case 9020:// muligvis også lav en mode hvor robotten ikke laver error correction når den mister linjen hvis den kan følge linjen godt nok
@@ -2250,23 +2254,38 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 9030:
-
+                if (status_linefollow == 90){
+                    status_linefollow = 0;
+                    m_lastTime1 = m_clock->now().seconds();
+                    sfc = 9040;
+                }
                 break;
             
-            case 9040:
-
+            case 9040: // her vil vi gerne finde ud af hvornår vi er færdige med at køre banen
+                m_lastTime2 = m_clock->now().seconds(); // ideen er at robotten vil bruge lang tid på at finde linjen igen når den er færdig med 9
+                if (status_linefollow == 90 || (m_lastTime2 - m_lastTime1) > 5.0 ){  // derfor vil jeg tjekke om den har mistet linjen og om der er gået mere end 5 sekunder
+                    status_linefollow = 0;
+                    sfc = 9050;
+                }
+                // hvis den finder linjen igen så skal den bare gå tilbage til case 9030, der er en mulighed for at vi bare ender i et evigt loop så sikker os at det her virker
+                else if (status_linefollow == 1)
+                {
+                    status_linefollow = 0;
+                    sfc = 9030;
+                }
+                
                 break;
             
             case 9050:
-
+                sfc = 9999;
                 break;
             
             case 9060:
 
                 break;
             
-            case 9070:
-
+            case 9999:
+                sfc = 10000;
                 break;
 
             //////////////////END case 9000-9999 ///////////////////////////////////////////////////////////////////////////////////
