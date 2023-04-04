@@ -46,7 +46,7 @@ def generate_launch_description():
      # Get the launch directory
     bringup_dir = get_package_share_directory('nav2_bringup')
     mobile_base_dir = get_package_share_directory('mobile_base_description')
-    turtlebotgaz = get_package_share_directory('turtlebot3_gazebo')
+    #turtlebotgaz = get_package_share_directory('turtlebot3_gazebo')
     launch_dir = os.path.join(bringup_dir, 'launch')
 
 
@@ -56,8 +56,8 @@ def generate_launch_description():
     x_pose = LaunchConfiguration('x_pose', default='-2.0')
     y_pose = LaunchConfiguration('y_pose', default='1.0')
 
-    #lifecycle_nodes = ['filter_mask_server', 'costmap_filter_info_server', 'simple_commander']
     lifecycle_nodes = ['filter_mask_server', 'costmap_filter_info_server']
+
     # Create the launch configuration variables
     slam = LaunchConfiguration('slam')
     namespace = LaunchConfiguration('namespace')

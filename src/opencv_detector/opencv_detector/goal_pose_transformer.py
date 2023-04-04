@@ -15,12 +15,12 @@ class MyNode(Node):
         self.tf_listener = TransformListener(self.tf_buffer, self)
         self.publisher = self.create_publisher(
             PoseStamped, 
-            '/goal_pose', 
+            '/goal', 
             10)
         
         self.subscription = self.create_subscription(
             PoseStamped, 
-            '/goal', 
+            '/goal_relative', 
             self.goal_callback,
             10)
         self.subscription
