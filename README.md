@@ -3,7 +3,7 @@ This is the repository for AAU Robotics bachelor project. This project aims to c
 
 ## Install dependencies
 ```
-sudo apt install ros-galactic-slam-toolbox ros-galactic-ros2-control ros-galactic-ros2-controllers ros-galactic-xacro ros-galactic-joint-state-publisher-gui ros-galactic-twist-mux ros-galactic-sick-safetyscanners-base ros-galactic-sick-safetyscanners2-interfaces ros-galactic-dynamixel-workbench-toolbox ros-galactic-moveit ros-galactic-bondcpp ros-galactic-behaviortree-cpp-v3
+sudo apt install ros-galactic-slam-toolbox ros-galactic-ros2-control ros-galactic-ros2-controllers ros-galactic-xacro ros-galactic-joint-state-publisher-gui ros-galactic-twist-mux ros-galactic-sick-safetyscanners-base ros-galactic-sick-safetyscanners2-interfaces ros-galactic-dynamixel-workbench-toolbox ros-galactic-moveit ros-galactic-bondcpp ros-galactic-behaviortree-cpp-v3 ros-galactic-test-msgs
 
 pip install opencv-python
 ```

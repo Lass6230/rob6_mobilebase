@@ -18,119 +18,138 @@ from nav2_simple_commander.robot_navigator import BasicNavigator, TaskResult
 import rclpy
 from rclpy.node import Node
 from rclpy.duration import Duration
+from std_msgs.msg import Int32
 
 """
 Basic navigation demo to go to pose.
 """
 
 
-class MyNode(Node):
+class NavigationClient(Node):
+    # rclpy.init()
 
     def __init__(self):
-        super().__init__('simple_commander')
+        super().__init__('navigation_client')
+        #self._action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
+        self.navigator = BasicNavigator()
+        self.navigator.waitUntilNav2Active()
+        self._goal_subscriber = self.create_subscription(
+            PoseStamped,
+            '/goal',
+            self.send_goal,
+            10
+        )
+        self.feedback_publisher = self.create_publisher(
+            Int32,
+            '/navigation_feedback',
+            10
+        )
+        timer_period = 0.5  # seconds
+        self.timer = self.create_timer(timer_period, self.timer_callback)
+        self.i = 0
+
+        # self.goal_reached = True
+        # self.count = 0
+        self.goal_recieved = False
+        self.goal_in_progress = False
         
-        Node.get_logger(self).warn('made to the top')
-        #rclpy.init()
 
-        navigator = BasicNavigator()
+    
 
-        Node.get_logger(self).warn('init basic nav')
-        # Set our demo's initial pose
-        initial_pose = PoseStamped()
-        initial_pose.header.frame_id = 'map'
-        initial_pose.header.stamp = navigator.get_clock().now().to_msg()
-        #print(initial_pose.header.stamp)
-        initial_pose.pose.position.x = 0.892
-        initial_pose.pose.position.y = -1.570
-        initial_pose.pose.orientation.z = 0.519
-        initial_pose.pose.orientation.w = 0.855
-        navigator.setInitialPose(initial_pose)
+    # # Set our demo's initial pose
+    # initial_pose = PoseStamped()
+    # initial_pose.header.frame_id = 'map'
+    # initial_pose.header.stamp = navigator.get_clock().now().to_msg()
+    # initial_pose.pose.position.x = 3.45
+    # initial_pose.pose.position.y = 2.15
+    # initial_pose.pose.orientation.z = 1.0
+    # initial_pose.pose.orientation.w = 0.0
+    # navigator.setInitialPose(initial_pose)
 
-        Node.get_logger(self).warn('set init pose')
+    # Activate navigation, if not autostarted. This should be called after setInitialPose()
+    # or this will initialize at the origin of the map and update the costmap with bogus readings.
+    # If autostart, you should `waitUntilNav2Active()` instead.
+    # navigator.lifecycleStartup()
 
-        # Activate navigation, if not autostarted. This should be called after setInitialPose()
-        # or this will initialize at the origin of the map and update the costmap with bogus readings.
-        # If autostart, you should `waitUntilNav2Active()` instead.
-        # navigator.lifecycleStartup()
+    # Wait for navigation to fully activate, since autostarting nav2
+    # navigator.waitUntilNav2Active()
 
-        # Wait for navigation to fully activate, since autostarting nav2
-        Node.get_logger(self).warn('waiting')
-        navigator.waitUntilNav2Active()
-        Node.get_logger(self).warn('stop wait')
-        # If desired, you can change or load the map as well
-        # navigator.changeMap('/path/to/map.yaml')
+    # If desired, you can change or load the map as well
+    # navigator.changeMap('/path/to/map.yaml')
 
-        # You may use the navigator to clear or obtain costmaps
-        # navigator.clearAllCostmaps()  # also have clearLocalCostmap() and clearGlobalCostmap()
-        # global_costmap = navigator.getGlobalCostmap()
-        # local_costmap = navigator.getLocalCostmap()
+    # You may use the navigator to clear or obtain costmaps
+    # navigator.clearAllCostmaps()  # also have clearLocalCostmap() and clearGlobalCostmap()
+    # global_costmap = navigator.getGlobalCostmap()
+    # local_costmap = navigator.getLocalCostmap()
 
-        # Go to our demos first goal pose
+
+    def send_goal(self, pose):
+        self.goal_recieved = True
         goal_pose = PoseStamped()
         goal_pose.header.frame_id = 'map'
-        goal_pose.header.stamp = navigator.get_clock().now().to_msg()
-        goal_pose.pose.position.x = 4.435
-        goal_pose.pose.position.y = 0.890
-        goal_pose.pose.orientation.z = 0.990 #
-        goal_pose.pose.orientation.w = 0.143
-
-        
+        goal_pose.header.stamp = self.navigator.get_clock().now().to_msg()
+        goal_pose.pose = pose.pose
+      
+        # goal_pose.pose.position.x = -2.0
+        # goal_pose.pose.position.y = -0.5
+        # goal_pose.pose.orientation.w = 1.0
 
         # sanity check a valid path exists
         # path = navigator.getPath(initial_pose, goal_pose)
+        self.goal_in_progress = True
+        self.navigator.goToPose(goal_pose)
 
-        navigator.goToPose(goal_pose)
-
+    def timer_callback(self):
         i = 0
-        while not navigator.isTaskComplete():
-            ################################################
-            #
-            # Implement some code here for your application!
-            #
-            ################################################
+        if not self.navigator.isTaskComplete():
+     
+            feedback = self.navigator.getFeedback()
+            
+            print('Estimated time of arrival: ' + '{0:.0f}'.format(
+                Duration.from_msg(feedback.estimated_time_remaining).nanoseconds / 1e9)
+                + ' seconds.')
 
-            # Do something with the feedback
-            i = i + 1
-            feedback = navigator.getFeedback()
-            if feedback and i % 5 == 0:
-                print('Estimated time of arrival: ' + '{0:.0f}'.format(
-                    Duration.from_msg(feedback.estimated_time_remaining).nanoseconds / 1e9)
-                    + ' seconds.')
-
-                # Some navigation timeout to demo cancellation
-                if Duration.from_msg(feedback.navigation_time) > Duration(seconds=600.0):
-                    navigator.cancelTask()
+            # Some navigation timeout to demo cancellation
+            if Duration.from_msg(feedback.navigation_time) > Duration(seconds=600.0):
+                self.navigator.cancelTask()
 
                 # Some navigation request change to demo preemption
-                if Duration.from_msg(feedback.navigation_time) > Duration(seconds=18.0):
-                    goal_pose.pose.position.x = -3.0
-                    navigator.goToPose(goal_pose)
+                # if Duration.from_msg(feedback.navigation_time) > Duration(seconds=18.0):
+                #     self.goal_pose.pose.position.x = -3.0
+                #     self.navigator.goToPose(self.goal_pose)
+        elif self.goal_recieved:     
 
-        # Do something depending on the return code
-        result = navigator.getResult()
-        if result == TaskResult.SUCCEEDED:
-            print('Goal succeeded!')
-        elif result == TaskResult.CANCELED:
-            print('Goal was canceled!')
-        elif result == TaskResult.FAILED:
-            print('Goal failed!')
-        else:
-            print('Goal has an invalid return status!')
+            # Do something depending on the return code
+            result = self.navigator.getResult()
+            
+            if result == TaskResult.SUCCEEDED:
+                print('Goal succeeded!')
+                # self.feedback_publisher.publish(1)
+            elif result == TaskResult.CANCELED:
+                print('Goal was canceled!')
+            elif result == TaskResult.FAILED:
+                print('Goal failed!')
+            else:
+                print('Goal has an invalid return status!')
 
-        navigator.lifecycleShutdown()
+            self.goal_recieved = False
 
-        #exit(0)
+        #navigator.lifecycleShutdown()
+
+
 
 
 def main(args=None):
     rclpy.init(args=args)
-    node = MyNode()
-    try:
-        rclpy.spin(node)
-    except KeyboardInterrupt:
+    navigation = NavigationClient()
+    rclpy.spin(navigation)
+    print("here")
+    while not navigation._feedback_received:
         pass
-    node.destroy_node()
+    navigation.destroy_node()
     rclpy.shutdown()
+
+
 
 if __name__ == '__main__':
     main()

@@ -22,8 +22,17 @@
   <depend>geometry_msgs</depend>
   <depend>rospy</depend>
   <depend>nav2_simple_commander</depend>
+  <depend>action_msgs</depend>
   
+
+
+
   
+  <build_depend>nav2_msgs</build_depend>
+  <exec_depend>nav2_msgs</exec_depend>
+
+
+
   <exec_depend>ros2launch</exec_depend>
 
   <export>

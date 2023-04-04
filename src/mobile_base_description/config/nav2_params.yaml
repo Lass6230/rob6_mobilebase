@@ -5,37 +5,63 @@ amcl: #
     alpha2: 0.1 #increase? #Expected process noise in odometry’s rotation estimate from translation.
     alpha3: 0.1 #decrease? #Expected process noise in odometry’s translation estimate from translation.
     alpha4: 0.2 #Expected process noise in odometry’s translation estimate from rotation.
-    alpha5: 0.2 #For Omni models only: translation noise.
-    base_frame_id: "base_footprint"
+   # alpha5: 0.2 #For Omni models only: translation noise.
+    base_frame_id: "base_footprint" #"base_link"  #basefootprint makes the local costmap work lol
     beam_skip_distance: 0.5 #decrease
     beam_skip_error_threshold: 0.9 #decrease
     beam_skip_threshold: 0.3 
     do_beamskip: false #try true
     global_frame_id: "map"
     lambda_short: 0.1
-    laser_likelihood_max_dist: 4.0 #2.0 #try 3 or 4
-    laser_max_range: 100.0 #100
+    laser_likelihood_max_dist: 3.0 #2.0 #try 3 or 4
+    laser_max_range: 20.0 #100
     laser_min_range: 0.1
     laser_model_type: "likelihood_field" #likelihood_field_prob this should incorporate beamskip
     max_beams: 60
     max_particles: 2000 #2000
     min_particles: 500
     odom_frame_id: "odom"
+    set_initial_pose: true
+    initial_pose: 
+      x: 1.7
+      y: 0.6
+      yaw: 1.9
+
+    # always_reset_initial_pose: True
+    # set_initial_pose: True
+    # initial_pose: {x:1.7, y:0.6, z:0.0, yaw:1.94} #header:
+    #       #   stamp:
+    #       #     sec: 1680599400
+    #       #     nanosec: 244094694
+    #       #   frame_id: map
+    #       # pose:
+    #       #   pose:
+    #       #     position:
+    #       #       x: 1.7076542377471924
+    #       #       y: 0.4616687297821045
+    #       #       z: 0.0
+    #       #     orientation:
+    #       #       x: 0.0
+    #       #       y: 0.0
+    #       #       z: 0.8249072830499744
+    #       #       w: 0.5652680553251789
+    #       #   covariance:
+
     pf_err: 0.05
     pf_z: 0.99
-    recovery_alpha_fast: 0.1 #0.1 #0
-    recovery_alpha_slow: 0.001 #0.001 #0
+    recovery_alpha_fast: 0.0 #0.1 #0.1 #0
+    recovery_alpha_slow: 0.0 #0.001 #0.001 #0
     resample_interval: 1
     robot_model_type: "differential" #"nav2_amcl::DifferentialMotionModel" 
-    save_pose_rate: 0.5
+    save_pose_rate: 1.0 #0.5
     sigma_hit: 0.2
     tf_broadcast: true
     transform_tolerance: 1.0 #0.2 #1.0
     update_min_a: 0.2
     update_min_d: 0.25
-    z_hit: 0.9 #1.0 #0.5
+    z_hit: 0.7 #0.9 
     z_max: 0.05
-    z_rand: 0.9 #1.0 #0.5
+    z_rand: 0.7 #0.9
     z_short: 0.05
     scan_topic: scan
 
@@ -52,13 +78,13 @@ bt_navigator:
     use_sim_time: True
     global_frame: map
     robot_base_frame: base_link
-    odom_topic: /odom
+    odom_topic: /odom #try commenting
     bt_loop_duration: 10
     default_server_timeout: 20
     enable_groot_monitoring: True
     groot_zmq_publisher_port: 1666
     groot_zmq_server_port: 1667
-    transform_tolerance: 0.1
+    transform_tolerance: 0.2
     goal_reached_tol: 0.25
     # 'default_nav_through_poses_bt_xml' and 'default_nav_to_pose_bt_xml' are use defaults:
     # nav2_bt_navigator/navigate_to_pose_w_replanning_and_recovery.xml
@@ -104,7 +130,7 @@ bt_navigator_rclcpp_node:
 controller_server:
   ros__parameters:
     use_sim_time: True
-    controller_frequency: 20.0
+    controller_frequency: 10.0
     min_x_velocity_threshold: 0.001
     min_y_velocity_threshold: 0.5
     min_theta_velocity_threshold: 0.001
@@ -112,7 +138,6 @@ controller_server:
     progress_checker_plugin: "progress_checker"
     goal_checker_plugins: ["general_goal_checker"] # "precise_goal_checker"
     controller_plugins: ["FollowPath"]
-
     # Progress checker parameters
     progress_checker:
       plugin: "nav2_controller::SimpleProgressChecker"
@@ -178,22 +203,23 @@ controller_server_rclcpp_node:
 local_costmap:
   local_costmap:
     ros__parameters:
-      update_frequency: 5.0
-      publish_frequency: 5.0
-      global_frame: map
-      robot_base_frame: base_footprint
+      update_frequency: 3.0
+      publish_frequency: 1.0
+      global_frame: map #odom works with base_link but is heavily delayed
+      robot_base_frame: base_footprint #base_link #both work
       use_sim_time: True
       rolling_window: true
-      width: 3
-      height: 3
-      resolution: 0.02
+      width: 2
+      height: 2
+      resolution: 0.04
+      #robot_radius: 0.18
       footprint: "[ [0.3, 0.06], [0.3, -0.14], [0.13, -0.17], [-0.43, -0.17], [-0.43, 0.17], [0.13, 0.17], [0.2, 0.17] ]"
       plugins: ["voxel_layer", "inflation_layer"]
-      filters: ["keepout_filter", "inflation_layer"]
-      keepout_filter:
-        plugin: "nav2_costmap_2d::KeepoutFilter"
-        enabled: True
-        filter_info_topic: "/costmap_filter_info"
+      # filters: ["keepout_filter", "inflation_layer"]
+      # keepout_filter:
+      #   plugin: "nav2_costmap_2d::KeepoutFilter"
+      #   enabled: True
+      #   filter_info_topic: "/costmap_filter_info"
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
@@ -214,9 +240,9 @@ local_costmap:
           clearing: True
           marking: True
           data_type: "LaserScan"
-          raytrace_max_range: 5.0
+          raytrace_max_range: 3.0
           raytrace_min_range: 0.0
-          obstacle_max_range: 1.5
+          obstacle_max_range: 2.5
           obstacle_min_range: 0.0
       static_layer:
         map_subscribe_transient_local: True
@@ -232,12 +258,13 @@ global_costmap:
   global_costmap:
     ros__parameters:
       update_frequency: 2.0
-      publish_frequency: 2.0
+      publish_frequency: 0.5
       global_frame: map
       robot_base_frame: base_footprint
       use_sim_time: True
-      footprint: "[ [0.3, 0.06], [0.3, -0.14], [0.13, -0.17], [-0.43, -0.17], [-0.43, 0.17], [0.13, 0.17], [0.2, 0.17] ]"
-      resolution: 0.05
+      robot_radius: 0.17
+      #footprint: "[ [0.3, 0.06], [0.3, -0.14], [0.13, -0.17], [-0.43, -0.17], [-0.43, 0.17], [0.13, 0.17], [0.2, 0.17] ]"
+      resolution: 0.04
       track_unknown_space: true
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
       filters: ["keepout_filter", "inflation_layer"]
@@ -255,7 +282,7 @@ global_costmap:
           clearing: True
           marking: True
           data_type: "LaserScan"
-          raytrace_max_range: 5.0
+          raytrace_max_range: 3.5
           raytrace_min_range: 0.0
           obstacle_max_range: 1.5
           obstacle_min_range: 0.0
@@ -266,7 +293,7 @@ global_costmap:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
         inflation_radius: 0.65
-      always_send_full_costmap: True
+      always_send_full_costmap: True #True
   global_costmap_client:
     ros__parameters:
       use_sim_time: True
@@ -287,16 +314,16 @@ map_saver:
     occupied_thresh_default: 0.65
     map_subscribe_transient_local: True
 
-# planner_server: #hates turning on the spot on startup otherwise nice
-#   ros__parameters:
-#     expected_planner_frequency: 20.0
-#     use_sim_time: True
-#     planner_plugins: ["GridBased"]
-#     GridBased:
-#       plugin: "nav2_navfn_planner/NavfnPlanner" 
-#       tolerance: 0.2
-#       use_astar: False
-#       allow_unknown: True
+planner_server: #hates turning on the spot on startup otherwise nice
+  ros__parameters:
+    expected_planner_frequency: 10.0
+    use_sim_time: True
+    planner_plugins: ["GridBased"]
+    GridBased:
+      plugin: "nav2_navfn_planner/NavfnPlanner" 
+      tolerance: 0.2
+      use_astar: False
+      allow_unknown: True
 
 # planner_server: #gets stuck  ALOT
 #   ros__parameters:
@@ -369,14 +396,14 @@ map_saver:
 #         do_refinement: true
 #         refinement_num: 2
 
-planner_server: #gets stuck a bit but seems reliable
-  ros__parameters:
-    planner_plugin_types: ["nav2_theta_star_planner/ThetaStarPlanner"] 
-    planner_plugin_ids: ["GridBased"]
-    GridBased:
-      how_many_corners: 8
-      w_euc_cost: 1.0
-      w_traversal_cost: 2.0
+# planner_server: #gets stuck a bit but seems reliable
+#   ros__parameters:
+#     planner_plugin_types: ["nav2_theta_star_planner/ThetaStarPlanner"] 
+#     planner_plugin_ids: ["GridBased"]
+#     GridBased:
+#       how_many_corners: 8
+#       w_euc_cost: 1.0
+#       w_traversal_cost: 2.0
 
 planner_server_rclcpp_node:
   ros__parameters:
@@ -409,7 +436,7 @@ robot_state_publisher:
 
 waypoint_follower:
   ros__parameters:
-    loop_rate: 20
+    loop_rate: 10
     stop_on_failure: false
     waypoint_task_executor_plugin: "wait_at_waypoint"   
     wait_at_waypoint:
