@@ -1253,7 +1253,7 @@ class MainProgram : public rclcpp::Node
 
                 break;
             
-            case 4300: // ball found long look
+            case 4300: // ball found long look, send command to mobile to drive to ball
                 transform_pose = tf_buffer_->lookupTransform(
                     "workspace_center", "ball",
                     tf2::TimePointZero);
@@ -1266,8 +1266,17 @@ class MainProgram : public rclcpp::Node
                 matrix.getRPY(rot_r_lookup, rot_p_lookup, rot_y_lookup);
                 quat_tf_lookup.setRPY(0.0,0.0,rot_y_lookup);
                 target_pose.pose.orientation = tf2::toMsg(quat_tf_lookup);
+                pub_mobile_relative_->publish(target_pose);
+                sfc = 4310;
+            
                 break;
 
+            case 4310: // waitting for mobile base to drive to ball pose
+                if(status_mobile == 1){
+                    status_mobile = 0;
+                    sfc = 4010; // send the back to the shearch function hopefully it will catch it when lokking down in midt
+                }
+                break;
 
             case 4600: // ball found, send command to go to ball
                 robot_msg.cmd = 16; // go to ball
