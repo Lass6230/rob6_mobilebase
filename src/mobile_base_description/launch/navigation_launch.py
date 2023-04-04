@@ -265,21 +265,19 @@ def generate_launch_description():
                           'autostart': autostart}.items())
     
 
-    spawn_turtlebot_cmd = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(launch_file_dir, 'spawn_turtlebot3.launch.py')
-        ),
-        launch_arguments={
-            'x_pose': x_pose,
-            'y_pose': y_pose
-        }.items()
-    )
+  
 
-    demo_cmd = Node( ##
+    demo_node = Node( ##
         package='opencv_detector',
         executable='simple_commander',
         emulate_tty=True, #True
         output='screen')
+    
+    goal_pose_transformer_node = Node( ##
+        package='opencv_detector',
+        executable='goal_transformer',
+        output='screen')
+
 
 
     
@@ -302,21 +300,12 @@ def generate_launch_description():
     ld.add_action(declare_use_robot_state_pub_cmd)
     ld.add_action(declare_use_rviz_cmd)
     ld.add_action(declare_simulator_cmd)
-    #ld.add_action(declare_world_cmd)
-
     
     ld.add_action(odomZOH)
     ld.add_action(robot_state_publisher)
-    # Add any conditioned actions
-    #ld.add_action(start_gazebo_server_cmd)
-    #ld.add_action(start_gazebo_client_cmd)
-
-    # Add the actions to launch all of the navigation nodes
-    #ld.add_action(start_robot_state_publisher_cmd)
     ld.add_action(rviz_cmd)
     ld.add_action(bringup_cmd)
 
-    #ld.add_action(spawn_turtlebot_cmd)
     
 
     ld.add_action(declare_keepout_params_file_cmd)
@@ -327,7 +316,11 @@ def generate_launch_description():
     ld.add_action(start_costmap_filter_info_server_cmd)
 
 
-    #ld.add_action(demo_cmd) ##
+
+
+    ld.add_action(demo_node) 
+
+    ld.add_action(goal_pose_transformer_node)
 
     return ld
 
