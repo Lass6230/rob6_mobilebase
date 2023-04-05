@@ -262,7 +262,7 @@ class ImageSubscriberNode(Node):
         tf.header.frame_id = 'camera_link'
         tf.child_frame_id = 'ball'
         tf.transform.translation.x = float(z) # +0.02#z
-        tf.transform.translation.y = float(x)+0.02
+        tf.transform.translation.y = float(x)+0.01
         tf.transform.translation.z = float(y) #+0.02#x
         tf.transform.rotation.x = 0.0
         tf.transform.rotation.y = 0.0
