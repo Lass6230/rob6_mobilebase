@@ -27,25 +27,7 @@ amcl: #
       y: 0.6
       yaw: 1.9
 
-    # always_reset_initial_pose: True
-    # set_initial_pose: True
-    # initial_pose: {x:1.7, y:0.6, z:0.0, yaw:1.94} #header:
-    #       #   stamp:
-    #       #     sec: 1680599400
-    #       #     nanosec: 244094694
-    #       #   frame_id: map
-    #       # pose:
-    #       #   pose:
-    #       #     position:
-    #       #       x: 1.7076542377471924
-    #       #       y: 0.4616687297821045
-    #       #       z: 0.0
-    #       #     orientation:
-    #       #       x: 0.0
-    #       #       y: 0.0
-    #       #       z: 0.8249072830499744
-    #       #       w: 0.5652680553251789
-    #       #   covariance:
+
 
     pf_err: 0.05
     pf_z: 0.99

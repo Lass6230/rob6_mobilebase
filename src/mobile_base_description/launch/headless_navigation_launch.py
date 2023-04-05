@@ -244,7 +244,7 @@ def generate_launch_description():
         output='screen'
     )
 
-    demo_node = Node( ##
+    simple_commander_cmd = Node( ##
         package='opencv_detector',
         executable='simple_commander',
         emulate_tty=True, #True
@@ -295,7 +295,7 @@ def generate_launch_description():
 
 
 
-    ld.add_action(demo_node) 
+    ld.add_action(simple_commander_cmd) 
 
     ld.add_action(goal_pose_transformer_node)
 
