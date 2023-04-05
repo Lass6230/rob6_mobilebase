@@ -53,10 +53,10 @@ def generate_launch_description():
     launch_file_dir = os.path.join(get_package_share_directory('turtlebot3_gazebo'), 'launch')
     #pkg_gazebo_ros = get_package_share_directory('gazebo_ros')
 
-    x_pose = LaunchConfiguration('x_pose', default='-2.0')
-    y_pose = LaunchConfiguration('y_pose', default='1.0')
+    # x_pose = LaunchConfiguration('x_pose', default='-2.0')
+    # y_pose = LaunchConfiguration('y_pose', default='1.0')
 
-    lifecycle_nodes = ['filter_mask_server', 'costmap_filter_info_server']
+    #lifecycle_nodes = ['filter_mask_server', 'costmap_filter_info_server']
 
     # Create the launch configuration variables
     slam = LaunchConfiguration('slam')
@@ -91,12 +91,12 @@ def generate_launch_description():
     # Declare the launch arguments
     declare_namespace_cmd = DeclareLaunchArgument(
         'namespace',
-        default_value='nav2_stack', #''
+        default_value='', #''
         description='Top-level namespace')
 
     declare_use_namespace_cmd = DeclareLaunchArgument(
         'use_namespace',
-        default_value='True', 
+        default_value='false', 
         description='Whether to apply a namespace to the navigation stack')
 
     declare_slam_cmd = DeclareLaunchArgument(
@@ -171,16 +171,16 @@ def generate_launch_description():
         param_rewrites=param_substitutions,
         convert_types=True)
     
-    start_lifecycle_manager_cmd = Node(
-            package='nav2_lifecycle_manager',
-            executable='lifecycle_manager',
-            name='lifecycle_manager_costmap_filters',
-            namespace=namespace,
-            output='screen',
-            emulate_tty=True,  # https://github.com/ros2/launch/issues/188
-            parameters=[{'use_sim_time': use_sim_time},
-                        {'autostart': autostart},
-                        {'node_names': lifecycle_nodes}])
+    # start_lifecycle_manager_cmd = Node(
+    #         package='nav2_lifecycle_manager',
+    #         executable='lifecycle_manager',
+    #         name='lifecycle_manager_costmap_filters',
+    #         namespace=namespace,
+    #         output='screen',
+    #         emulate_tty=True,  # https://github.com/ros2/launch/issues/188
+    #         parameters=[{'use_sim_time': use_sim_time},
+    #                     {'autostart': autostart},
+    #                     {'node_names': lifecycle_nodes}])
 
     start_map_server_cmd = Node(
             package='nav2_map_server',
@@ -278,15 +278,15 @@ def generate_launch_description():
                           'autostart': autostart}.items())
     
 
-    spawn_turtlebot_cmd = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(launch_file_dir, 'spawn_turtlebot3.launch.py')
-        ),
-        launch_arguments={
-            'x_pose': x_pose,
-            'y_pose': y_pose
-        }.items()
-    )
+    # spawn_turtlebot_cmd = IncludeLaunchDescription(
+    #     PythonLaunchDescriptionSource(
+    #         os.path.join(launch_file_dir, 'spawn_turtlebot3.launch.py')
+    #     ),
+    #     launch_arguments={
+    #         'x_pose': x_pose,
+    #         'y_pose': y_pose
+    #     }.items()
+    # )
 
     demo_cmd = Node( ##
         package='opencv_detector',
