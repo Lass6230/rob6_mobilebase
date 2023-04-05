@@ -14,6 +14,8 @@ In a ros2 workspace build navigation2, dynamixel_interface and sicksafety_scanne
 mkdir -p ~/ros2_ws/src
 cd ros2_ws/src
 git clone https://github.com/ros-planning/navigation2 -b galactic
+git clone https://github.com/rst-tu-dortmund/teb_local_planner.git -b galactic
+git clone https://github.com/rst-tu-dortmund/costmap_converter.git -b ros2 
 git clone https://github.com/SICKAG/sick_safetyscanners2.git 
 cd ..
 rosdep install -y -r -q --from-paths src --ignore-src --rosdistro galactic
