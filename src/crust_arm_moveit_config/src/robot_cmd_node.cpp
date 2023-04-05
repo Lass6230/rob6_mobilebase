@@ -8,6 +8,7 @@
 //#include <crust_msgs/srv/robot_cmd_srv.h>
 #include <memory>
 #include <vector>
+#include <cmath>
 
 #include <moveit/move_group_interface/move_group_interface.h>
 
@@ -407,7 +408,8 @@ class RobotHandler : public rclcpp::Node
           double rot_r{}, rot_p{}, rot_y{};
           tf2::Matrix3x3 m(quat_tf);
           m.getRPY(rot_r, rot_p, rot_y);
-          quat_tf.setRPY(0.0,1.44,rot_y);
+          
+          quat_tf.setRPY(0.0,1.44,atan2(target_pose.transform.translation.y, target_pose.transform.translation.x));
           RCLCPP_INFO(LOGGER,"R: %f", rot_r);
           RCLCPP_INFO(LOGGER,"P: %f", rot_p);
           RCLCPP_INFO(LOGGER,"Y: %f", rot_y);

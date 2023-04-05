@@ -2264,6 +2264,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 8020: // wait for line follow to be done
+                RCLCPP_INFO(this->get_logger(), "Publishing: '%i'", status_linefollow);
                 if (status_linefollow == 90){ // vent på at robotten mister linjen
                 status_linefollow = 0;
                 sfc = 8030;
