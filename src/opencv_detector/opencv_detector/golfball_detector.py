@@ -138,7 +138,7 @@ class ImageSubscriberNode(Node):
 
                     self.get_logger().info("range: %f" %range2)
 
-                    z = range2+0.03
+                    z = range2 +0.0215
 
                     if z < 2000:
                         # circle center
