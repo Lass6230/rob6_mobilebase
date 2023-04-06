@@ -880,7 +880,7 @@ class MainProgram : public rclcpp::Node
 
             case 4030: // set pose for robot søg ned lige foran
                 robot_msg.cmd = 6;
-                robot_msg.pose = {0.34,0.0,0.168,0.0,1.45,0.0};
+                robot_msg.pose = {0.34,0.0,0.168,0.0,1.57,0.0};
                 pub_robot_->publish(robot_msg);
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
 
@@ -941,7 +941,7 @@ class MainProgram : public rclcpp::Node
             
             case 4070: // send to robot to go to pose right looking down
                 robot_msg.cmd = 6;
-                robot_msg.pose = {0.23319,-0.24479,0.15955,0.0,1.45,-0.785398};
+                robot_msg.pose = {0.23319,-0.24479,0.15955,0.0,1.57,-0.785398};
                 pub_robot_->publish(robot_msg);
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
 
@@ -1000,7 +1000,7 @@ class MainProgram : public rclcpp::Node
             
             case 4110: // set robot pose to look down left
                 robot_msg.cmd = 6;
-                robot_msg.pose = {0.23319,0.24479,0.15955,0.0,1.45,0.785398};
+                robot_msg.pose = {0.23319,0.24479,0.15955,0.0,1.57,0.785398};
                 pub_robot_->publish(robot_msg);
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
 
@@ -1333,7 +1333,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 4620;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >25.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
@@ -2273,16 +2273,22 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 8030:
-                if (status_linefollow == 11){ // når robotten har mistet linjen vil vi gerne have den til at bare køre lige så stille frem for at finde linjen igen
+                if (status_linefollow == 40){ // når robotten har mistet linjen vil vi gerne have den til at bare køre lige så stille frem for at finde linjen igen
                     status_linefollow = 0;
                     sfc = 8040;
                 }
                 break;
-
-            case 8040: // måske tilføje en måde at bestemme hvilken vej vi drejer i tilfælde af linjen er horizontal som den ville være i dette tilfælde
+            case 8040:
+                if (status_linefollow == 50){
+                    status_linefollow = 0;
+                    sfc = 8050;
+                }
+                break;
+                
+            case 8050: // måske tilføje en måde at bestemme hvilken vej vi drejer i tilfælde af linjen er horizontal som den ville være i dette tilfælde
                 linefollow_msg.data = 1; // her slår vi normal line mode til igen så den vil prøve at finde linjen igen 
                 pub_linefollow_->publish(linefollow_msg);
-                sfc = 8999;
+                sfc = 8050;
                 break;
 
 
