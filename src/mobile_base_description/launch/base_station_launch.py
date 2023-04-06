@@ -53,8 +53,8 @@ def generate_launch_description():
     launch_file_dir = os.path.join(get_package_share_directory('turtlebot3_gazebo'), 'launch')
     #pkg_gazebo_ros = get_package_share_directory('gazebo_ros')
 
-    x_pose = LaunchConfiguration('x_pose', default='-2.0')
-    y_pose = LaunchConfiguration('y_pose', default='1.0')
+    # x_pose = LaunchConfiguration('x_pose', default='-2.0')
+    # y_pose = LaunchConfiguration('y_pose', default='1.0')
 
     lifecycle_nodes = ['filter_mask_server', 'costmap_filter_info_server']
 
@@ -85,24 +85,23 @@ def generate_launch_description():
     #              https://github.com/ros2/launch_ros/issues/56
 
 
-
     remappings = [('/tf', 'tf'),
                   ('/tf_static', 'tf_static')]
 
     # Declare the launch arguments
     declare_namespace_cmd = DeclareLaunchArgument(
         'namespace',
-        default_value='nav2_stack', #''
+        default_value='', #''
         description='Top-level namespace')
 
     declare_use_namespace_cmd = DeclareLaunchArgument(
         'use_namespace',
-        default_value='True', #true
+        default_value='false', 
         description='Whether to apply a namespace to the navigation stack')
 
     declare_slam_cmd = DeclareLaunchArgument(
         'slam',
-        default_value='False', #False
+        default_value='False', 
         description='Whether run a SLAM')
 
     declare_map_yaml_cmd = DeclareLaunchArgument(
@@ -161,18 +160,17 @@ def generate_launch_description():
         default_value='False',
         description='Whether to execute gzclient)')
 
-    # declare_world_cmd = DeclareLaunchArgument(
-    #     'world',
-    #     # TODO(orduno) Switch back once ROS argument passing has been fixed upstream
-    #     #              https://github.com/ROBOTIS-GIT/turtlebot3_simulations/issues/91
-    #     # default_value=os.path.join(get_package_share_directory('turtlebot3_gazebo'),
-    #     # worlds/turtlebot3_worlds/waffle.model')
-    #     default_value=os.path.join(
-    #         turtlebotgaz,
-    #         'worlds',
-    #         'turtlebot3_house.world'),
-    #     description='Full path to world model file to load')
+    param_substitutions2 = {
+        'use_sim_time': use_sim_time,
+        'yaml_filename': map_yaml_file}
     
+    configured_params2 = RewrittenYaml(
+        source_file=params_file,
+        root_key=namespace,
+        param_rewrites=param_substitutions2,
+        convert_types=True)
+
+
     param_substitutions = {
         'use_sim_time': use_sim_time,
         'yaml_filename': mask_yaml_file}
@@ -194,6 +192,16 @@ def generate_launch_description():
                         {'autostart': autostart},
                         {'node_names': lifecycle_nodes}])
 
+    
+    start_map_server_cmd2 = Node(
+            package='nav2_map_server',
+            executable='map_server',
+            name='map_server',
+            namespace=namespace,
+            output='screen',
+            emulate_tty=True,  # https://github.com/ros2/launch/issues/188
+            parameters=[configured_params2])
+    
     start_map_server_cmd = Node(
             package='nav2_map_server',
             executable='map_server',
@@ -235,14 +243,6 @@ def generate_launch_description():
 
     )
 
-    # Publish arbitrary joint angles
-    joint_state_publisher_node = launch_ros.actions.Node(
-        package='joint_state_publisher',
-        executable='joint_state_publisher',
-        name='joint_state_publisher',
-        #condition=launch.conditions.UnlessCondition(LaunchConfiguration('gui'))
-    )
-
 
     odomZOH = Node(
         package='mobile_base_description',
@@ -251,67 +251,16 @@ def generate_launch_description():
         output='screen'
     )
 
-   
-    # Specify the actions
-    start_gazebo_server_cmd = ExecuteProcess(
-        condition=IfCondition(use_simulator),
-        cmd=['gzserver', '-s', 'libgazebo_ros_init.so',  '-s', 'libgazebo_ros_factory.so', world],
-        cwd=[launch_dir], output='screen')
-
-    start_gazebo_client_cmd = ExecuteProcess(
-        condition=IfCondition(PythonExpression(
-            [use_simulator, ' and not ', headless])),
-        cmd=['gzclient'],
-        cwd=[launch_dir], output='screen')
-
-    # urdf = os.path.join(bringup_dir, 'urdf', 'turtlebot3_waffle.urdf')
-
-    # start_robot_state_publisher_cmd = Node(
-    #     condition=IfCondition(use_robot_state_pub),
-    #     package='robot_state_publisher',
-    #     executable='robot_state_publisher',
-    #     name='robot_state_publisher',
-    #     namespace=namespace,
-    #     output='screen',
-    #     parameters=[{'use_sim_time': use_sim_time}],
-    #     remappings=remappings,
-    #     arguments=[urdf])
-
-    rviz_cmd = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(launch_dir, 'rviz_launch.py')),
-        condition=IfCondition(use_rviz),
-        launch_arguments={'namespace': '',
-                          'use_namespace': 'False',
-                          'rviz_config': rviz_config_file}.items())
-
-    bringup_cmd = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(launch_dir, 'bringup_launch.py')),
-        launch_arguments={'namespace': namespace,
-                          'use_namespace': use_namespace,
-                          'slam': slam,
-                          'map': map_yaml_file,
-                          'use_sim_time': use_sim_time,
-                          'params_file': params_file,
-                          'autostart': autostart}.items())
     
 
-    spawn_turtlebot_cmd = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(launch_file_dir, 'spawn_turtlebot3.launch.py')
-        ),
-        launch_arguments={
-            'x_pose': x_pose,
-            'y_pose': y_pose
-        }.items()
+    rviz_cmd = IncludeLaunchDescription(
+    PythonLaunchDescriptionSource(
+        os.path.join(mobile_base_dir, 'launch/rviz_launch.py')),
+    condition=IfCondition(use_rviz),
+    launch_arguments={'namespace': '',
+                        'use_namespace': 'False',
+                        'rviz_config': rviz_config_file}.items()
     )
-
-    demo_cmd = Node( ##
-        package='opencv_detector',
-        executable='simple_commander',
-        emulate_tty=True, #True
-        output='screen')
 
 
     
@@ -323,40 +272,30 @@ def generate_launch_description():
     # Declare the launch options
     ld.add_action(declare_namespace_cmd)
     ld.add_action(declare_use_namespace_cmd)
-    # ld.add_action(declare_slam_cmd)
-    ld.add_action(declare_map_yaml_cmd)
+    
     ld.add_action(declare_use_sim_time_cmd)
     ld.add_action(declare_params_file_cmd)
     ld.add_action(declare_autostart_cmd)
 
     ld.add_action(declare_rviz_config_file_cmd)
-    # ld.add_action(declare_use_simulator_cmd)
-    # ld.add_action(declare_use_robot_state_pub_cmd)
     ld.add_action(declare_use_rviz_cmd)
-    # ld.add_action(declare_simulator_cmd)
-    # ld.add_action(declare_world_cmd)
 
     
     # ld.add_action(odomZOH)
     # ld.add_action(robot_state_publisher)
-    # # Add any conditioned actions
-    # ld.add_action(start_gazebo_server_cmd)
-    # ld.add_action(start_gazebo_client_cmd)
 
-    # Add the actions to launch all of the navigation nodes
-    #ld.add_action(start_robot_state_publisher_cmd)
     ld.add_action(rviz_cmd)
-    # ld.add_action(bringup_cmd)
 
-    # #ld.add_action(spawn_turtlebot_cmd)
-    
 
-    ld.add_action(declare_keepout_params_file_cmd)
-    ld.add_action(declare_mask_yaml_file_cmd)
 
-    ld.add_action(start_lifecycle_manager_cmd)
-    ld.add_action(start_map_server_cmd)
-    ld.add_action(start_costmap_filter_info_server_cmd)
+    # #start map?
+    # ld.add_action(start_map_server_cmd2)
+    # ld.add_action(declare_map_yaml_cmd)
+    # ld.add_action(declare_keepout_params_file_cmd)
+    # ld.add_action(declare_mask_yaml_file_cmd)
+    # ld.add_action(start_lifecycle_manager_cmd)
+    # ld.add_action(start_map_server_cmd)
+    # ld.add_action(start_costmap_filter_info_server_cmd)
 
 
     #ld.add_action(demo_cmd) ##

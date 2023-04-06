@@ -119,10 +119,15 @@ class MainProgram : public rclcpp::Node
             // INIT poseStamped values for
             tf2::Quaternion quat_trolly[3];
 
+            //gobal pose for the wall diretly outside group room in maps/0_04res/map.pgm
             quat_trolly[0].setRPY(0.0, 0.0, 0.0);
-            trolly_pose[0].pose.position.x = 0.0;
-            trolly_pose[0].pose.position.y = 0.0;
-            trolly_pose[0].pose.orientation = tf2::toMsg(quat_trolly[0]);
+            trolly_pose[0].pose.position.x = 0.88;
+            trolly_pose[0].pose.position.y = 1.13;
+            trolly_pose[0].pose.orientation.z = 0.77;
+            trolly_pose[0].pose.orientation.w = 0.62; //tf2::toMsg(quat_trolly[0]);
+
+            //gobal pose for the wall diretly outside group room in maps/0_04res/map.pgm
+
 
             quat_trolly[1].setRPY(0.0, 0.0, 0.0);
             trolly_pose[1].pose.position.x = 0.0;
@@ -875,7 +880,7 @@ class MainProgram : public rclcpp::Node
 
             case 4030: // set pose for robot søg ned lige foran
                 robot_msg.cmd = 6;
-                robot_msg.pose = {0.34,0.0,0.168,0.0,1.45,0.0};
+                robot_msg.pose = {0.34,0.0,0.168,0.0,1.57,0.0};
                 pub_robot_->publish(robot_msg);
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
 
@@ -936,7 +941,7 @@ class MainProgram : public rclcpp::Node
             
             case 4070: // send to robot to go to pose right looking down
                 robot_msg.cmd = 6;
-                robot_msg.pose = {0.23319,-0.24479,0.15955,0.0,1.45,-0.785398};
+                robot_msg.pose = {0.23319,-0.24479,0.15955,0.0,1.57,-0.785398};
                 pub_robot_->publish(robot_msg);
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
 
@@ -995,7 +1000,7 @@ class MainProgram : public rclcpp::Node
             
             case 4110: // set robot pose to look down left
                 robot_msg.cmd = 6;
-                robot_msg.pose = {0.23319,0.24479,0.15955,0.0,1.45,0.785398};
+                robot_msg.pose = {0.23319,0.24479,0.15955,0.0,1.57,0.785398};
                 pub_robot_->publish(robot_msg);
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
 
@@ -1248,7 +1253,7 @@ class MainProgram : public rclcpp::Node
 
                 break;
             
-            case 4300: // ball found long look
+            case 4300: // ball found long look, send command to mobile to drive to ball
                 transform_pose = tf_buffer_->lookupTransform(
                     "workspace_center", "ball",
                     tf2::TimePointZero);
@@ -1261,7 +1266,50 @@ class MainProgram : public rclcpp::Node
                 matrix.getRPY(rot_r_lookup, rot_p_lookup, rot_y_lookup);
                 quat_tf_lookup.setRPY(0.0,0.0,rot_y_lookup);
                 target_pose.pose.orientation = tf2::toMsg(quat_tf_lookup);
+                pub_mobile_relative_->publish(target_pose);
+                sfc = 4310;
+            
                 break;
+
+            case 4310: // waitting for mobile base to drive to ball pose
+                if(status_mobile == 1){
+                    status_mobile = 0;
+                    sfc = 4010; // send the back to the shearch function hopefully it will catch it when lokking down in midt
+                }
+                break;
+            
+
+
+            case 4400: // søg der hvor den er
+                 ball_msg.data = 2;
+                pub_camera_ball_->publish(ball_msg); // setting the ball camera off
+                status_ball = 0;
+
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+                
+                sfc = 4410;
+                break;
+
+
+            case 4410:
+                if(status_ball == 1)
+                {
+                    status_ball = 0;
+                    sfc = 4600;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out, No golfball found");
+                    ball_msg.data = 0;
+                    pub_camera_ball_->publish(ball_msg); // setting the ball camera off
+                   
+                    status_ball = 0;
+                    
+                    sfc = 4400;
+                    
+                }
+                break;
+
 
 
             case 4600: // ball found, send command to go to ball
@@ -1285,11 +1333,11 @@ class MainProgram : public rclcpp::Node
                     sfc = 4620;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >25.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
-                    sfc = 4260; // go back and resend the robot cmd
+                    sfc = 4400; // go back and resend the robot cmd
                     if(robot_attempts == 5){
                        // sfc = 6030;
                        RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
@@ -2216,6 +2264,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 8020: // wait for line follow to be done
+                RCLCPP_INFO(this->get_logger(), "Publishing: '%i'", status_linefollow);
                 if (status_linefollow == 90){ // vent på at robotten mister linjen
                 status_linefollow = 0;
                 sfc = 8030;
