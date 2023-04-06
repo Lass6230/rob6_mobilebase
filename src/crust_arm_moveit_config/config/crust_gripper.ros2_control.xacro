@@ -7,7 +7,7 @@
       <hardware>
         <plugin>dynamixel_hardware/DynamixelHardware</plugin>
         <param name="usb_port">/dev/ttyUSB0</param>
-        <param name="baud_rate">115200</param>
+        <param name="baud_rate">57600</param>
         <!-- TO Use it on dummy uncommet this undeer-->
         <!--<param name="use_dummy">true</param>-->
       </hardware>
