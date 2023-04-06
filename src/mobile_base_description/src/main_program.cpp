@@ -2277,6 +2277,7 @@ class MainProgram : public rclcpp::Node
                     status_linefollow = 0;
                     sfc = 8040;
                 }
+                RCLCPP_INFO(this->get_logger(), "Publishing: '%i'", status_linefollow);
                 break;
             case 8040:
                 if (status_linefollow == 50){
