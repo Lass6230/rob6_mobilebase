@@ -279,7 +279,7 @@ def generate_launch_description():
     
     ld.add_action(odomZOH)
     ld.add_action(robot_state_publisher)
-    #ld.add_action(rviz_cmd)
+    ld.add_action(rviz_cmd)
     ld.add_action(bringup_cmd)
 
     
