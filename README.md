@@ -18,6 +18,7 @@ git clone https://github.com/rst-tu-dortmund/teb_local_planner.git -b galactic
 git clone https://github.com/rst-tu-dortmund/costmap_converter.git -b ros2 
 git clone https://github.com/SICKAG/sick_safetyscanners2.git 
 cd ..
+rosdep update --include-eol
 rosdep install -y -r -q --from-paths src --ignore-src --rosdistro galactic
 colcon build --symlink-install
 # remember to source the workspace !

@@ -209,17 +209,21 @@ controller_server:
       acc_lim_theta: 3.2
 
       footprint_model: # types: "point", "circular", "two_circles", "line", "polygon"
-        type: "circular"
-        radius: 0.17
+        type: "line"
+        line_start: [0.1, 0.0] # for type "line"
+        line_end: [-0.3, 0.0] # for type "line"
 
-        type: "two_circles"
-        front_offset: 0.1 # for type "two_circles"
-        front_radius: 0.18 # for type "two_circles"
-        rear_offset: 0.25 # for type "two_circles"
-        rear_radius: 0.18 # for type "two_circles"
+        # type: "circular"
+        # radius: 0.17
         
-        #type: "polygon"
-        #vertices: [ [0.3, 0.06], [0.3, -0.14], [0.13, -0.17], [-0.43, -0.17], [-0.43, 0.17], [0.13, 0.17], [0.2, 0.17],  ]
+        # type: "two_circles"
+        # front_offset: 0.1 # for type "two_circles"
+        # front_radius: 0.18 # for type "two_circles"
+        # rear_offset: 0.25 # for type "two_circles"
+        # rear_radius: 0.18 # for type "two_circles"
+
+        # type: "polygon"
+        # vertices: [ [0.3, 0.06], [0.3, -0.14], [0.13, -0.17], [-0.43, -0.17], [-0.43, 0.17], [0.13, 0.17], [0.2, 0.17],  ]
       
 
       # GoalTolerance
@@ -228,7 +232,7 @@ controller_server:
           
       # Obstacles
           
-      min_obstacle_dist: 0.27
+      min_obstacle_dist: 0.18
       inflation_dist: 0.6
       include_costmap_obstacles: True
       costmap_obstacles_behind_robot_dist: 1.0
@@ -254,8 +258,8 @@ controller_server:
       weight_acc_lim_x: 0.5
       weight_acc_lim_theta: 10.5
       weight_kinematics_nh: 1000.0
-      weight_kinematics_forward_drive: 3.0
-      weight_kinematics_turning_radius: 1.0
+      weight_kinematics_forward_drive: 500.0 # 3.0
+      weight_kinematics_turning_radius: 0.2 #1.0
       weight_optimaltime: 1.0 # must be > 0
       weight_shortest_path: 0.0
       weight_obstacle: 100.0
