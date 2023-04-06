@@ -2224,16 +2224,22 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 8030:
-                if (status_linefollow == 11){ // når robotten har mistet linjen vil vi gerne have den til at bare køre lige så stille frem for at finde linjen igen
+                if (status_linefollow == 40){ // når robotten har mistet linjen vil vi gerne have den til at bare køre lige så stille frem for at finde linjen igen
                     status_linefollow = 0;
                     sfc = 8040;
                 }
                 break;
-
-            case 8040: // måske tilføje en måde at bestemme hvilken vej vi drejer i tilfælde af linjen er horizontal som den ville være i dette tilfælde
+            case 8040:
+                if (status_linefollow == 50){
+                    status_linefollow = 0;
+                    sfc = 8050;
+                }
+                break;
+                
+            case 8050: // måske tilføje en måde at bestemme hvilken vej vi drejer i tilfælde af linjen er horizontal som den ville være i dette tilfælde
                 linefollow_msg.data = 1; // her slår vi normal line mode til igen så den vil prøve at finde linjen igen 
                 pub_linefollow_->publish(linefollow_msg);
-                sfc = 8999;
+                sfc = 8050;
                 break;
 
 
