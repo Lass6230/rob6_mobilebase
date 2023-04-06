@@ -409,7 +409,7 @@ class RobotHandler : public rclcpp::Node
           tf2::Matrix3x3 m(quat_tf);
           m.getRPY(rot_r, rot_p, rot_y);
           
-          quat_tf.setRPY(0.0,1.44,atan2(target_pose.transform.translation.y, target_pose.transform.translation.x));
+          quat_tf.setRPY(0.0,1.57,atan2(target_pose.transform.translation.y, target_pose.transform.translation.x));
           RCLCPP_INFO(LOGGER,"R: %f", rot_r);
           RCLCPP_INFO(LOGGER,"P: %f", rot_p);
           RCLCPP_INFO(LOGGER,"Y: %f", rot_y);
@@ -417,9 +417,24 @@ class RobotHandler : public rclcpp::Node
           bool i = RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z+0.1,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.5);
           if(i == 1){
 
-            return RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z-0.03,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.05);
+            i =  RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z-0.03,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.05);
           }
           else{
+            return false;
+          }
+          if(i == 1){
+            i = RobotHandler::gripperOn();
+          }
+          else
+          {
+            return false;
+          }
+          if(i == 1)
+          {
+            return RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z+0.1,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.5);
+          }
+          else
+          {
             return false;
           }
 
@@ -454,7 +469,7 @@ class RobotHandler : public rclcpp::Node
           double rot_r{}, rot_p{}, rot_y{};
           tf2::Matrix3x3 m(quat_tf);
           m.getRPY(rot_r, rot_p, rot_y);
-          quat_tf.setRPY(0.0,1.44,atan2(target_pose.transform.translation.y, target_pose.transform.translation.x));
+          quat_tf.setRPY(0.0,1.57,atan2(target_pose.transform.translation.y, target_pose.transform.translation.x));
           RCLCPP_INFO(LOGGER,"R: %f", rot_r);
           RCLCPP_INFO(LOGGER,"P: %f", rot_p);
           RCLCPP_INFO(LOGGER,"Y: %f", rot_y);
@@ -465,9 +480,24 @@ class RobotHandler : public rclcpp::Node
           bool i = RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x -0.01,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z+0.1,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.5);
           if(i == 1){
 
-            return RobotHandler::CartesianPath(target_pose.transform.translation.x + x -0.01,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z -0.03,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.05);
+            i = RobotHandler::CartesianPath(target_pose.transform.translation.x + x -0.01,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z -0.03,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.05);
           }
           else{
+            return false;
+          }
+          if(i == 1){
+            i = RobotHandler::gripperOn();
+          }
+          else
+          {
+            return false;
+          }
+          if(i == 1)
+          {
+            return RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x -0.01,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z+0.1,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.5);
+          }
+          else
+          {
             return false;
           }
         } catch (const tf2::TransformException & ex) {
