@@ -11,6 +11,7 @@ find_package(rclcpp REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 find_package(message_filters REQUIRED)
 find_package(crust_msgs REQUIRED)
 
@@ -25,7 +26,16 @@ ament_target_dependencies(
   tf2
   tf2_ros
   nav_msgs
+  sensor_msgs
   crust_msgs 
+)
+
+add_executable(joy_listner src/joy_control.cpp)
+ament_target_dependencies(
+  joy_listner
+  rclcpp
+  #std_msgs
+  sensor_msgs 
 )
 
 add_executable(odom_rebroadcaster src/odom_ZOH.cpp)
@@ -41,6 +51,7 @@ ament_target_dependencies(
 install(TARGETS
   odom_rebroadcaster
   main_program
+  joy_listner
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY

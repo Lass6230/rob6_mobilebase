@@ -26,6 +26,7 @@
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include "tf2_ros/buffer.h"
 #include <vector>
+#include <sensor_msgs/msg/joy.hpp>
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -71,6 +72,10 @@ class MainProgram : public rclcpp::Node
             
             sub_linefollow_ = this->create_subscription<std_msgs::msg::Int32>("/lineStatus", 10,std::bind(&MainProgram::subLineStatus, this, _1), sub1_opt);
             pub_linefollow_ = this->create_publisher<std_msgs::msg::Int32>("/cmd_lineFollow", 10);
+
+            sub_joy_status_ = this->create_subscription<std_msgs::msg::Bool>("/joy_status",10,std::bind(&MainProgram::subJoyStatus, this, _1), sub1_opt);
+            //sub_joy_ = this->create_subscription<sensor_msgs::msg::Joy>("/joy",10,std::bind(&MainProgram::subJoyStatus, this, _1), sub1_opt);
+            
             ///////////// Line status og cmd koder ////////////////////////////
 
                 //STATUS MED KOMMANDO NØDVENDIG
@@ -188,6 +193,10 @@ class MainProgram : public rclcpp::Node
         }
     
     private:
+        void subJoyStatus(const std_msgs::msg::Bool & msg){
+            joy_status = msg.data;
+
+        }
         void subLineStatus(const std_msgs::msg::Int32 & msg){
             status_linefollow = msg.data;
         }
@@ -232,6 +241,8 @@ class MainProgram : public rclcpp::Node
 
             // robot look out positions
             // long look x:0.23881 Y:0.2679 Z:0.18507 R0.0 P:0.785398163 Y0.0
+            if(joy_status == true)
+            {
 
             switch (sfc)
             {
@@ -241,7 +252,7 @@ class MainProgram : public rclcpp::Node
                 // t_time1 = clock();
                 // m_lastTime1 = m_clock->now().seconds();
                 
-                sfc = 4000;//6000;//4000;//155;//1100;
+                sfc = 2050;//6000;//4000;//155;//1100;
 
                 break;
             case 10:
@@ -716,6 +727,7 @@ class MainProgram : public rclcpp::Node
                 robot_msg.cmd = 3;
                 robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};
                 pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds();
                 sfc = 2040;
                 break;
             
@@ -726,7 +738,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 2050;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >25.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
@@ -743,16 +755,17 @@ class MainProgram : public rclcpp::Node
             case 2050: // start line follower
                 linefollow_msg.data = 1;
                 pub_linefollow_->publish(linefollow_msg);
+                m_lastTime1 = m_clock->now().seconds();
                 sfc= 2060;
                 break;
             
             case 2060: // waitting for line follower to be done
                 if (status_linefollow == 20){ //line following har fundet en sammenfletning eller skarpt sving og venter på en svar fra ros
                     status_linefollow = 0;
-                    sfc = 2070;
+                    sfc = 2090;
                 }
                 m_lastTime2 = m_clock->now().seconds();
-                if ((m_lastTime2-m_lastTime1)> 15.0){
+                if ((m_lastTime2-m_lastTime1)> 45.0){
                     RCLCPP_INFO(this->get_logger(),"timed out");
                 }
                 break;
@@ -790,10 +803,15 @@ class MainProgram : public rclcpp::Node
             case 2090: // start line following igen vi vil gerne have den til at køre til venstre i sammenfletningen
                 linefollow_msg.data = 5; // set linefollowing til og kør til venstre i sammenfletning
                 pub_linefollow_->publish(linefollow_msg);
-                sfc = 2100;
+                sfc = 2095;
 
                 break;
             
+            case 2095:
+                linefollow_msg.data = 6;
+                pub_linefollow_->publish(linefollow_msg);
+                sfc = 2100;
+
             case 2100:
                 if (status_linefollow == 20) { //se hvornår linefollow rammer sammenfletning / skarp sving
                     status_linefollow = 0;
@@ -805,10 +823,13 @@ class MainProgram : public rclcpp::Node
             case 2110:
                 linefollow_msg.data = 4;
                 pub_linefollow_->publish(linefollow_msg);
-                sfc = 2120;
+                sfc = 2115;
 
                 break;
-            
+            case 2115:
+                linefollow_msg.data = 6;
+                pub_linefollow_->publish(linefollow_msg);
+                sfc = 2120;
             case 2120:
                 if (status_linefollow == 20){ // når vi ser det næste cross burde vi være ved opgaven
                     status_linefollow = 0;
@@ -1702,6 +1723,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 6060: // waitting for camera to detect aruco code
+                m_lastTime2 = m_clock->now().seconds(); // get time now
                 if(status_aruco == 5|| status_aruco == 6 || status_aruco == 20) // check if aruco code is found for rød or green or yellow
                 {
                     // the color code is store in the variable status_aruco
@@ -1733,10 +1755,10 @@ class MainProgram : public rclcpp::Node
                 if(robot_status == 1){ // check if robot is done
                     robot_status = 0;
                     robot_attempts = 0;
-                    sfc = 6090;
+                    sfc = 6110;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >25.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
@@ -1751,6 +1773,7 @@ class MainProgram : public rclcpp::Node
 
                 break;
             
+            // Not used
             case 6090: // close gripper
                 robot_msg.cmd = 18; // close gripper
                 robot_msg.pose = {-0.3,-0.3};
@@ -1761,7 +1784,7 @@ class MainProgram : public rclcpp::Node
                 sfc = 6100;
 
                 break;
-            
+            /// not used
             case 6100: // waitting for gripper to close
                 if(robot_status == 1){ // check if robot is done
                     robot_status = 0;
@@ -1940,7 +1963,7 @@ class MainProgram : public rclcpp::Node
                 break;
 
             case 6210: // move robot to ball pose
-                robot_msg.cmd = 16; // go to ball
+                robot_msg.cmd = 22; // go to ball
                 robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};
                 pub_robot_->publish(robot_msg);
                 ball_msg.data = false;
@@ -1956,17 +1979,17 @@ class MainProgram : public rclcpp::Node
                 if(robot_status == 1){
                     robot_status = 0;
                     robot_attempts = 0;
-                    sfc = 6230;
+                    sfc = 6240;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >25.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
                     sfc = 6190; // go back and resend the robot cmd
                     
                 }
                 break;
-            
+            // not used
             case 6230: // close gripper
                 robot_msg.cmd = 18; // close gripper
                 robot_msg.pose = {0.37336,-0.007814,0.24958,0.0,1.57,0.0};
@@ -1977,7 +2000,7 @@ class MainProgram : public rclcpp::Node
                 sfc = 6240;
 
                 break;
-            
+            // not used
             case 6235: // waitting for gripper to close
                 if(robot_status == 1){ // check if robot is done
                     robot_status = 0;
@@ -2267,19 +2290,21 @@ class MainProgram : public rclcpp::Node
                 RCLCPP_INFO(this->get_logger(), "Publishing: '%i'", status_linefollow);
                 if (status_linefollow == 90){ // vent på at robotten mister linjen
                 status_linefollow = 0;
-                sfc = 8030;
+                sfc = 8040;
 
                 }
                 break;
             
+            /// NOT USED
             case 8030:
-                if (status_linefollow == 40){ // når robotten har mistet linjen vil vi gerne have den til at bare køre lige så stille frem for at finde linjen igen
+                if (status_linefollow == 50){ // når robotten har mistet linjen vil vi gerne have den til at bare køre lige så stille frem for at finde linjen igen
                     status_linefollow = 0;
                     sfc = 8040;
                 }
                 RCLCPP_INFO(this->get_logger(), "Publishing: '%i'", status_linefollow);
                 break;
             case 8040:
+                RCLCPP_INFO(this->get_logger(), "Publishing: '%i'", status_linefollow);
                 if (status_linefollow == 50){
                     status_linefollow = 0;
                     sfc = 8050;
@@ -2703,6 +2728,7 @@ class MainProgram : public rclcpp::Node
             default:
                 break;
             }
+            }
             RCLCPP_INFO(this->get_logger(), "sfc: %d",sfc);
         }
         
@@ -2799,6 +2825,12 @@ class MainProgram : public rclcpp::Node
         rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr pub_linefollow_;
         int32_t status_linefollow = 0;
         std_msgs::msg::Int32 linefollow_msg;
+
+
+        // joystick
+        // rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr sub_joy_;
+        bool joy_status = true; 
+        rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr sub_joy_status_;
 
 
 };
