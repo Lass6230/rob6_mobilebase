@@ -241,7 +241,7 @@ class MainProgram : public rclcpp::Node
                 // t_time1 = clock();
                 // m_lastTime1 = m_clock->now().seconds();
                 
-                sfc = 6000;//6000;//4000;//155;//1100;
+                sfc = 8000;//6000;//4000;//155;//1100;
 
                 break;
             case 10:
@@ -2271,11 +2271,12 @@ class MainProgram : public rclcpp::Node
                 RCLCPP_INFO(this->get_logger(), "Publishing: '%i'", status_linefollow);
                 if (status_linefollow == 90){ // vent på at robotten mister linjen
                 status_linefollow = 0;
-                sfc = 8030;
+                sfc = 8040;
 
                 }
                 break;
             
+            /// NOT USED
             case 8030:
                 if (status_linefollow == 40){ // når robotten har mistet linjen vil vi gerne have den til at bare køre lige så stille frem for at finde linjen igen
                     status_linefollow = 0;
@@ -2284,6 +2285,7 @@ class MainProgram : public rclcpp::Node
                 RCLCPP_INFO(this->get_logger(), "Publishing: '%i'", status_linefollow);
                 break;
             case 8040:
+                RCLCPP_INFO(this->get_logger(), "Publishing: '%i'", status_linefollow);
                 if (status_linefollow == 50){
                     status_linefollow = 0;
                     sfc = 8050;
