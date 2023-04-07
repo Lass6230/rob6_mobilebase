@@ -7,14 +7,18 @@ from cv2 import aruco
 import numpy as np
 import message_filters 
 from std_msgs.msg import Bool, Int8
-import imutils
+#import imutils
 
 from geometry_msgs.msg import TransformStamped
 from tf2_ros import TransformBroadcaster
 
+import time
+
 class ImageSubscriberNode(Node):
     
     search = 1
+
+   
 
     def __init__(self):
         super().__init__('image_subscriber_node')
@@ -39,202 +43,109 @@ class ImageSubscriberNode(Node):
 
     def image_callback(self, rgb_image, depth_image):
         if self.search == 1 or self.search == 2:
-            cv_image = self.bridge.imgmsg_to_cv2(rgb_image, desired_encoding='passthrough')
+            cv_image = self.bridge.imgmsg_to_cv2(rgb_image, desired_encoding='bgr8')
             cv_depth = self.bridge.imgmsg_to_cv2(depth_image, desired_encoding="passthrough")
+            cv2.waitKey(1)
+            #time.sleep(1)
             self.process_image(cv_image, cv_depth)
 
     
-    def post_process(self, image, color):
-        kernel = np.ones((9, 9), np.uint8)
-        image = cv2.erode(image, kernel)
-        image = cv2.dilate(image, kernel)
-        blur = cv2.medianBlur(image, 9)
-        #text = "post process: " + str(color)
-        #cv2.imshow(text, blur)
-        return blur
+    def detector(self, frame, colors_to_detect):
+        
+        
+
+        hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
+        # loop through each color to detect
+        for color in colors_to_detect:
+            #print(f"looking for {color[6]}")
+            # define the range of colors in HSV color space
+            lower_color = np.array([color[0], color[1], color[2]])
+            upper_color = np.array([color[3], color[4], color[5]])
+        
+            # create a mask for the color range
+            mask = cv2.inRange(hsv, lower_color, upper_color)
+
+            # close the found
+            kernel_close = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+            mask_closed = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel_close)
+            
+            # find the contours of the golf balls in the mask
+            contours, hierarchy = cv2.findContours(mask_closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            #cv2.imshow("bruh", frame)
+
+            #cv2.imshow("mask", mask)
+            #averages = []
+            # loop through each contour
+            for contour in contours:
+                # find the center and radius of the circle that encloses the contour
+                (x,y), radius = cv2.minEnclosingCircle(contour)
+                r = radius
+                center = (int(x),int(y))
+                radius = int(radius)
+
+                if radius > 5:
+                    # compute the circularity of the circle
+                    mask_circle = np.zeros_like(mask_closed)
+                    cv2.circle(mask_circle, center, radius, 255, -1)
+                
+                    area_color = cv2.countNonZero(cv2.bitwise_and(mask_closed, mask_circle))
+                    
+                    # compute the area of a perfect circle with the same radius
+                    area_circle = np.pi * r * r
+
+                    # compute the circularity ratio
+                    circularity = area_color / area_circle
+
+                    if circularity > 0.8:
+                        #circle found!
+                        cv2.circle(frame, center, radius, color[7], 2)
+                        #save
+                        #cv2.imshow("ball", frame)
+
+                        return 0, mask, contour, color[6], x, y 
+
+
+        return 1 ,0,0,0,0,0
        
 
 
     def process_image(self, cv_image, cv_depth):
-        cv_image = cv2.GaussianBlur(cv_image, (11, 11), 0)
-        # # Blue
-        
-        #frame_HSV = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
-        #frame_threshold_blue = cv2.inRange(frame_HSV, (14, 148, 122), (23, 255, 255))
-        #frame_threshold_blue = cv2.inRange(frame_HSV, (17, 156, 54), (255, 255, 255))#(14, 97, 77), (24, 255, 255)
-        #cv2.imshow("blue", frame_threshold_blue)
-         
-       
-        #cv2.imshow("green", frame_threshold_green)
+
         if self.search == 1:
-            # # Yellow
-            frame_HSV = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
-            frame_threshold_yellow = cv2.inRange(frame_HSV, (54, 41, 149), (94, 220, 255))
-            
-            # Green
-            frame_HSV = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
-            frame_threshold_green = cv2.inRange(frame_HSV, (0, 78, 0), (80, 255, 255))
-        
-            # red
-            frame_HSV = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
-            frame_threshold_red = cv2.inRange(frame_HSV, (104, 132, 184), (186, 255, 220))
-
-            frame_all = frame_threshold_green + frame_threshold_yellow + frame_threshold_red# + frame_threshold_blue
-        elif self.search == 2:
-
-            # orange
-            frame_HSV = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
-            frame_threshold_orange = cv2.inRange(frame_HSV, (90, 158, 193), (255, 255, 255))
-
-            # pink
-            frame_HSV = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
-            frame_threshold_pink = cv2.inRange(frame_HSV, (113, 22, 129), (255, 110, 255))
-
-            frame_all = frame_threshold_pink + frame_threshold_orange
-        
-        #cv2.imshow("yellow", frame_threshold_yellow)
-
-        #frame_all = frame_threshold_green + frame_threshold_yellow + frame_threshold_blue
-
-        blur = self.post_process(frame_all, "green")
-
-        cnts = cv2.findContours(blur.copy(), cv2.RETR_EXTERNAL,
-                            cv2.CHAIN_APPROX_SIMPLE)
-        cnts = imutils.grab_contours(cnts)
-        center = None
-
-        if len(cnts) > 0:
-            c = max(cnts, key=cv2.contourArea)
-            ((x, y), radius) = cv2.minEnclosingCircle(c)
-            M = cv2.moments(c)
-            center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-            width, height = cv_image.shape[:2]
-            if radius > 10:
-                cv2.circle(cv_image, (int(x), int(y)), int(radius), (0, 255, 255), 5)
-                #cv2.imwrite("circled_frame.png", cv2.resize(cv_image, (int(height / 2), int(width / 2))))
-                cv2.circle(cv_image, center, 5, (0, 0, 255), -1)
-                radius_i = int(radius)
-                self.get_logger().info("radius_i: %i" %radius_i)
-                x, y = center
-                count = 0
-                sum = 0
-                range2 = 0
-                # for k in blur[0,:]:
-                #     for j in blur[:,k]:
-                #         count +=1
-                if radius_i < 80 and radius_i >10:
-                    if radius_i + y < 480 and radius_i + x < 640:
-
-                        for k in range(radius_i):
-                            for j in range(radius_i):
-                                count +=1
-                                sum += cv_depth[y+j,x+k]
-                        for k in range(-radius_i):
-                            for j in range(-radius_i):
-                                count +=1
-                                sum += cv_depth[y+j,x+k]
-                        
-                        range2 = sum/count
-
-                    self.get_logger().info("range: %f" %range2)
-
-                    z = range2 +0.0215
-
-                    if z < 2000:
-                        # circle center
-                        #cv2.circle(cv_image, center, 1, (0, 100, 100), 3)
-                        # circle outline
-                        #radius = i[2]
-                        #cv2.circle(cv_image, center, radius, (255, 0, 255), 3)
-
-                        self.calculate_cartesian(x, y, z, cv_image,range2)
-
-                    else:
-                        print("ball rejected: >2m")
-                    # circle center
-                    #cv2.circle(cv_image, center, 1, (0, 255, 255), 3)
-                    # circle outline
-                    #radius = i[2]
-                    #cv2.circle(cv_image, center, radius, (0, 0, 255), 3)
-        
-        #circles = cv2.HoughCircles(blur, cv2.HOUGH_GRADIENT, dp=1, minDist=50,
-        #                       param1=1000, param2=15, minRadius=10, maxRadius=80)
+            colors_to_detect = [
+                #(Lhue, Lsat, Lval, Hhue, Hsat, Hval, color, color in BGR)
+                (105, 81, 249, 129, 235, 255, "red", (0, 0, 255)), # Red works well
+                (87, 81, 166, 105, 177, 255, "yellow", (0, 255, 255)), # Yellow good
+                (32, 62, 88, 94, 255, 255, "green", (0, 255, 0)) #green good? (32, 62, 88, 94, 186, 255, "green", (0, 255, 0))
+                ]
+            status, mask, contour, color, x, y, = self.detector(cv_image, colors_to_detect)
     
-        #print(circles)
-        # if circles is not None:
-        #     circles = np.uint16(np.around(circles))
-        #     for i in circles[0, :]:
-        #         center = (i[0], i[1])
-        #         x, y = center
-        #         z = cv_depth[y,x]
-        #         radius_i = int(i[2]/2)
-        #         #self.get_logger().info('z: "%f"' % z)
-        #         #self.get_logger().info("pixel x: %i" %x)
-        #         #self.get_logger().info("pixel y: %i" %y)
-        #         #self.get_logger().info("radius: %i" %radius_i)
-        #         count = 0
-        #         sum = 0
-        #         range2 = 0
-        #         # for k in blur[0,:]:
-        #         #     for j in blur[:,k]:
-        #         #         count +=1
-
-        #         if radius_i + y < 640 or radius_i + x < 640:
-
-        #             for k in range(radius_i):
-        #                 for j in range(radius_i):
-        #                     count +=1
-        #                     sum += cv_depth[y+j,x+k]
-        #             for k in range(-radius_i):
-        #                 for j in range(-radius_i):
-        #                     count +=1
-        #                     sum += cv_depth[y+j,x+k]
-                
-                
-                
-                # #self.get_logger().info("count: %i" %count)
-                # #self.get_logger().info("sum: %f" %sum)
-                # range2 = sum/count
-
-                # self.get_logger().info("range: %f" %range2)
-
-                # z = range2+0.05
-                # # radius_i =i[2]
-                # # sum = 0
-                # # count = 0
-                # # for k in range(radius_i):
-                # #     for j in range(radius_i):
-                # #         sum += cv_depth[y+k,x+j]
-                # #         count += 1
-                # # for k in range(-radius_i):
-                # #     for j in range(-radius_i):
-                # #         sum += cv_depth[y+k,x+j]
-                # #         count += 1
-                # # print(str(sum/count))
-
-                # if z < 2000:
-                #     # circle center
-                #     cv2.circle(cv_image, center, 1, (0, 100, 100), 3)
-                #     # circle outline
-                #     radius = i[2]
-                #     cv2.circle(cv_image, center, radius, (255, 0, 255), 3)
-
-                #     self.calculate_cartesian(x, y, z, cv_image,range2)
-
-                # else:
-                #     print("ball rejected: >2m")
-                #     # circle center
-                #     cv2.circle(cv_image, center, 1, (0, 255, 255), 3)
-                #     # circle outline
-                #     radius = i[2]
-                #     cv2.circle(cv_image, center, radius, (0, 0, 255), 3)
+        elif self.search == 2:
+            colors_to_detect = [
+                #(Lhue, Lsat, Lval, Hhue, Hsat, Hval, color, color in BGR)
+                (115, 33, 158, 134, 98, 255, "pink", (147, 112, 219)), # Pink decent
+                (110, 110, 114, 119, 195, 255, "orange", (0, 165, 255)), # Orange decent
+                ]
+            status, mask, contour, color, x, y = self.detector(cv_image, colors_to_detect)
+        
+        
+        if not status:
+            mask = np.zeros(cv_depth.shape, np.uint8)
+            cv2.drawContours(mask, [contour], 0, 255, -1)
+            
+            # Calculate average value of gray image within mask
+            avg = cv2.mean(cv_depth, mask=mask)[0]
+            z = avg / 1000 + 0.0215
+            cv2.imshow("depthmask",mask)
+            #print(z)
+            self.get_logger().info(f"{color} ball seen at depth: {z}")
+            self.calculate_cartesian(x, y, z, cv_image)
 
 
-        cv2.imshow("detected circles", cv_image)
-        cv2.waitKey(1)
 
+           
 
-    def calculate_cartesian(self, x, y, z, cv_image, range2):
+    def calculate_cartesian(self, x, y, z, cv_image):
         center_x, center_y = cv_image.shape[1]/2, cv_image.shape[0]/2
                     
         #calculate angle from center
