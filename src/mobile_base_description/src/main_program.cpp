@@ -26,6 +26,7 @@
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include "tf2_ros/buffer.h"
 #include <vector>
+#include <sensor_msgs/msg/joy.hpp>
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -71,6 +72,10 @@ class MainProgram : public rclcpp::Node
             
             sub_linefollow_ = this->create_subscription<std_msgs::msg::Int32>("/lineStatus", 10,std::bind(&MainProgram::subLineStatus, this, _1), sub1_opt);
             pub_linefollow_ = this->create_publisher<std_msgs::msg::Int32>("/cmd_lineFollow", 10);
+
+           
+            //sub_joy_ = this->create_subscription<sensor_msgs::msg::Joy>("/joy",10,std::bind(&MainProgram::subJoyStatus, this, _1), sub1_opt);
+            
             ///////////// Line status og cmd koder ////////////////////////////
 
                 //STATUS MED KOMMANDO NØDVENDIG
@@ -188,6 +193,10 @@ class MainProgram : public rclcpp::Node
         }
     
     private:
+        // void subJoyStatus(const sensor_msgs::msg::Joy & msg){
+        //     joy_status = msg.buttons[5];
+
+        // }
         void subLineStatus(const std_msgs::msg::Int32 & msg){
             status_linefollow = msg.data;
         }
@@ -241,7 +250,7 @@ class MainProgram : public rclcpp::Node
                 // t_time1 = clock();
                 // m_lastTime1 = m_clock->now().seconds();
                 
-                sfc = 8000;//6000;//4000;//155;//1100;
+                sfc = 2050;//6000;//4000;//155;//1100;
 
                 break;
             case 10:
@@ -751,7 +760,7 @@ class MainProgram : public rclcpp::Node
             case 2060: // waitting for line follower to be done
                 if (status_linefollow == 20){ //line following har fundet en sammenfletning eller skarpt sving og venter på en svar fra ros
                     status_linefollow = 0;
-                    sfc = 2070;
+                    sfc = 2090;
                 }
                 m_lastTime2 = m_clock->now().seconds();
                 if ((m_lastTime2-m_lastTime1)> 15.0){
@@ -798,7 +807,7 @@ class MainProgram : public rclcpp::Node
             
             case 2095:
                 linefollow_msg.data = 6;
-                pub_limefollow_->publish(linefollow_msg);
+                pub_linefollow_->publish(linefollow_msg);
                 sfc = 2100;
 
             case 2100:
@@ -2810,6 +2819,11 @@ class MainProgram : public rclcpp::Node
         rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr pub_linefollow_;
         int32_t status_linefollow = 0;
         std_msgs::msg::Int32 linefollow_msg;
+
+
+        // joystick
+        // rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr sub_joy_;
+        // int32_t joy_status = 1;
 
 
 };
