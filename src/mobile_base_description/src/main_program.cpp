@@ -812,10 +812,13 @@ class MainProgram : public rclcpp::Node
             case 2110:
                 linefollow_msg.data = 4;
                 pub_linefollow_->publish(linefollow_msg);
-                sfc = 2120;
+                sfc = 2115;
 
                 break;
-            
+            case 2115:
+                linefollow_msg.data = 6;
+                pub_linefollow_->publish(linefollow_msg);
+                sfc = 2120;
             case 2120:
                 if (status_linefollow == 20){ // når vi ser det næste cross burde vi være ved opgaven
                     status_linefollow = 0;
@@ -2282,7 +2285,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 8030:
-                if (status_linefollow == 40){ // når robotten har mistet linjen vil vi gerne have den til at bare køre lige så stille frem for at finde linjen igen
+                if (status_linefollow == 50){ // når robotten har mistet linjen vil vi gerne have den til at bare køre lige så stille frem for at finde linjen igen
                     status_linefollow = 0;
                     sfc = 8040;
                 }
