@@ -135,7 +135,8 @@ class ImageSubscriberNode(Node):
                                 sum += cv_depth[y+j,x+k]
                         
                         range2 = sum/count
-
+                    else:
+                        range2 = cv_depth[y,x]
                     self.get_logger().info("range: %f" %range2)
 
                     z = range2 +0.0215
