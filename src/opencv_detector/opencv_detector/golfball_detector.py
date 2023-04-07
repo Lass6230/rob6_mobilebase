@@ -19,7 +19,6 @@ class ImageSubscriberNode(Node):
     search = 1
 
    
-
     def __init__(self):
         super().__init__('image_subscriber_node')
         self.bridge = CvBridge()
@@ -136,7 +135,7 @@ class ImageSubscriberNode(Node):
             # Calculate average value of gray image within mask
             avg = cv2.mean(cv_depth, mask=mask)[0]
             z = avg / 1000 + 0.0215
-            cv2.imshow("depthmask",mask)
+            #cv2.imshow("depthmask",mask)
             #print(z)
             self.get_logger().info(f"{color} ball seen at depth: {z}")
             self.calculate_cartesian(x, y, z, cv_image)
