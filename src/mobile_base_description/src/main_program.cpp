@@ -73,7 +73,7 @@ class MainProgram : public rclcpp::Node
             sub_linefollow_ = this->create_subscription<std_msgs::msg::Int32>("/lineStatus", 10,std::bind(&MainProgram::subLineStatus, this, _1), sub1_opt);
             pub_linefollow_ = this->create_publisher<std_msgs::msg::Int32>("/cmd_lineFollow", 10);
 
-           
+            sub_joy_status_ = this->create_subscription<std_msgs::msg::Bool>("/joy_status",10,std::bind(&MainProgram::subJoyStatus, this, _1), sub1_opt);
             //sub_joy_ = this->create_subscription<sensor_msgs::msg::Joy>("/joy",10,std::bind(&MainProgram::subJoyStatus, this, _1), sub1_opt);
             
             ///////////// Line status og cmd koder ////////////////////////////
@@ -193,10 +193,10 @@ class MainProgram : public rclcpp::Node
         }
     
     private:
-        // void subJoyStatus(const sensor_msgs::msg::Joy & msg){
-        //     joy_status = msg.buttons[5];
+        void subJoyStatus(const std_msgs::msg::Bool & msg){
+            joy_status = msg.data;
 
-        // }
+        }
         void subLineStatus(const std_msgs::msg::Int32 & msg){
             status_linefollow = msg.data;
         }
@@ -241,6 +241,8 @@ class MainProgram : public rclcpp::Node
 
             // robot look out positions
             // long look x:0.23881 Y:0.2679 Z:0.18507 R0.0 P:0.785398163 Y0.0
+            if(joy_status == true)
+            {
 
             switch (sfc)
             {
@@ -763,7 +765,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 2090;
                 }
                 m_lastTime2 = m_clock->now().seconds();
-                if ((m_lastTime2-m_lastTime1)> 15.0){
+                if ((m_lastTime2-m_lastTime1)> 45.0){
                     RCLCPP_INFO(this->get_logger(),"timed out");
                 }
                 break;
@@ -2726,6 +2728,7 @@ class MainProgram : public rclcpp::Node
             default:
                 break;
             }
+            }
             RCLCPP_INFO(this->get_logger(), "sfc: %d",sfc);
         }
         
@@ -2826,7 +2829,8 @@ class MainProgram : public rclcpp::Node
 
         // joystick
         // rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr sub_joy_;
-        // int32_t joy_status = 1;
+        bool joy_status = true; 
+        rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr sub_joy_status_;
 
 
 };

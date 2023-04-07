@@ -32,14 +32,14 @@ def generate_launch_description():
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(crust_launch,'real_base_gripper.launch.py')),
             launch_arguments={
-                'headless': True,
+                'headless': 'true',
             }.items()
         ),
         IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(os.path.join(opencv_launch,'rs_launch.py')),
+            PythonLaunchDescriptionSource(os.path.join(opencv_detector_dir,'rs_launch.py')),
         ),
         IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(os.path.join(lidar_launch,'sick_safetyscanners2_launch.py'))
+           PythonLaunchDescriptionSource(os.path.join(lidar_launch,'sick_safetyscanners2_launch.py'))
         )
         
 
@@ -51,11 +51,17 @@ def generate_launch_description():
         name='main_program',
     )
 
+    joy_control_node = launch_ros.actions.Node(
+        package= 'mobile_base_description',
+        executable='joy_listner',
+        name='joy_listner',
+    )
 
 
     ld = LaunchDescription()
 
     ld.add_action(bringup_cmd_group)
+    ld.add_action(joy_control_node)
     ld.add_action(main_program_node)
 
     return ld
