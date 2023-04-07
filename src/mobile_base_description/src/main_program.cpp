@@ -792,10 +792,15 @@ class MainProgram : public rclcpp::Node
             case 2090: // start line following igen vi vil gerne have den til at køre til venstre i sammenfletningen
                 linefollow_msg.data = 5; // set linefollowing til og kør til venstre i sammenfletning
                 pub_linefollow_->publish(linefollow_msg);
-                sfc = 2100;
+                sfc = 2095;
 
                 break;
             
+            case 2095:
+                linefollow_msg.data = 6;
+                pub_limefollow_->publish(linefollow_msg);
+                sfc = 2100;
+
             case 2100:
                 if (status_linefollow == 20) { //se hvornår linefollow rammer sammenfletning / skarp sving
                     status_linefollow = 0;
