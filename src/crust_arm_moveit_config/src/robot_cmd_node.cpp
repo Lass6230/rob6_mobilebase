@@ -192,6 +192,10 @@ class RobotHandler : public rclcpp::Node
               case 21:
                 status_msg.data = RobotHandler::RealativeJointMovement(robot_msg.pose[0],robot_msg.pose[1],robot_msg.pose[2],robot_msg.pose[3]);
                 break;
+              
+              case 22:
+                status_msg.data = RobotHandler::moveToBallTrolly(robot_msg.pose[0],robot_msg.pose[1],robot_msg.pose[2]);
+                break;
 
               default:
                 break;
@@ -385,6 +389,66 @@ class RobotHandler : public rclcpp::Node
       return status;
 
     }
+    bool moveToBallTrolly(double x, double y, double z){
+      geometry_msgs::msg::TransformStamped target_pose; //= tf_buffer_.lookupTransform("tool_link","crust_base_link");
+      
+      try {
+          //target_pose = tf_buffer_->lookupTransform();
+          target_pose = tf_buffer_->lookupTransform(
+            "crust_base_link", "ball",
+            tf2::TimePointZero);
+          auto const LOGGER = rclcpp::get_logger("moveToObject");
+          RCLCPP_INFO(LOGGER,"x: %f", target_pose.transform.translation.x);
+          RCLCPP_INFO(LOGGER,"y: %f", target_pose.transform.translation.y);
+          RCLCPP_INFO(LOGGER,"z: %f", target_pose.transform.translation.z);
+          RCLCPP_INFO(LOGGER,"x: %f", target_pose.transform.rotation.x);
+          RCLCPP_INFO(LOGGER,"y: %f", target_pose.transform.rotation.y);
+          RCLCPP_INFO(LOGGER,"z: %f", target_pose.transform.rotation.z);
+          RCLCPP_INFO(LOGGER,"x: %f", target_pose.transform.rotation.w);
+          tf2::Quaternion quat_tf;
+          
+          tf2::fromMsg(target_pose.transform.rotation, quat_tf);
+          double rot_r{}, rot_p{}, rot_y{};
+          tf2::Matrix3x3 m(quat_tf);
+          m.getRPY(rot_r, rot_p, rot_y);
+          
+          quat_tf.setRPY(0.0,1.57,atan2(target_pose.transform.translation.y, target_pose.transform.translation.x));
+          RCLCPP_INFO(LOGGER,"R: %f", rot_r);
+          RCLCPP_INFO(LOGGER,"P: %f", rot_p);
+          RCLCPP_INFO(LOGGER,"Y: %f", rot_y);
+          target_pose.transform.rotation = tf2::toMsg(quat_tf);
+          bool i = RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z+0.1,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.5);
+          if(i == 1){
+
+            i =  RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z-0.02,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.05);
+          }
+          else{
+            return false;
+          }
+          if(i == 1){
+            i = RobotHandler::gripperOn();
+          }
+          else
+          {
+            return false;
+          }
+          if(i == 1)
+          {
+            return RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z+0.1,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.5);
+          }
+          else
+          {
+            return false;
+          }
+
+        } catch (const tf2::TransformException & ex) {
+          RCLCPP_INFO(
+            this->get_logger(), "Could not transform %s to %s: %s",
+            "ball", "crust_base_link", ex.what());
+          return false;
+        }
+    }
+
 
     bool moveToBall(double x, double y, double z){
       geometry_msgs::msg::TransformStamped target_pose; //= tf_buffer_.lookupTransform("tool_link","crust_base_link");
@@ -598,9 +662,9 @@ class RobotHandler : public rclcpp::Node
 
     bool packDownRobot(){
       double j1 = 0.0;
-      double j2 = 1.57;
-      double j3 = 0.785398163;
-      double j4 = -1.57;
+      double j2 = 1.22173048;
+      double j3 = 1.85004901;
+      double j4 = -1.74532925;
       return RobotHandler::jointMovement(j1, j2, j3, j4);
     }
     bool defaultPose(){
