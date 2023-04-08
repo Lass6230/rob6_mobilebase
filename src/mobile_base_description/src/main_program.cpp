@@ -2479,9 +2479,11 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 11020:
-                if status_linefollow == 20; 
+                if(status_linefollow == 20)
+                { 
                     status_linefollow = 0;
                     sfc = 11030;
+                }
                 break;
             
             case 11030:
@@ -2491,10 +2493,11 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 11040: 
-                  if status_linefollow == 20; 
+                  if(status_linefollow == 20)
+                  {
                     status_linefollow = 0;
                     sfc = 11500;
-
+                  }
                 break;
 
             // Her kan nr 5 sættes ind hvis det er
@@ -2526,9 +2529,11 @@ class MainProgram : public rclcpp::Node
                 break; 
 
             case 12100:
-                    if status_linefollow == 20; 
+                    if(status_linefollow == 20)
+                    {
                     status_linefollow = 0;
                     sfc = 11030;
+                    }
                 break;
             
             case 12110: // publish to robot arm to move its arm down to be able to touch buttom
