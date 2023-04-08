@@ -822,7 +822,14 @@ class MainProgram : public rclcpp::Node
             case 2095:
                 linefollow_msg.data = 6;
                 pub_linefollow_->publish(linefollow_msg);
+                sfc = 2096;
+            
+            case 2096: // start line following igen vi vil gerne have den til at køre til venstre i sammenfletningen
+                linefollow_msg.data = 5; // set linefollowing til og kør til venstre i sammenfletning
+                pub_linefollow_->publish(linefollow_msg);
                 sfc = 2100;
+
+                break;
 
             case 2100:
                 if (status_linefollow == 20) { //se hvornår linefollow rammer sammenfletning / skarp sving
@@ -909,7 +916,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 4030;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
                     sfc = 4010; // go back and resend the robot cmd
