@@ -68,7 +68,7 @@ class MainProgram : public rclcpp::Node
 
             pub_mobile_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/goal",10);
             pub_mobile_relative_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/goal_relative",10);
-            sub_mobile_ = this->create_subscription<std_msgs::msg::Int32>("/goal_feedback", 10,std::bind(&MainProgram::subMobileStatus, this, _1), sub1_opt);
+            sub_mobile_ = this->create_subscription<std_msgs::msg::Int32>("/navigation_feedback", 10,std::bind(&MainProgram::subMobileStatus, this, _1), sub1_opt);
             
             sub_linefollow_ = this->create_subscription<std_msgs::msg::Int32>("/lineStatus", 10,std::bind(&MainProgram::subLineStatus, this, _1), sub1_opt);
             pub_linefollow_ = this->create_publisher<std_msgs::msg::Int32>("/cmd_lineFollow", 10);

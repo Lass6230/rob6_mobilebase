@@ -128,7 +128,7 @@ class ImageSubscriberNode(Node):
         self.tf_broadcaster.sendTransform(tf)
         self.found_aruco_counter += 1
         
-        try:
+        try: # gør så den også publisher nummer to hvis der er det
             if self.found_aruco_counter == 10 and int(id[0]) != 53:
                 msg = Int8()
                 msg.data = int(id[0])
