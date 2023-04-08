@@ -690,9 +690,21 @@ class MainProgram : public rclcpp::Node
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
             case 2000:
-                sfc = 2010;
+                sfc = 2009;
                 break;
-            
+
+            case 2009:
+
+                aruco_msg.data = false; 
+                pub_camera_aruco_->publish(aruco_msg); // setting the aruco camera off
+                ball_msg.data = 0;
+                pub_camera_ball_->publish(ball_msg); // setting the ball camera off
+                status_aruco = 0;
+                status_ball = 0;
+
+                sfc=2010;
+                break;
+
             case 2010: // close gripper
                 robot_msg.cmd = 18; // close gripper
                 robot_msg.pose = {-0.3,-0.3};
@@ -762,7 +774,7 @@ class MainProgram : public rclcpp::Node
             case 2060: // waitting for line follower to be done
                 if (status_linefollow == 20){ //line following har fundet en sammenfletning eller skarpt sving og venter på en svar fra ros
                     status_linefollow = 0;
-                    sfc = 2090;
+                    sfc = 2090;  // Ændres tilbage til 2070 
                 }
                 m_lastTime2 = m_clock->now().seconds();
                 if ((m_lastTime2-m_lastTime1)> 45.0){
@@ -841,15 +853,21 @@ class MainProgram : public rclcpp::Node
             case 2130:
                 linefollow_msg.data = 0; // sluk for line following så vi kan begynde at bruge navigation
                 pub_linefollow_->publish(linefollow_msg);
-
+                
+                sfc = 2999;
                 break;
-
-            case 2140:
+            
+            case 2140:      
+                // Indsæt muligvis et punkt som er bedre egnet til at se all golf bolde før vi stater med at løse Task 12
 
                 break;
             
             case 2150:
 
+                break;
+            
+            case 2999:
+                sfc = 4000;
                 break;
 
             //////////////////END Start first gate (3) from case 2000-2999 /////////////////////////////////////////////////////
@@ -894,7 +912,7 @@ class MainProgram : public rclcpp::Node
                 if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
-                    sfc = 4030; // go back and resend the robot cmd
+                    sfc = 4010; // go back and resend the robot cmd
                     
                 }
                 break;
@@ -1351,7 +1369,7 @@ class MainProgram : public rclcpp::Node
                 if(robot_status == 1){ // check if robot is done
                     robot_status = 0;
                     robot_attempts = 0;
-                    sfc = 4620;
+                    sfc = 4640;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >25.0){ // if timeout 
@@ -1368,7 +1386,7 @@ class MainProgram : public rclcpp::Node
                 }
                 break;
             
-            case 4620: // send command to close gripper
+            case 4620: // send command to close gripper (Not used)
                 robot_msg.cmd = 18; // close gripper
                 robot_msg.pose = {-0.3,-0.3};
                 pub_robot_->publish(robot_msg); // send to robot to set gripper close
@@ -1568,7 +1586,7 @@ class MainProgram : public rclcpp::Node
                 break;
 
             case 4999:
-
+                sfc = 5000;
                 break;
 
             //////////////////END TASK 12 from case 4000-4999 /////////////////////////////////////////////////////////////////
@@ -1597,7 +1615,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 5020:
-                if(robot_status == 1){// Wait for gripper to be open
+                if(robot_status == 1){// Wait for robot to got to pose
                     robot_status = 0;
                     robot_attempts = 0;
                     sfc = 5030;
@@ -1732,6 +1750,8 @@ class MainProgram : public rclcpp::Node
                
                 if((m_lastTime2-m_lastTime1) >5.0){ // check if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out, no aruco code found");
+                    
+                    sfc = 6050;
                     
                     
                 }
@@ -1936,7 +1956,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 6190:  // start camera to sharch for golfball
-                ball_msg.data = true;
+                ball_msg.data = 1;
                 pub_camera_ball_->publish(ball_msg); // setting the ball camera off
                 status_ball = 0;
 
@@ -1955,6 +1975,8 @@ class MainProgram : public rclcpp::Node
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out, No golfball found");
+                    
+                    sfc = 6190;
                     
                     
                     
@@ -2114,7 +2136,7 @@ class MainProgram : public rclcpp::Node
                  if(robot_status == 1){ // check if robot is done
                     robot_status = 0;
                     robot_attempts = 0;
-                    sfc = 6240;
+                    sfc = 6320;
                 }
 
                 break;
@@ -2181,6 +2203,7 @@ class MainProgram : public rclcpp::Node
             
             
             case 6999: // tasl 13 done
+                sfc = 7000;
 
                  break;
 
@@ -2198,7 +2221,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 7010:
-                robot_msg.cmd = 6;
+                robot_msg.cmd = 3;
                 robot_msg.pose = {0.34,0.0,0.168,0.0,1.45,0.0};
                 pub_robot_->publish(robot_msg);
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
@@ -2263,6 +2286,7 @@ class MainProgram : public rclcpp::Node
 
 
             case 7999:
+                sfc = 8000;
 
                 break;
 
@@ -2295,14 +2319,16 @@ class MainProgram : public rclcpp::Node
                 }
                 break;
             
-            /// NOT USED
+            
             case 8030:
                 if (status_linefollow == 50){ // når robotten har mistet linjen vil vi gerne have den til at bare køre lige så stille frem for at finde linjen igen
                     status_linefollow = 0;
-                    sfc = 8040;
+                    sfc = 8999;
                 }
                 RCLCPP_INFO(this->get_logger(), "Publishing: '%i'", status_linefollow);
                 break;
+            
+            // NOT USED
             case 8040:
                 RCLCPP_INFO(this->get_logger(), "Publishing: '%i'", status_linefollow);
                 if (status_linefollow == 50){
@@ -2310,11 +2336,11 @@ class MainProgram : public rclcpp::Node
                     sfc = 8050;
                 }
                 break;
-                
+             /// NOT USED   
             case 8050: // måske tilføje en måde at bestemme hvilken vej vi drejer i tilfælde af linjen er horizontal som den ville være i dette tilfælde
                 linefollow_msg.data = 1; // her slår vi normal line mode til igen så den vil prøve at finde linjen igen 
                 pub_linefollow_->publish(linefollow_msg);
-                sfc = 8050;
+                sfc = 8999;
                 break;
 
 
@@ -2373,7 +2399,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 9060:
-
+                // Hvis vi ikke kan finde linjen konsitent kan vi sætte et Nav Goal som skal hjælpe med at finde linjen. 
                 break;
             
             case 9999:
@@ -2388,11 +2414,12 @@ class MainProgram : public rclcpp::Node
 
 
 
-            //////////////////Begin task 9 case 10000-10999 ///////////////////////////////////////////////////////////////////////////////////
+            //////////////////Drive to 4,2,11 case 10000-10999 ///////////////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
             case 10000:
+                sfc = 10500;
 
                 break;
             
@@ -2416,7 +2443,21 @@ class MainProgram : public rclcpp::Node
 
                 break;
 
+            case 10500:   
 
+                pub_mobile_->publish(task_4_pose); 
+                sfc = 10510;
+
+                break;
+            case 10510: 
+                if(status_mobile == 1){
+                    status_mobile = 0;
+                    sfc = 10999;
+                }
+
+            case 10999: 
+                sfc = 11000;
+                break;
 
             //////////////////END task 9 case 10000-10999 ///////////////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2424,52 +2465,107 @@ class MainProgram : public rclcpp::Node
             
 
 
-            //////////////////Begin drive to task 8 case 11000-11999 ///////////////////////////////////////////////////////////////////////////////////
+            //////////////////Begin task 4,6  case 11000-11999 ///////////////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             case 11000:
-
+                sfc = 11010;
                 break;
             
             case 11010:
-
+                linefollow_msg.data = 1;    
+                pub_linefollow_->publish(linefollow_msg);
+                sfc = 11020;
                 break;
             
             case 11020:
-
+                if status_linefollow == 20; 
+                    status_linefollow = 0;
+                    sfc = 11030;
                 break;
             
             case 11030:
-
+                linefollow_msg.data = 6;    
+                pub_linefollow_->publish(linefollow_msg);
+                sfc = 11040;
                 break;
             
-            case 11040:
+            case 11040: 
+                  if status_linefollow == 20; 
+                    status_linefollow = 0;
+                    sfc = 11500;
 
+                break;
+
+            // Her kan nr 5 sættes ind hvis det er
+
+            case 11500:
+                 linefollow_msg.data = 6;    
+                pub_linefollow_->publish(linefollow_msg);
+                sfc = 11999;
                 break;
             
-            case 11050:
-
-                break;
-            
-            case 11060:
-
-                break;
         
             case 11999:
-
+                sfc = 12000;
                 break;
 
-            //////////////////END drive to task 8 case 11000-11999 ///////////////////////////////////////////////////////////////////////////////////
+            //////////////////END task 4,6 case 11000-11999 ///////////////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-            /// maybe ///
-            //////////////////Begin task 8 case 12000-12999 ///////////////////////////////////////////////////////////////////////////////////
+            
+            //////////////////Begin task 15 case 12000-12999 ///////////////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+            case 12000:
+                sfc = 12100;
 
+                break; 
+
+            case 12100:
+                    if status_linefollow == 20; 
+                    status_linefollow = 0;
+                    sfc = 11030;
+                break;
+            
+            case 12110: // publish to robot arm to move its arm down to be able to touch buttom
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.29200,0.0,-0.12,0.0,1.45,0.0};
+                pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+                sfc = 12120;
+                break;
+            
+            case 12120: // waitting for robot to go to pose
+                if(robot_status == 1){ // check if robot is done
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 12130;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    
+                    sfc = 12110; // go back and resend the robot cmd
+                    if(robot_attempts == 5){
+                       
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                }
+                break;
+
+            
+            case 12130:
+                linefollow_msg.data = 6;    
+                pub_linefollow_->publish(linefollow_msg);
+                // Maybe stop in code
+                break;
 
 
             //////////////////END task 8 case 12000-12999 ///////////////////////////////////////////////////////////////////////////////////
