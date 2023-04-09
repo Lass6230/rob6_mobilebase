@@ -823,8 +823,14 @@ class MainProgram : public rclcpp::Node
                 linefollow_msg.data = 6;
                 pub_linefollow_->publish(linefollow_msg);
                 sfc = 2096;
-            
-            case 2096: // start line following igen vi vil gerne have den til at køre til venstre i sammenfletningen
+
+            case 2096:
+                if (status_linefollow == 15){
+                    status_linefollow = 0;
+                    sfc = 2099;
+                }
+
+            case 2099: // start line following igen vi vil gerne have den til at køre til venstre i sammenfletningen
                 linefollow_msg.data = 5; // set linefollowing til og kør til venstre i sammenfletning
                 pub_linefollow_->publish(linefollow_msg);
                 sfc = 2100;
