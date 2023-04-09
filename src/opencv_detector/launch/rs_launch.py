@@ -146,6 +146,6 @@ def generate_launch_description():
 
     return LaunchDescription(declare_configurable_parameters(configurable_parameters) + [
         OpaqueFunction(function=launch_setup),
-        #aruco_detector,
-        #golfball_detector
+        aruco_detector,
+        golfball_detector
     ])
