@@ -358,7 +358,7 @@ class MainProgram : public rclcpp::Node
             case 2060: // waitting for line follower to be done
                 if (status_linefollow == 20){ //line following har fundet en sammenfletning eller skarpt sving og venter på en svar fra ros
                     status_linefollow = 0;
-                    sfc = 2090;  // Ændres tilbage til 2070 
+                    sfc = 2070;  // Ændres tilbage til 2070 
                 }
                 m_lastTime2 = m_clock->now().seconds();
                 if ((m_lastTime2-m_lastTime1)> 45.0){
@@ -407,12 +407,14 @@ class MainProgram : public rclcpp::Node
                 linefollow_msg.data = 6;
                 pub_linefollow_->publish(linefollow_msg);
                 sfc = 2096;
+                break;
 
             case 2096:
                 if (status_linefollow == 15){
                     status_linefollow = 0;
                     sfc = 2099;
                 }
+                break;
 
             case 2099: // start line following igen vi vil gerne have den til at køre til venstre i sammenfletningen
                 linefollow_msg.data = 5; // set linefollowing til og kør til venstre i sammenfletning
@@ -432,13 +434,31 @@ class MainProgram : public rclcpp::Node
             case 2110:
                 linefollow_msg.data = 4;
                 pub_linefollow_->publish(linefollow_msg);
-                sfc = 2115;
+                sfc = 2111;
 
+                break;
+            case 2111:
+                linefollow_msg.data = 7;
+                pub_linefollow_->publish(linefollow_msg);
+                sfc = 2115;
                 break;
             case 2115:
                 linefollow_msg.data = 6;
                 pub_linefollow_->publish(linefollow_msg);
+                sfc = 2116;
+                break;
+            
+            case 2116:
+                if (status_linefollow == 13){
+                    status_linefollow = 0;
+                    sfc = 2117;
+                }
+                break;
+            case 2117:
+                linefollow_msg.data = 4;
+                pub_linefollow_->publish(linefollow_msg);
                 sfc = 2120;
+                break;
             case 2120:
                 if (status_linefollow == 20){ // når vi ser det næste cross burde vi være ved opgaven
                     status_linefollow = 0;
@@ -2052,6 +2072,7 @@ class MainProgram : public rclcpp::Node
                     status_mobile = 0;
                     sfc = 10999;
                 }
+                break;
 
             case 10999: 
                 sfc = 11000;
