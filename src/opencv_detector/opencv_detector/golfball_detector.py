@@ -113,9 +113,9 @@ class ImageSubscriberNode(Node):
         if self.search == 1:
             colors_to_detect = [
                 #(Lhue, Lsat, Lval, Hhue, Hsat, Hval, color, color in BGR)
-                (105, 81, 249, 129, 235, 255, "red", (0, 0, 255)), # Red works well
-                (87, 81, 166, 105, 177, 255, "yellow", (0, 255, 255)), # Yellow good
-                (32, 62, 88, 94, 255, 255, "green", (0, 255, 0)) #green good? (32, 62, 88, 94, 186, 255, "green", (0, 255, 0))
+                (113, 119, 97, 142, 255, 255, "red", (0, 0, 255)), # Red works well
+                (88, 38, 139, 102, 255, 255, "yellow", (0, 255, 255)), # Yellow good
+                (24, 101, 120, 65, 255, 255, "green", (0, 255, 0)) #green good? (32, 62, 88, 94, 186, 255, "green", (0, 255, 0))
                 ]
             status, mask, contour, color, x, y, = self.detector(cv_image, colors_to_detect)
     
