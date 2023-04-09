@@ -73,7 +73,7 @@ class ImageSubscriberNode(Node):
             # find the contours of the golf balls in the mask
             contours, hierarchy = cv2.findContours(mask_closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             #cv2.imshow("bruh", frame)
-            self.publisher_.publish(self.br.cv2_to_imgmsg(mask_closed))
+            self.publisher_.publish(self.bridge.cv2_to_imgmsg(mask_closed))
             #cv2.imshow("mask", mask)
             #averages = []
             # loop through each contour
