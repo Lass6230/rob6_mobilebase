@@ -45,11 +45,11 @@ def generate_launch_description():
 
     ])
 
-    main_program_node = launch_ros.actions.Node(
-        package= 'mobile_base_description',
-        executable='main_program',
-        name='main_program',
-    )
+    #main_program_node = launch_ros.actions.Node(
+    #    package= 'mobile_base_description',
+    #    executable='main_program',
+    #    name='main_program',
+    #)
 
     joy_control_node = launch_ros.actions.Node(
         package= 'mobile_base_description',
@@ -62,6 +62,6 @@ def generate_launch_description():
 
     ld.add_action(bringup_cmd_group)
     ld.add_action(joy_control_node)
-    ld.add_action(main_program_node)
+    #ld.add_action(main_program_node)
 
     return ld
