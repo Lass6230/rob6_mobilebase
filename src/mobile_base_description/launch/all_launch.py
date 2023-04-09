@@ -4,12 +4,13 @@ from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
 from launch.actions import (DeclareLaunchArgument, GroupAction,
-                            IncludeLaunchDescription, SetEnvironmentVariable)
+                            IncludeLaunchDescription, SetEnvironmentVariable, RegisterEventHandler)
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PythonExpression
+from launch.event_handlers import *
 import launch
-import launch_ros.actions
+import launch_ros.actions 
 
 
 def generate_launch_description():
@@ -24,32 +25,34 @@ def generate_launch_description():
     lidar_launch = os.path.join(lidar_dir,'launch')
 
 
-    bringup_cmd_group = GroupAction([
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(os.path.join(mobile_launch,'headless_navigation_launch.py')),
-                ),
-        
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(os.path.join(crust_launch,'real_base_gripper.launch.py')),
-            launch_arguments={
-                'headless': 'true',
-            }.items()
-        ),
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(os.path.join(opencv_detector_dir,'rs_launch.py')),
-        ),
-        IncludeLaunchDescription(
-           PythonLaunchDescriptionSource(os.path.join(lidar_launch,'sick_safetyscanners2_launch.py'))
-        )
-        
+    # bringup_cmd_group = GroupAction([
+    headless = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(mobile_launch,'headless_navigation_launch.py')),
+            )
+    
+    gripper = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(crust_launch,'real_base_gripper.launch.py')),
+        launch_arguments={
+            'headless': 'true',
+        }.items()
+    )
 
-    ])
+    realsense = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(opencv_detector_dir,'rs_launch.py')),
+    )
 
-    #main_program_node = launch_ros.actions.Node(
-    #    package= 'mobile_base_description',
-    #    executable='main_program',
-    #    name='main_program',
-    #)
+    lidar = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(lidar_launch,'sick_safetyscanners2_launch.py')),
+
+    )
+
+
+
+    main_program_node = launch_ros.actions.Node(
+       package= 'mobile_base_description',
+       executable='main_program',
+       name='main_program',
+    )
 
     joy_control_node = launch_ros.actions.Node(
         package= 'mobile_base_description',
@@ -58,10 +61,56 @@ def generate_launch_description():
     )
 
 
-    ld = LaunchDescription()
+    return LaunchDescription([
+        
 
-    ld.add_action(bringup_cmd_group)
-    ld.add_action(joy_control_node)
-    #ld.add_action(main_program_node)
+        RegisterEventHandler(
+            OnExecutionComplete(
+                target_action=lidar,
+                on_completion=[
+                    headless,
+                ]
+            )
+        ),
 
-    return ld
+        RegisterEventHandler(
+            OnExecutionComplete(
+                target_action=headless,
+                on_completion=[
+                    realsense,
+                ]
+            )
+        ),
+
+        RegisterEventHandler(
+            OnExecutionComplete(
+                target_action=realsense,
+                on_completion=[
+                    gripper,
+                ]
+            )
+        ),
+
+        RegisterEventHandler(
+            OnExecutionComplete(
+                target_action=gripper,
+                on_completion=[
+                    joy_control_node,
+                ]
+            )
+        ),
+
+        # RegisterEventHandler(
+        #     OnExecutionComplete(
+        #         target_action=joy_control_node,
+        #         on_start=[
+        #             main_program_node,
+        #         ]
+        #     )
+        # ),
+
+        
+        lidar,
+
+
+    ])

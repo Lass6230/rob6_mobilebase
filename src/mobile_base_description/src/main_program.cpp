@@ -135,61 +135,78 @@ class MainProgram : public rclcpp::Node
 
 
             quat_trolly[1].setRPY(0.0, 0.0, 0.0);
-            trolly_pose[1].pose.position.x = 0.0;
-            trolly_pose[1].pose.position.y = 0.0;
-            trolly_pose[1].pose.orientation = tf2::toMsg(quat_trolly[1]);
+            trolly_pose[1].pose.position.x = 4.882589817047119;
+            trolly_pose[1].pose.position.y = 7.87235689163208;
+            //trolly_pose[1].pose.orientation = tf2::toMsg(quat_trolly[1]);
+            trolly_pose[1].pose.orientation.z = 0.5191984976626288;
+            trolly_pose[1].pose.orientation.w = 0.8546536842633214;
+
 
             quat_trolly[2].setRPY(0.0, 0.0, 0.0);
-            trolly_pose[2].pose.position.x = 0.0;
-            trolly_pose[2].pose.position.y = 0.0;
-            trolly_pose[2].pose.orientation = tf2::toMsg(quat_trolly[2]);
-
+            trolly_pose[2].pose.position.x = 5.135969638824463;
+            trolly_pose[2].pose.position.y = 7.8197407722473145;
+            //trolly_pose[2].pose.orientation = tf2::toMsg(quat_trolly[2]);
+            trolly_pose[2].pose.orientation.z = 0.5321182250637609;
+            trolly_pose[2].pose.orientation.w = 0.8466700623944328;
+            
             tf2::Quaternion quat_house[3];
 
-            quat_house[0].setRPY(0.0, 0.0, 0.0);
-            house_pose[0].pose.position.x = 0.0;
-            house_pose[0].pose.position.y = 0.0;
-            house_pose[0].pose.orientation = tf2::toMsg(quat_house[0]);
+            quat_house[0].setRPY(0.0, 0.0, 0.0); // grøn
+            house_pose[0].pose.position.x = 6.673497200012207;
+            house_pose[0].pose.position.y = 7.855735778808594;
+            //house_pose[0].pose.orientation = tf2::toMsg(quat_house[0]);
+            house_pose[0].pose.orientation.z = 0.8509684673911989;
+            house_pose[0].pose.orientation.w = 0.8509684673911989;
 
-            quat_house[1].setRPY(0.0, 0.0, 0.0);
-            house_pose[1].pose.position.x = 0.0;
-            house_pose[1].pose.position.y = 0.0;
-            house_pose[1].pose.orientation = tf2::toMsg(quat_house[1]);
+            quat_house[1].setRPY(0.0, 0.0, 0.0); //gul
+            house_pose[1].pose.position.x = 6.548923015594482;
+            house_pose[1].pose.position.y = 7.908321380615234;
+            //house_pose[1].pose.orientation = tf2::toMsg(quat_house[1]);
+            house_pose[1].pose.orientation.z = 0.8647521459490137;
+            house_pose[1].pose.orientation.w = 0.49773273306061583;
 
-            quat_house[2].setRPY(0.0, 0.0, 0.0);
-            house_pose[2].pose.position.x = 0.0;
-            house_pose[2].pose.position.y = 0.0;
-            house_pose[2].pose.orientation = tf2::toMsg(quat_house[2]);
-
+            quat_house[2].setRPY(0.0, 0.0, 0.0); //rød
+            house_pose[2].pose.position.x = 6.249172210693359;
+            house_pose[2].pose.position.y = 7.756110191345215;
+            //house_pose[2].pose.orientation = tf2::toMsg(quat_house[2]);
+            house_pose[2].pose.orientation.z = 0.8647521459490137;
+            house_pose[2].pose.orientation.w = 0.5021988909551431;
 
             // init task_10_pose
             tf2::Quaternion quat_task10;
             quat_task10.setRPY(0.0, 0.0, 0.0);
             task_10_pose.pose.position.x = 0.0;
             task_10_pose.pose.position.y = 0.0;
-            task_10_pose.pose.orientation = tf2::toMsg(quat_task10);
+            //task_10_pose.pose.orientation = tf2::toMsg(quat_task10);
+            //task_10_pose.pose.orientation.z = ;
+            //task_10_pose.pose.orientation.w = ;
 
             // init task_4_pose
             tf2::Quaternion quat_task4;
             quat_task4.setRPY(0.0, 0.0, 0.0);
-            task_4_pose.pose.position.x = 0.0;
-            task_4_pose.pose.position.y = 0.0;
-            task_4_pose.pose.orientation = tf2::toMsg(quat_task4);
+            task_4_pose.pose.position.x = 4.810085296630859;
+            task_4_pose.pose.position.y = 6.515294551849365;
+            //task_4_pose.pose.orientation = tf2::toMsg(quat_task4);
+            task_4_pose.pose.orientation.z = 0.2745127250902252;
+            task_4_pose.pose.orientation.w = 0.9615834668730211;
 
             // init golf_hole_pose
             tf2::Quaternion quat_golf_hole;
             quat_task4.setRPY(0.0, 0.0, 0.0);
-            golf_hole_pose.pose.position.x = 0.0;
-            golf_hole_pose.pose.position.y = 0.0;
-            golf_hole_pose.pose.orientation = tf2::toMsg(quat_golf_hole);
+            golf_hole_pose.pose.position.x = 2.9660608768463135;
+            golf_hole_pose.pose.position.y = 8.976078987121582;
+            //golf_hole_pose.pose.orientation = tf2::toMsg(quat_golf_hole);
+            golf_hole_pose.pose.orientation.z = 0.8723363354228847;
+            golf_hole_pose.pose.orientation.w = 0.488906246535031;
 
             // init golfball_sheach_pose
             tf2::Quaternion quat_golfball_sheach;
             quat_task4.setRPY(0.0, 0.0, 0.0);
-            golfball_sheach_pose.pose.position.x = 0.0;
-            golfball_sheach_pose.pose.position.y = 0.0;
-            golfball_sheach_pose.pose.orientation = tf2::toMsg(quat_golfball_sheach);
-            
+            golfball_sheach_pose.pose.position.x = 3.837470293045044;
+            golfball_sheach_pose.pose.position.y = 8.343067169189453;
+            //golfball_sheach_pose.pose.orientation = tf2::toMsg(quat_golfball_sheach);
+            golfball_sheach_pose.pose.orientation.z = -0.9790553726243351;
+            golfball_sheach_pose.pose.orientation.w = 0.203594148578549;
         }
     
     private:
