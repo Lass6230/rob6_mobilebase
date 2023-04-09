@@ -40,6 +40,8 @@ class ImageSubscriberNode(Node):
         if self.search:
             cv_image = self.bridge.imgmsg_to_cv2(rgb_image, desired_encoding='bgr8')
             cv_depth = self.bridge.imgmsg_to_cv2(depth_image, desired_encoding="passthrough")
+
+            cv2.waitKey(1)
             self.process_image(cv_image, cv_depth)
 
 
