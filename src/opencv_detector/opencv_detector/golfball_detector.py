@@ -29,6 +29,8 @@ class ImageSubscriberNode(Node):
         self.subscription
         self.status_publisher = self.create_publisher(Int8, '/status_ball',10)
         self.found_ball_counter = 0
+
+        self.publisher_ = self.create_publisher(Image, 'video_frames', 10)
    
         # Syncronize topics
         ts = message_filters.TimeSynchronizer([self.image_sub, self.depth_sub], 1)
@@ -71,7 +73,7 @@ class ImageSubscriberNode(Node):
             # find the contours of the golf balls in the mask
             contours, hierarchy = cv2.findContours(mask_closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             #cv2.imshow("bruh", frame)
-
+            self.publisher_.publish(self.br.cv2_to_imgmsg(mask_closed))
             #cv2.imshow("mask", mask)
             #averages = []
             # loop through each contour
@@ -82,6 +84,8 @@ class ImageSubscriberNode(Node):
                 center = (int(x),int(y))
                 radius = int(radius)
 
+            
+            
                 if radius > 5:
                     # compute the circularity of the circle
                     mask_circle = np.zeros_like(mask_closed)
@@ -113,9 +117,9 @@ class ImageSubscriberNode(Node):
         if self.search == 1:
             colors_to_detect = [
                 #(Lhue, Lsat, Lval, Hhue, Hsat, Hval, color, color in BGR)
-                (105, 81, 249, 129, 235, 255, "red", (0, 0, 255)), # Red works well
-                (87, 81, 166, 105, 177, 255, "yellow", (0, 255, 255)), # Yellow good
-                (32, 62, 88, 94, 255, 255, "green", (0, 255, 0)) #green good? (32, 62, 88, 94, 186, 255, "green", (0, 255, 0))
+                (113, 119, 97, 142, 255, 255, "red", (0, 0, 255)), # Red works well
+                (88, 38, 139, 102, 255, 255, "yellow", (0, 255, 255)), # Yellow good
+                (24, 101, 120, 65, 255, 255, "green", (0, 255, 0)) #green good? (32, 62, 88, 94, 186, 255, "green", (0, 255, 0))
                 ]
             status, mask, contour, color, x, y, = self.detector(cv_image, colors_to_detect)
     
