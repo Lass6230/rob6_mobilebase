@@ -23,12 +23,14 @@ amcl: #
     odom_frame_id: "odom"
     set_initial_pose: true
     initial_pose: 
-      # x: 1.7
-      # y: 0.6
-      # yaw: 1.9
-      x: -2.0
-      y: 1.0
-      yaw: 0.0
+      ## hall
+      x: 1.7
+      y: 0.6
+      yaw: 1.9
+      ## simulation
+      # x: -2.0
+      # y: 1.0
+      # yaw: 0.0
 
 
 
