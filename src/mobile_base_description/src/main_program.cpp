@@ -389,7 +389,20 @@ class MainProgram : public rclcpp::Node
             case 2095:
                 linefollow_msg.data = 6;
                 pub_linefollow_->publish(linefollow_msg);
+                sfc = 2096;
+
+            case 2096:
+                if (status_linefollow == 15){
+                    status_linefollow = 0;
+                    sfc = 2099;
+                }
+
+            case 2099: // start line following igen vi vil gerne have den til at køre til venstre i sammenfletningen
+                linefollow_msg.data = 5; // set linefollowing til og kør til venstre i sammenfletning
+                pub_linefollow_->publish(linefollow_msg);
                 sfc = 2100;
+
+                break;
 
             case 2100:
                 if (status_linefollow == 20) { //se hvornår linefollow rammer sammenfletning / skarp sving
@@ -476,7 +489,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 4030;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
                     sfc = 4010; // go back and resend the robot cmd
@@ -2047,9 +2060,11 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 11020:
-                if status_linefollow == 20; 
+                if(status_linefollow == 20)
+                { 
                     status_linefollow = 0;
                     sfc = 11030;
+                }
                 break;
             
             case 11030:
@@ -2059,10 +2074,11 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 11040: 
-                  if status_linefollow == 20; 
+                  if(status_linefollow == 20)
+                  {
                     status_linefollow = 0;
                     sfc = 11500;
-
+                  }
                 break;
 
             // Her kan nr 5 sættes ind hvis det er
@@ -2094,9 +2110,11 @@ class MainProgram : public rclcpp::Node
                 break; 
 
             case 12100:
-                    if status_linefollow == 20; 
+                    if(status_linefollow == 20)
+                    {
                     status_linefollow = 0;
                     sfc = 11030;
+                    }
                 break;
             
             case 12110: // publish to robot arm to move its arm down to be able to touch buttom

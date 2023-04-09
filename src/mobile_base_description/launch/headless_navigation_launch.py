@@ -205,15 +205,15 @@ def generate_launch_description():
     robot_description = {"robot_description": robot_description_config.toxml()}
 
     # Publish TF
-    robot_state_publisher = Node(
-        package="robot_state_publisher",
-        executable="robot_state_publisher",
-        name="robot_state_publisher",
-        output="both",
-        parameters=[robot_description],
-        remappings=remappings,
+    #robot_state_publisher = Node(
+    #    package="robot_state_publisher",
+    #    executable="robot_state_publisher",
+    #    name="robot_state_publisher",
+    #    output="both",
+    #    parameters=[robot_description],
+    #    remappings=remappings,
 
-    )
+    #)
 
     rviz_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
