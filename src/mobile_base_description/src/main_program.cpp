@@ -403,6 +403,7 @@ class MainProgram : public rclcpp::Node
 
                 break;
             
+            
             case 2095:
                 linefollow_msg.data = 6;
                 pub_linefollow_->publish(linefollow_msg);
@@ -1309,7 +1310,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6030;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
                     sfc = 6010; // go back and resend the robot cmd
@@ -1334,7 +1335,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6050;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >20.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
@@ -1366,7 +1367,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6070;
                 }
                
-                if((m_lastTime2-m_lastTime1) >5.0){ // check if timeout 
+                if((m_lastTime2-m_lastTime1) >7.0){ // check if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out, no aruco code found");
                     
                     sfc = 6050;
