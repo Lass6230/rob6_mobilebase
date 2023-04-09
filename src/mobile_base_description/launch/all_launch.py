@@ -28,25 +28,25 @@ def generate_launch_description():
     # bringup_cmd_group = GroupAction([
     headless = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(mobile_launch,'headless_navigation_launch.py')),
-            ),
+            )
     
     gripper = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(crust_launch,'real_base_gripper.launch.py')),
         launch_arguments={
             'headless': 'true',
         }.items()
-    ),
+    )
+
     realsense = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(opencv_detector_dir,'rs_launch.py')),
-    ),
+    )
 
     lidar = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(lidar_launch,'sick_safetyscanners2_launch.py'))
+        PythonLaunchDescriptionSource(os.path.join(lidar_launch,'sick_safetyscanners2_launch.py')),
 
     )
-        
 
-    # ])
+
 
     main_program_node = launch_ros.actions.Node(
        package= 'mobile_base_description',
@@ -62,7 +62,7 @@ def generate_launch_description():
 
 
     return LaunchDescription([
-        lidar,
+        
 
         RegisterEventHandler(
             OnExecutionComplete(
@@ -110,7 +110,7 @@ def generate_launch_description():
         # ),
 
         
-
+        lidar,
 
 
     ])
