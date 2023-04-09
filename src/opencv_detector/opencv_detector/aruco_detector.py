@@ -108,8 +108,8 @@ class ImageSubscriberNode(Node):
 
 
         # display the image with overlayed markers
-        cv2.imshow("Image", cv_image)
-        cv2.waitKey(1)
+        #cv2.imshow("Image", cv_image)
+        #cv2.waitKey(1)
 
 
     def publish_transform(self, x, y, z, id):
