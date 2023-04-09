@@ -147,8 +147,8 @@ controller_server:
 
       footprint_model: # types: "point", "circular", "two_circles", "line", "polygon"
         type: "line"
-        line_start: [0.1, 0.0] # for type "line"
-        line_end: [-0.3, 0.0] # for type "line"
+        line_start: [0.15, 0.0] # for type "line"
+        line_end: [-0.35, 0.0] # for type "line"
 
         # type: "circular"
         # radius: 0.17
@@ -195,7 +195,7 @@ controller_server:
       weight_acc_lim_x: 0.5
       weight_acc_lim_theta: 10.5
       weight_kinematics_nh: 1000.0
-      weight_kinematics_forward_drive: 200.0 # 3.0
+      weight_kinematics_forward_drive: 10.0 # 3.0
       weight_kinematics_turning_radius: 1.0
       weight_optimaltime: 1.0 # must be > 0
       weight_shortest_path: 0.1 #0.0
