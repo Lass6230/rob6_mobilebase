@@ -127,7 +127,9 @@ class NavigationClient(Node):
             
             if result == TaskResult.SUCCEEDED:
                 print('Goal succeeded!')
-                # self.feedback_publisher.publish(1)
+                i = Int32()
+                i.data = 1
+                self.feedback_publisher.publish(i)
             elif result == TaskResult.CANCELED:
                 print('Goal was canceled!')
             elif result == TaskResult.FAILED:
