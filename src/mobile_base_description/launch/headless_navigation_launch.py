@@ -94,12 +94,12 @@ def generate_launch_description():
     declare_map_yaml_cmd = DeclareLaunchArgument(
         'map',
         default_value=os.path.join(
-            mobile_base_dir, 'maps/0_04res/headless', 'map.yaml'),
+            mobile_base_dir, 'maps/robocup_hall/headless', 'map.yaml'),
         description='Full path to map file to load')
     
     declare_mask_yaml_file_cmd = DeclareLaunchArgument(
         'mask',
-        default_value=os.path.join(mobile_base_dir, 'maps/0_04res/headless', 'map_keepout.yaml'),
+        default_value=os.path.join(mobile_base_dir, 'maps/robocup_hall/headless', 'map_keepout.yaml'),
         description='Full path to filter mask yaml file to load')
 
     
@@ -205,15 +205,15 @@ def generate_launch_description():
     robot_description = {"robot_description": robot_description_config.toxml()}
 
     # Publish TF
-    #robot_state_publisher = Node(
-    #    package="robot_state_publisher",
-    #    executable="robot_state_publisher",
-    #    name="robot_state_publisher",
-    #    output="both",
-    #    parameters=[robot_description],
-    #    remappings=remappings,
+    robot_state_publisher = Node(
+       package="robot_state_publisher",
+       executable="robot_state_publisher",
+       name="robot_state_publisher",
+       output="both",
+       parameters=[robot_description],
+       remappings=remappings,
 
-    #)
+    )
 
     rviz_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -279,7 +279,7 @@ def generate_launch_description():
     ld.add_action(declare_simulator_cmd)
     
     ld.add_action(odomZOH)
-    #ld.add_action(robot_state_publisher)
+    ld.add_action(robot_state_publisher)
     #ld.add_action(rviz_cmd)
     ld.add_action(bringup_cmd)
 
