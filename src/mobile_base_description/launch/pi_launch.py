@@ -12,7 +12,6 @@ from launch.event_handlers import *
 import launch
 import launch_ros.actions 
 
-
 def generate_launch_description():
     mobile_description_dir = get_package_share_directory('mobile_base_description')
     mobile_launch = os.path.join(mobile_description_dir,'launch')
@@ -21,30 +20,24 @@ def generate_launch_description():
     opencv_detector_dir = get_package_share_directory('opencv_detector')
     opencv_launch = os.path.join(opencv_detector_dir,'launch')
 
-    lidar_dir = get_package_share_directory('sick_safetyscanners2')
-    lidar_launch = os.path.join(lidar_dir,'launch')
+  
 
 
-    # bringup_cmd_group = GroupAction([
-    headless = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(mobile_launch,'headless_navigation_launch.py')),
-            )
     
-    # gripper = IncludeLaunchDescription(
-    #     PythonLaunchDescriptionSource(os.path.join(crust_launch,'real_base_gripper.launch.py')),
-    #     launch_arguments={
-    #         'headless': 'true',
-    #     }.items()
-    # )
-
-    # realsense = IncludeLaunchDescription(
-    #     PythonLaunchDescriptionSource(os.path.join(opencv_detector_dir,'rs_launch.py')),
-    # )
-
-    lidar = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(lidar_launch,'sick_safetyscanners2_launch.py')),
-
+  
+    
+    gripper = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(crust_launch,'real_base_gripper.launch.py')),
+        launch_arguments={
+            'headless': 'true',
+        }.items()
     )
+
+    realsense = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(opencv_detector_dir,'rs_launch.py')),
+    )
+
+    
 
 
 
@@ -54,24 +47,20 @@ def generate_launch_description():
        name='main_program',
     )
 
-    joy_control_node = launch_ros.actions.Node(
-        package= 'mobile_base_description',
-        executable='joy_listner',
-        name='joy_listner',
-    )
+
 
 
     return LaunchDescription([
         
 
-        RegisterEventHandler(
-            OnExecutionComplete(
-                target_action=lidar,
-                on_completion=[
-                    headless,
-                ]
-            )
-        ),
+        # RegisterEventHandler(
+        #     OnExecutionComplete(
+        #         target_action=lidar,
+        #         on_completion=[
+        #             headless,
+        #         ]
+        #     )
+        # ),
 
         # RegisterEventHandler(
         #     OnExecutionComplete(
@@ -82,23 +71,23 @@ def generate_launch_description():
         #     )
         # ),
 
-        # RegisterEventHandler(
-        #     OnExecutionComplete(
-        #         target_action=realsense,
-        #         on_completion=[
-        #             gripper,
-        #         ]
-        #     )
-        # ),
-
         RegisterEventHandler(
             OnExecutionComplete(
-                target_action=headless,
+                target_action=realsense,
                 on_completion=[
-                    joy_control_node,
+                    gripper,
                 ]
             )
         ),
+
+        # RegisterEventHandler(
+        #     OnExecutionComplete(
+        #         target_action=gripper,
+        #         on_completion=[
+        #             joy_control_node,
+        #         ]
+        #     )
+        # ),
 
         # RegisterEventHandler(
         #     OnExecutionComplete(
@@ -110,7 +99,7 @@ def generate_launch_description():
         # ),
 
         
-        lidar,
+        realsense,
 
 
     ])
