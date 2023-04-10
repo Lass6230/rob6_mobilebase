@@ -3,17 +3,16 @@ This is the repository for AAU Robotics bachelor project. This project aims to c
 
 ## Install dependencies
 ```
-sudo apt install ros-galactic-slam-toolbox ros-galactic-ros2-control ros-galactic-ros2-controllers ros-galactic-xacro ros-galactic-joint-state-publisher-gui ros-galactic-twist-mux ros-galactic-sick-safetyscanners-base ros-galactic-sick-safetyscanners2-interfaces ros-galactic-dynamixel-workbench-toolbox ros-galactic-moveit ros-galactic-bondcpp ros-galactic-behaviortree-cpp-v3 ros-galactic-test-msgs
+sudo apt install ros-galactic-slam-toolbox ros-galactic-ros2-control ros-galactic-ros2-controllers ros-galactic-xacro ros-galactic-joint-state-publisher-gui ros-galactic-twist-mux ros-galactic-sick-safetyscanners-base ros-galactic-sick-safetyscanners2-interfaces ros-galactic-dynamixel-workbench-toolbox ros-galactic-moveit ros-galactic-bondcpp ros-galactic-behaviortree-cpp-v3 ros-galactic-test-msgs ros-galactic-realsense2* ros-galactic-navigation2 
 
 pip install opencv-python
 ```
 
 
-In a ros2 workspace build navigation2, dynamixel_interface and sicksafety_scanners2 from source 
+In a ros2 workspace build teb_local_planner and sicksafety_scanners2 from source 
 ```
 mkdir -p ~/ros2_ws/src
 cd ros2_ws/src
-git clone https://github.com/ros-planning/navigation2 -b galactic
 git clone https://github.com/rst-tu-dortmund/teb_local_planner.git -b galactic
 git clone https://github.com/rst-tu-dortmund/costmap_converter.git -b ros2 
 git clone https://github.com/SICKAG/sick_safetyscanners2.git 
@@ -32,6 +31,7 @@ cd ~/galactic/src
 git clone https://github.com/Lass6230/rob6_mobilebase
 git clone https://github.com/dynamixel-community/dynamixel_hardware -b galactic
 cd ..
+rosdep update --include-eol
 rosdep install -y -r -q --from-paths src --ignore-src --rosdistro galactic
 colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 # remember to source the workspace!
