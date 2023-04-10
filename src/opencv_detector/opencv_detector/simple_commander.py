@@ -32,6 +32,16 @@ class NavigationClient(Node):
         super().__init__('navigation_client')
         #self._action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
         self.navigator = BasicNavigator()
+
+        initial_pose = PoseStamped()
+        initial_pose.header.frame_id = 'map'
+        initial_pose.header.stamp = self.navigator.get_clock().now().to_msg()
+        initial_pose.pose.position.x = 7.71
+        initial_pose.pose.position.y = -1.42
+        initial_pose.pose.orientation.z = -0.79
+        initial_pose.pose.orientation.w = 0.61
+        self.navigator.setInitialPose(initial_pose)
+
         self.navigator.waitUntilNav2Active()
         self._goal_subscriber = self.create_subscription(
             PoseStamped,
@@ -57,14 +67,7 @@ class NavigationClient(Node):
     
 
         # # # Set our demo's initial pose
-        # initial_pose = PoseStamped()
-        # initial_pose.header.frame_id = 'map'
-        # initial_pose.header.stamp = self.navigator.get_clock().now().to_msg()
-        # initial_pose.pose.position.x = 1.7
-        # initial_pose.pose.position.y = 0.6
-        # initial_pose.pose.orientation.z = 0.6
-        # initial_pose.pose.orientation.w = 0.0
-        # self.navigator.setInitialPose(initial_pose)
+       
 
     # Activate navigation, if not autostarted. This should be called after setInitialPose()
     # or this will initialize at the origin of the map and update the costmap with bogus readings.
