@@ -207,6 +207,15 @@ class MainProgram : public rclcpp::Node
             //golfball_sheach_pose.pose.orientation = tf2::toMsg(quat_golfball_sheach);
             golfball_sheach_pose.pose.orientation.z = -0.9790553726243351;
             golfball_sheach_pose.pose.orientation.w = 0.203594148578549;
+
+
+
+            // golfball release
+            golfball_release_pose.pose.position.x = 3.837470293045044;
+            golfball_release_pose.pose.position.y = 8.343067169189453;
+            //golfball_sheach_pose.pose.orientation = tf2::toMsg(quat_golfball_sheach);
+            golfball_release_pose.pose.orientation.z = -0.9790553726243351;
+            golfball_release_pose.pose.orientation.w = 0.203594148578549;
         }
     
     private:
@@ -320,8 +329,8 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 2030: // send command to pack down robot
-                robot_msg.cmd = 3;
-                robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};
+                robot_msg.cmd = 3;//6;//3;
+                robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};//{0.29200,0.0,-0.12,0.0,1.45,0.0};//{0.0,0.0,0.0,0.0,0.0,0.0};
                 pub_robot_->publish(robot_msg);
                 m_lastTime1 = m_clock->now().seconds();
                 sfc = 2040;
@@ -358,13 +367,42 @@ class MainProgram : public rclcpp::Node
             case 2060: // waitting for line follower to be done
                 if (status_linefollow == 20){ //line following har fundet en sammenfletning eller skarpt sving og venter på en svar fra ros
                     status_linefollow = 0;
-                    sfc = 2070;  // Ændres tilbage til 2070 
+                    sfc = 2061;  // Ændres tilbage til 2070 
                 }
                 m_lastTime2 = m_clock->now().seconds();
                 if ((m_lastTime2-m_lastTime1)> 45.0){
                     RCLCPP_INFO(this->get_logger(),"timed out");
                 }
                 break;
+            
+
+            case 2061:
+                target_pose.pose.position.x = 1.0;
+                target_pose.pose.position.y = 0.0;
+                pub_mobile_relative_->publish(target_pose);
+                sfc = 2062;
+                break;
+            
+            case 2062:
+                if(status_mobile == 1){
+                    status_mobile = 0;
+                    sfc = 2063;
+                }
+                break;
+
+            case 2063:
+                pub_mobile_->publish(golfball_release_pose);
+                sfc = 2064;
+
+                break;
+            
+            case 2064:
+                if(status_mobile == 1){
+                    status_mobile = 0;
+                    sfc = 2070;
+                }
+                break;
+
             
             case 2070: // set robot down in front of the mobile base ready for the ball releaser
                 robot_msg.cmd = 6;
@@ -1555,7 +1593,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6190;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
                     robot_attempts ++;
@@ -2537,6 +2575,9 @@ class MainProgram : public rclcpp::Node
         // golfball Hole pose
         geometry_msgs::msg::PoseStamped golfball_sheach_pose;
         geometry_msgs::msg::PoseStamped golf_hole_pose;
+
+        geometry_msgs::msg::PoseStamped golfball_release_pose;
+
         int32_t golfball_counter = 0;
 
 
