@@ -1,35 +1,209 @@
+robocup start
 header:
   stamp:
-    sec: 1680600145
-    nanosec: 819338735
+    sec: 1681163032
+    nanosec: 118977780
   frame_id: map
 pose:
   position:
-    x: 1.9041175842285156
-    y: 5.163924217224121
+    x: 7.710514068603516
+    y: -1.424069881439209
     z: 0.0
   orientation:
     x: 0.0
     y: 0.0
-    z: -0.9693301098755754
-    w: 0.24576236100876953
----
+    z: -0.7901300711777252
+    w: 0.6129392063008231
+
+
+
+
+golfball release:
 header:
   stamp:
-    sec: 1680600167
-    nanosec: 881315784
+    sec: 1681163274
+    nanosec: 172969396
   frame_id: map
 pose:
   position:
-    x: 1.4325792789459229
-    y: 0.8128470182418823
+    x: 5.028180122375488
+    y: -3.191586971282959
     z: 0.0
   orientation:
     x: 0.0
     y: 0.0
-    z: 0.826531521684339
-    w: 0.5628904366412446
+    z: -0.17158369066287102
+    w: 0.9851695473868994
 ---
 
 
-ros2 topic pub --once /goal_relative geometry_msgs/PoseStamped "{header: {stamp: {sec: $(date +%s), nanosec: $(date +%N)}, frame_id: 'map'}, pose: {position: {x: 3.0, y: 0.0, z: 0.0}, orientation: {x: 0.0, y: 0.0, z: 0.77, w: 0.6}}}"
+golf ball search pose:
+header:
+  stamp:
+    sec: 1681163586
+    nanosec: 892299478
+  frame_id: map
+pose:
+  position:
+    x: 6.979703426361084
+    y: -4.2692718505859375
+    z: 0.0
+  orientation:
+    x: 0.0
+    y: 0.0
+    z: 0.5510739606132259
+    w: 0.8344564038546608
+---
+
+
+golf hole:
+header:
+  stamp:
+    sec: 1681163734
+    nanosec: 732543270
+  frame_id: map
+pose:
+  position:
+    x: 6.758194923400879
+    y: -4.097546100616455
+    z: 0.0
+  orientation:
+    x: 0.0
+    y: 0.0
+    z: 0.6340538789350814
+    w: 0.7732888713846703
+---
+
+
+trolley all/mid:
+header:
+  stamp:
+    sec: 1681163965
+    nanosec: 928740001
+  frame_id: map
+pose:
+  position:
+    x: 4.728928565979004
+    y: -3.7367677688598633
+    z: 0.0
+  orientation:
+    x: 0.0
+    y: 0.0
+    z: -0.8026999780103126
+    w: 0.5963830524941531
+---
+
+
+red house:
+header:
+  stamp:
+    sec: 1681164135
+    nanosec: 491512704
+  frame_id: map
+pose:
+  position:
+    x: 6.307386875152588
+    y: -4.949221611022949
+    z: 0.0
+  orientation:
+    x: 0.0
+    y: 0.0
+    z: -0.809115591304415
+    w: 0.5876495213204098
+---
+
+
+yellow house:
+header:
+  stamp:
+    sec: 1681164174
+    nanosec: 378785546
+  frame_id: map
+pose:
+  position:
+    x: 6.074102878570557
+    y: -4.910430908203125
+    z: 0.0
+  orientation:
+    x: 0.0
+    y: 0.0
+    z: -0.7811356671048362
+    w: 0.6243613293411777
+---
+
+
+green house:
+header:
+  stamp:
+    sec: 1681164251
+    nanosec: 224059427
+  frame_id: map
+pose:
+  position:
+    x: 5.823143482208252
+    y: -4.915400505065918
+    z: 0.0
+  orientation:
+    x: 0.0
+    y: 0.0
+    z: -0.7921972265226599
+    w: 0.6102651508072582
+---
+
+
+task 4:
+header:
+  stamp:
+    sec: 1681164400
+    nanosec: 700093628
+  frame_id: map
+pose:
+  position:
+    x: 3.079353094100952
+    y: -0.5278006196022034
+    z: 0.0
+  orientation:
+    x: 0.0
+    y: 0.0
+    z: 0.9955758379458963
+    w: 0.09396143303678546
+---
+
+
+økseport:
+header:
+  stamp:
+    sec: 1681164585
+    nanosec: 891167872
+  frame_id: map
+pose:
+  position:
+    x: 4.693809986114502
+    y: -5.980169296264648
+    z: 0.0
+  orientation:
+    x: 0.0
+    y: 0.0
+    z: -0.13493156158721403
+    w: 0.9908549206052498
+---
+
+
+
+speeeeeed:
+header:
+  stamp:
+    sec: 1681164861
+    nanosec: 712670012
+  frame_id: map
+pose:
+  position:
+    x: 6.314323425292969
+    y: -7.268889427185059
+    z: 0.0
+  orientation:
+    x: 0.0
+    y: 0.0
+    z: -0.7979435037636673
+    w: 0.6027322496775516
+---
