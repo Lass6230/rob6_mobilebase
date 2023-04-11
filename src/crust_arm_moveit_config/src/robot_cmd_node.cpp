@@ -488,7 +488,7 @@ class RobotHandler : public rclcpp::Node
           target_pose = tf_buffer_->lookupTransform(
             "crust_base_link", "ball",
             tf2::TimePointZero);
-          auto const LOGGER = rclcpp::get_logger("moveToObject");
+          auto const LOGGER = rclcpp::get_logger("moveToObjectball");
           RCLCPP_INFO(LOGGER,"x: %f", target_pose.transform.translation.x);
           RCLCPP_INFO(LOGGER,"y: %f", target_pose.transform.translation.y);
           RCLCPP_INFO(LOGGER,"z: %f", target_pose.transform.translation.z);
@@ -548,7 +548,7 @@ class RobotHandler : public rclcpp::Node
           target_pose = tf_buffer_->lookupTransform(
             "crust_base_link", "aruco",
             tf2::TimePointZero);
-          auto const LOGGER = rclcpp::get_logger("moveToObject");
+          auto const LOGGER = rclcpp::get_logger("moveToObjectaruco");
           RCLCPP_INFO(LOGGER,"x: %f", target_pose.transform.translation.x);
           RCLCPP_INFO(LOGGER,"y: %f", target_pose.transform.translation.y);
           RCLCPP_INFO(LOGGER,"z: %f", target_pose.transform.translation.z);
@@ -723,6 +723,7 @@ class RobotHandler : public rclcpp::Node
               // const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
               // moveit::planning_interface::MoveGroupInterface::Plan my_plan;
               //this->move_group.setStartStateToCurrentState();
+
               auto const LOGGER = rclcpp::get_logger("absoluteMovementQuadCrustbase");
               std::vector<double> joints = {joint1, joint2, joint3, joint4};
               this->move_group.setJointValueTarget(joints);
