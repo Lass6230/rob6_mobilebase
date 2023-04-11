@@ -362,7 +362,7 @@ class RobotHandler : public rclcpp::Node
         this->move_group.setPoseReferenceFrame("crust_base_link");
         //geometry_msgs::msg::PoseStamped current_pose;
         
-        this->move_group.setStartStateToCurrentState();
+        //this->move_group.setStartStateToCurrentState();
 
         
         geometry_msgs::msg::Pose pos;
@@ -722,6 +722,7 @@ class RobotHandler : public rclcpp::Node
               // moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
               // const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
               // moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+              //this->move_group.setStartStateToCurrentState();
               auto const LOGGER = rclcpp::get_logger("absoluteMovementQuadCrustbase");
               std::vector<double> joints = {joint1, joint2, joint3, joint4};
               this->move_group.setJointValueTarget(joints);
@@ -766,7 +767,7 @@ class RobotHandler : public rclcpp::Node
               joints[3] += joint4;
               this->move_group.setJointValueTarget(joints);
               bool success = static_cast<bool>(this->move_group.plan(my_plan));
-              RCLCPP_INFO(LOGGER, " (baseRelativeMovementQuad) %s", success ? "" : "FAILED");
+              RCLCPP_INFO(LOGGER, " (realative joint movement) %s", success ? "" : "FAILED");
               if(success == true){
                   //move_group.move();
                   this->move_group.execute(my_plan);
@@ -807,7 +808,7 @@ class RobotHandler : public rclcpp::Node
               this->move_group.setPoseReferenceFrame("crust_base_link");
               geometry_msgs::msg::PoseStamped current_pose;
               
-              this->move_group.setStartStateToCurrentState();
+              //this->move_group.setStartStateToCurrentState();
               
               geometry_msgs::msg::Pose pos;
               pos.orientation.x = q_x;
@@ -819,7 +820,7 @@ class RobotHandler : public rclcpp::Node
               pos.position.z = z;
               this->move_group.setPoseTarget(pos);
               bool success = static_cast<bool>(this->move_group.plan(my_plan));
-              RCLCPP_INFO(LOGGER, " (baseRelativeMovementQuad) %s", success ? "" : "FAILED");
+              RCLCPP_INFO(LOGGER, " (absolute qoud base with tolerance) %s", success ? "" : "FAILED");
               if(success == true){
                   //move_group.move();
                   this->move_group.execute(my_plan);
@@ -860,7 +861,7 @@ class RobotHandler : public rclcpp::Node
               this->move_group.setPoseReferenceFrame("crust_base_link");
               geometry_msgs::msg::PoseStamped current_pose;
               
-              this->move_group.setStartStateToCurrentState();
+              //this->move_group.setStartStateToCurrentState();
               
               geometry_msgs::msg::Pose pos;
               pos.orientation.x = q_x;
@@ -872,7 +873,7 @@ class RobotHandler : public rclcpp::Node
               pos.position.z = z;
               this->move_group.setPoseTarget(pos);
               bool success = static_cast<bool>(this->move_group.plan(my_plan));
-              RCLCPP_INFO(LOGGER, " (baseRelativeMovementQuad) %s", success ? "" : "FAILED");
+              RCLCPP_INFO(LOGGER, " (absoluteMovementQuadCrustBase) %s", success ? "" : "FAILED");
               if(success == true){
                   //move_group.move();
                   this->move_group.execute(my_plan);
@@ -915,7 +916,7 @@ class RobotHandler : public rclcpp::Node
               //current_pose = move_group.getCurrentPose();
               
               
-              this->move_group.setStartStateToCurrentState();
+              //this->move_group.setStartStateToCurrentState();
               geometry_msgs::msg::Pose pos;
               tf2::Quaternion q_rot;
               //q_orig.setRPY(current_rpy[0],current_rpy[1],current_rpy[2]);
@@ -934,7 +935,7 @@ class RobotHandler : public rclcpp::Node
               this->move_group.setPoseTarget(pos);
               
               bool success = static_cast<bool>(this->move_group.plan(my_plan));
-              RCLCPP_INFO(LOGGER, " (baseRelativeMovementQuad) %s", success ? "" : "FAILED");
+              RCLCPP_INFO(LOGGER, " (absoluteMovementRPYCrustBase) %s", success ? "" : "FAILED");
               if(success == true){
                   //move_group.move();
                   move_group.execute(my_plan);
@@ -1010,7 +1011,7 @@ class RobotHandler : public rclcpp::Node
 
               this->move_group.setPoseReferenceFrame("tool_link");
               
-              this->move_group.setStartStateToCurrentState();
+              //this->move_group.setStartStateToCurrentState();
               
               geometry_msgs::msg::Pose relative_tool;
               relative_tool.orientation.x = q_x;
@@ -1069,7 +1070,7 @@ class RobotHandler : public rclcpp::Node
             tf2::Vector3 vec_new = tf2::operator*({x,y,x},{current_pose.pose.position.x,current_pose.pose.position.y,current_pose.pose.position.z});
             this->move_group.setPoseReferenceFrame("tool_link");
             
-            this->move_group.setStartStateToCurrentState();
+            //this->move_group.setStartStateToCurrentState();
             geometry_msgs::msg::Pose pos;
             pos.orientation.x = q_new.x();//q_new.x();
             pos.orientation.y = q_new.y();//q_new.y();
@@ -1136,7 +1137,7 @@ class RobotHandler : public rclcpp::Node
               geometry_msgs::msg::PoseStamped current_pose;
               current_pose = this->move_group.getCurrentPose();
               
-              this->move_group.setStartStateToCurrentState();
+              //this->move_group.setStartStateToCurrentState();
               
               geometry_msgs::msg::Pose relative_tool;
               relative_tool.orientation.x = current_pose.pose.orientation.x+q_x;
@@ -1202,7 +1203,7 @@ class RobotHandler : public rclcpp::Node
               current_pose = this->move_group.getCurrentPose();
               
               
-              this->move_group.setStartStateToCurrentState();
+              //this->move_group.setStartStateToCurrentState();
               
               geometry_msgs::msg::Pose pos;
               pos.orientation.x = q_new.x();//q_new.x();
