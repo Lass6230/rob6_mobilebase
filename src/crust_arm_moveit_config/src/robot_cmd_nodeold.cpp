@@ -1,7 +1,8 @@
-
 #define BOOST_BIND_NO_PLACEHOLDERS
 
 #include "rclcpp/rclcpp.hpp"
+#include <rclcpp/qos.hpp>
+
 //#include "crust_msgs/srv/RobotCmdSrv.hpp"
 #include <crust_msgs/srv/robot_cmd_srv.hpp>
 #include <crust_msgs/msg/robot_cmd_msg.hpp>
@@ -37,6 +38,13 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 using std::placeholders::_3;
 #include <stdio.h>
+
+const std::string MOVEGROUPGRIPPER = "gripper";
+const std::string MOVEGROUPMANIPULATOR = "manipulator";
+//std::shared_ptr<rclcpp::Node> node = nullptr;
+//rclcpp::executors::MultiThreadedExecutor executor;
+
+
 void robot_handler(const std::shared_ptr<crust_msgs::srv::RobotCmdSrv::Request> request,
           std::shared_ptr<crust_msgs::srv::RobotCmdSrv::Response>      response)
 {
@@ -62,8 +70,17 @@ void robot_handler(const std::shared_ptr<crust_msgs::srv::RobotCmdSrv::Request> 
 }
 class RobotHandler : public rclcpp::Node
 {
+
+  private:
+
+    moveit::planning_interface::MoveGroupInterface move_group;
+    moveit::planning_interface::MoveGroupInterface move_group_gripper;
+    const moveit::core::JointModelGroup* joint_model_group_gripper;
+    const moveit::core::JointModelGroup* joint_model_group;
+    moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+
   public:
-    RobotHandler() : Node("robot_cmd_srv_server")
+    RobotHandler() : Node("robot_cmd_srv_server"), move_group(std::shared_ptr<rclcpp::Node>(std::move(this)), MOVEGROUPMANIPULATOR), move_group_gripper(std::shared_ptr<rclcpp::Node>(std::move(this)), MOVEGROUPGRIPPER)
     {
       service = this->create_service<crust_msgs::srv::RobotCmdSrv>("robot_cmd_srv", std::bind(&RobotHandler::cmdCase, this, _1, _2));
       
@@ -72,12 +89,16 @@ class RobotHandler : public rclcpp::Node
       tf_listener_ = std::make_unique<tf2_ros::TransformListener>(*tf_buffer_);
       // Subscribe to pose published by sensor node (check every second)
       pose_sub_ = create_subscription<geometry_msgs::msg::PoseStamped>
-          ("/detected_object", 10,
+          ("/detected_object", rclcpp::QoS(1),
           std::bind(&RobotHandler::poseCallback, this, std::placeholders::_1));
       //cmd_sub = create_subscription<<crust_msgs::srv::RobotCmdSrv>("/cmd_msg",10,std::bind(&RobotHandler::cmdCallback, this, std::placeholders::_3));
       //status_pub = 
-      cmd_sub_ = this->create_subscription<crust_msgs::msg::RobotCmdMsg>("/robot_cmd_msg",10,std::bind(&RobotHandler::cmdCaseMsg, this, std::placeholders::_1));
+      cmd_sub_ = this->create_subscription<crust_msgs::msg::RobotCmdMsg>("/robot_cmd_msg",rclcpp::QoS(1),std::bind(&RobotHandler::cmdCaseMsg, this, std::placeholders::_1));
       cmd_pub_ = this->create_publisher<std_msgs::msg::Int8>("/robot_cmd_status",10);
+      RCLCPP_INFO(this->get_logger(), "Initialization successful.");
+
+      
+
     }
     
     /*
@@ -103,6 +124,7 @@ class RobotHandler : public rclcpp::Node
         19: gripper off
         20: gripper set joint value
         21: relative joint
+
     */
     void cmdCaseMsg(const crust_msgs::msg::RobotCmdMsg::SharedPtr msg){
         robot_msg = *msg;
@@ -205,25 +227,26 @@ class RobotHandler : public rclcpp::Node
     }
     bool gripperSetValue(double j1, double j2){
         bool status;
-        rclcpp::NodeOptions node_options;
-        node_options.automatically_declare_parameters_from_overrides(true);
-        auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
-        rclcpp::executors::MultiThreadedExecutor executor;
-        executor.add_node(move_group_node);
-        std::thread([&executor]() { executor.spin(); }).detach();
-        static const std::string PLANNING_GROUP = "gripper";
-        moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
-        moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
-        const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+        //rclcpp::NodeOptions node_options;
+        //node_options.automatically_declare_parameters_from_overrides(true);
+        //auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
+        //rclcpp::executors::MultiThreadedExecutor executor;
+        //executor.add_node(move_group_node);
+        //std::thread([&executor]() { executor.spin(); }).detach();
+        //static const std::string PLANNING_GROUP = "gripper";
+        //moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
+        //moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+        //const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+        //joint_model_group_gripper = this->move_group_gripper.getCurrentState()->getJointModelGroup(MOVEGROUPGRIPPER);
         auto const LOGGER = rclcpp::get_logger("gripper On");
-        moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+        //moveit::planning_interface::MoveGroupInterface::Plan my_plan;
         std::vector<double> joints = {j1, j2};
-        move_group.setJointValueTarget(joints);
-        bool success = static_cast<bool>(move_group.plan(my_plan));
+        move_group_gripper.setJointValueTarget(joints);
+        bool success = static_cast<bool>(this->move_group_gripper.plan(my_plan));
         RCLCPP_INFO(LOGGER, " (gripper On) %s", success ? "" : "FAILED");
         if(success == true){
             //move_group.move();
-            move_group.execute(my_plan);
+            this->move_group.execute(my_plan);
             status = true;
 
             
@@ -232,33 +255,40 @@ class RobotHandler : public rclcpp::Node
         {
             status = false;
         }
-        executor.cancel();
+        //executor.cancel();
         return status;
 
     }
 
     bool gripperOn(){
         bool status;
-        rclcpp::NodeOptions node_options;
-        node_options.automatically_declare_parameters_from_overrides(true);
-        auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
-        rclcpp::executors::MultiThreadedExecutor executor;
-        executor.add_node(move_group_node);
-        std::thread([&executor]() { executor.spin(); }).detach();
-        static const std::string PLANNING_GROUP = "gripper";
-        moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
-        moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
-        const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+        // rclcpp::NodeOptions node_options;
+        // node_options.automatically_declare_parameters_from_overrides(true);
+        // auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
+        // rclcpp::executors::MultiThreadedExecutor executor;
+        // executor.add_node(move_group_node);
+        // std::thread([&executor]() { executor.spin(); }).detach();
+        // static const std::string PLANNING_GROUP = "gripper";
+        // moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
+        // moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+        
+        //const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+        
+        //executor2.add_node(node);
+        //std::thread([&executor]() { executor.spin(); }).detach();
+        
+        
+        //joint_model_group_gripper = this->move_group_gripper.getCurrentState()->getJointModelGroup(MOVEGROUPGRIPPER);
         auto const LOGGER = rclcpp::get_logger("gripper On");
-        moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+        //moveit::planning_interface::MoveGroupInterface::Plan my_plan;
         std::vector<double> joints = {0.13962634, 0.13962634};
         std::vector<std::string> joint_names = {"finger1_joint", "finger2_joint"};
-        move_group.setJointValueTarget(joint_names,joints);
-        bool success = static_cast<bool>(move_group.plan(my_plan));
+        this->move_group_gripper.setJointValueTarget(joint_names,joints);
+        bool success = static_cast<bool>(this->move_group_gripper.plan(my_plan));
         RCLCPP_INFO(LOGGER, " (gripper On) %s", success ? "" : "FAILED");
         if(success == true){
             //move_group.move();
-            move_group.execute(my_plan);
+            this->move_group_gripper.execute(my_plan);
             status = true;
 
             
@@ -267,34 +297,34 @@ class RobotHandler : public rclcpp::Node
         {
             status = false;
         }
-        executor.cancel();
+        //executor.cancel();
         return status;
 
     }
 
     bool gripperOff(){
         bool status;
-        rclcpp::NodeOptions node_options;
-        node_options.automatically_declare_parameters_from_overrides(true);
-        auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
-        rclcpp::executors::MultiThreadedExecutor executor;
-        executor.add_node(move_group_node);
-        std::thread([&executor]() { executor.spin(); }).detach();
-        static const std::string PLANNING_GROUP = "gripper";
-        moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
-        moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
-        const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+        // rclcpp::NodeOptions node_options;
+        // node_options.automatically_declare_parameters_from_overrides(true);
+        // auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
+        // rclcpp::executors::MultiThreadedExecutor executor;
+        // executor.add_node(move_group_node);
+        // std::thread([&executor]() { executor.spin(); }).detach();
+        // static const std::string PLANNING_GROUP = "gripper";
+        // moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
+        // moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+        // const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
         auto const LOGGER = rclcpp::get_logger("gripper Off");
-        moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+        // moveit::planning_interface::MoveGroupInterface::Plan my_plan;
         std::vector<double> joints = {-0.40, -0.40};
         std::vector<std::string> joint_names = {"finger1_joint", "finger2_joint"};
-        move_group.setJointValueTarget(joint_names,joints);
+        this->move_group_gripper.setJointValueTarget(joint_names,joints);
         //move_group.setJointValueTarget(joints);
-        bool success = static_cast<bool>(move_group.plan(my_plan));
+        bool success = static_cast<bool>(this->move_group_gripper.plan(my_plan));
         RCLCPP_INFO(LOGGER, " (gripper On) %s", success ? "" : "FAILED");
         if(success == true){
             //move_group.move();
-            move_group.execute(my_plan);
+            this->move_group_gripper.execute(my_plan);
             status = true;
 
             
@@ -303,36 +333,36 @@ class RobotHandler : public rclcpp::Node
         {
             status = false;
         }
-        executor.cancel();
+        //executor.cancel();
         return status;
     }
 
     bool CartesianPath(double x, double y, double z, double q_x, double q_y, double q_z, double q_w, double orientation_tolerance){
         std::vector<geometry_msgs::msg::Pose> waypoints;
         bool status;
-        rclcpp::NodeOptions node_options;
-        node_options.automatically_declare_parameters_from_overrides(true);
-        auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
-        rclcpp::executors::MultiThreadedExecutor executor;
-        executor.add_node(move_group_node);
-        std::thread([&executor]() { executor.spin(); }).detach();
-        static const std::string PLANNING_GROUP = "manipulator";
-        moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
-        moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
-        const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+        // rclcpp::NodeOptions node_options;
+        // node_options.automatically_declare_parameters_from_overrides(true);
+        // auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
+        // rclcpp::executors::MultiThreadedExecutor executor;
+        // executor.add_node(move_group_node);
+        // std::thread([&executor]() { executor.spin(); }).detach();
+        // static const std::string PLANNING_GROUP = "manipulator";
+        // moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
+        // moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+        // const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
         auto const LOGGER = rclcpp::get_logger("absoluteMovementQuadCrustbase");
         
-        move_group.setNumPlanningAttempts(5);
+        this->move_group.setNumPlanningAttempts(5);
 
-        move_group.setPlanningTime(10.0);
+        this->move_group.setPlanningTime(10.0);
         //move_group.setGoalOrientationTolerance(orientation_tolerance);
 
-        moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+        //moveit::planning_interface::MoveGroupInterface::Plan my_plan;
 
-        move_group.setPoseReferenceFrame("crust_base_link");
+        this->move_group.setPoseReferenceFrame("crust_base_link");
         //geometry_msgs::msg::PoseStamped current_pose;
         
-        move_group.setStartStateToCurrentState();
+        //this->move_group.setStartStateToCurrentState();
 
         
         geometry_msgs::msg::Pose pos;
@@ -352,8 +382,8 @@ class RobotHandler : public rclcpp::Node
         moveit_msgs::msg::RobotTrajectory trajectory;
         const double jump_threshold = 0.0;
         const double eef_step = 0.01;
-        double fraction = move_group.computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory);
-        move_group.execute(trajectory);
+        double fraction = this->move_group.computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory);
+        this->move_group.execute(trajectory);
 
         if(fraction < 0.0){
            
@@ -365,7 +395,7 @@ class RobotHandler : public rclcpp::Node
         {
             status = true;
         }
-        executor.cancel();
+        //executor.cancel();
         return status;
 
 
@@ -373,18 +403,18 @@ class RobotHandler : public rclcpp::Node
 
     bool stop(){
       bool status;
-      rclcpp::NodeOptions node_options;
-      node_options.automatically_declare_parameters_from_overrides(true);
-      auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
-      rclcpp::executors::MultiThreadedExecutor executor;
-      executor.add_node(move_group_node);
-      std::thread([&executor]() { executor.spin(); }).detach();
-      static const std::string PLANNING_GROUP = "manipulator";
-      moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
-      moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
-      const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+      // rclcpp::NodeOptions node_options;
+      // node_options.automatically_declare_parameters_from_overrides(true);
+      // auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
+      // rclcpp::executors::MultiThreadedExecutor executor;
+      // executor.add_node(move_group_node);
+      // std::thread([&executor]() { executor.spin(); }).detach();
+      // static const std::string PLANNING_GROUP = "manipulator";
+      // moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
+      // moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+      // const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
       auto const LOGGER = rclcpp::get_logger("stop");
-      move_group.stop();
+      this->move_group.stop();
       status = true;
       return status;
 
@@ -458,7 +488,7 @@ class RobotHandler : public rclcpp::Node
           target_pose = tf_buffer_->lookupTransform(
             "crust_base_link", "ball",
             tf2::TimePointZero);
-          auto const LOGGER = rclcpp::get_logger("moveToObject");
+          auto const LOGGER = rclcpp::get_logger("moveToObjectball");
           RCLCPP_INFO(LOGGER,"x: %f", target_pose.transform.translation.x);
           RCLCPP_INFO(LOGGER,"y: %f", target_pose.transform.translation.y);
           RCLCPP_INFO(LOGGER,"z: %f", target_pose.transform.translation.z);
@@ -474,11 +504,15 @@ class RobotHandler : public rclcpp::Node
           m.getRPY(rot_r, rot_p, rot_y);
           
           quat_tf.setRPY(0.0,1.57,atan2(target_pose.transform.translation.y, target_pose.transform.translation.x));
+          //quat_tf.setRPY(rot_r, rot_p, rot_y);
+          quat_tf.normalize();
           RCLCPP_INFO(LOGGER,"R: %f", rot_r);
           RCLCPP_INFO(LOGGER,"P: %f", rot_p);
           RCLCPP_INFO(LOGGER,"Y: %f", rot_y);
           target_pose.transform.rotation = tf2::toMsg(quat_tf);
-          bool i = RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z+0.1,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.5);
+          bool i = RobotHandler::absoluteMovementRPYCrustBase(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z+0.1,0.0,0.157,atan2(target_pose.transform.translation.y, target_pose.transform.translation.x));
+          //bool i = RobotHandler::absoluteMovementQuadCrustBaseWOrientationTolerance(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z+0.1,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.7);
+          
           if(i == 1){
 
             i =  RobotHandler::CartesianPath(target_pose.transform.translation.x + x,target_pose.transform.translation.y + y,target_pose.transform.translation.z + z-0.03,target_pose.transform.rotation.x,target_pose.transform.rotation.y,target_pose.transform.rotation.z,target_pose.transform.rotation.w, 0.05);
@@ -518,7 +552,7 @@ class RobotHandler : public rclcpp::Node
           target_pose = tf_buffer_->lookupTransform(
             "crust_base_link", "aruco",
             tf2::TimePointZero);
-          auto const LOGGER = rclcpp::get_logger("moveToObject");
+          auto const LOGGER = rclcpp::get_logger("moveToObjectaruco");
           RCLCPP_INFO(LOGGER,"x: %f", target_pose.transform.translation.x);
           RCLCPP_INFO(LOGGER,"y: %f", target_pose.transform.translation.y);
           RCLCPP_INFO(LOGGER,"z: %f", target_pose.transform.translation.z);
@@ -681,25 +715,27 @@ class RobotHandler : public rclcpp::Node
 
     bool jointMovement(double joint1, double joint2, double joint3, double joint4){
               bool status;
-              rclcpp::NodeOptions node_options;
-              node_options.automatically_declare_parameters_from_overrides(true);
-              auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
-              rclcpp::executors::MultiThreadedExecutor executor;
-              executor.add_node(move_group_node);
-              std::thread([&executor]() { executor.spin(); }).detach();
-              static const std::string PLANNING_GROUP = "manipulator";
-              moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
-              moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
-              const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
-              moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+              // rclcpp::NodeOptions node_options;
+              // node_options.automatically_declare_parameters_from_overrides(true);
+              // auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
+              // rclcpp::executors::MultiThreadedExecutor executor;
+              // executor.add_node(move_group_node);
+              // std::thread([&executor]() { executor.spin(); }).detach();
+              // static const std::string PLANNING_GROUP = "manipulator";
+              // moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
+              // moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+              // const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+              // moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+              //this->move_group.setStartStateToCurrentState();
+
               auto const LOGGER = rclcpp::get_logger("absoluteMovementQuadCrustbase");
               std::vector<double> joints = {joint1, joint2, joint3, joint4};
-              move_group.setJointValueTarget(joints);
-              bool success = static_cast<bool>(move_group.plan(my_plan));
+              this->move_group.setJointValueTarget(joints);
+              bool success = static_cast<bool>(this->move_group.plan(my_plan));
               RCLCPP_INFO(LOGGER, " (joint movement) %s", success ? "" : "FAILED");
               if(success == true){
                   //move_group.move();
-                  move_group.execute(my_plan);
+                  this->move_group.execute(my_plan);
                   status = true;
 
                   
@@ -708,37 +744,38 @@ class RobotHandler : public rclcpp::Node
               {
                   status = false;
               }
-              executor.cancel();
+              //executor.cancel();
               return status;
     }
 
+    //
     bool RealativeJointMovement(double joint1, double joint2, double joint3, double joint4){
               bool status;
-              rclcpp::NodeOptions node_options;
-              node_options.automatically_declare_parameters_from_overrides(true);
-              auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
-              rclcpp::executors::MultiThreadedExecutor executor;
-              executor.add_node(move_group_node);
-              std::thread([&executor]() { executor.spin(); }).detach();
-              static const std::string PLANNING_GROUP = "manipulator";
-              moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
-              moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
-              const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
-              moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+              // rclcpp::NodeOptions node_options;
+              // node_options.automatically_declare_parameters_from_overrides(true);
+              // auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
+              // rclcpp::executors::MultiThreadedExecutor executor;
+              // executor.add_node(move_group_node);
+              // std::thread([&executor]() { executor.spin(); }).detach();
+              // static const std::string PLANNING_GROUP = "manipulator";
+              // moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
+              // moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+              // const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+              // moveit::planning_interface::MoveGroupInterface::Plan my_plan;
               auto const LOGGER = rclcpp::get_logger("realative joint");
               std::vector<double> joints = {joint1, joint2, joint3, joint4};
-              moveit::core::RobotStatePtr current_state = move_group.getCurrentState(10);
+              moveit::core::RobotStatePtr current_state = this->move_group.getCurrentState(10);
               current_state->copyJointGroupPositions(joint_model_group, joints);
               joints[0] += joint1;
               joints[1] += joint2;
               joints[2] += joint3;
               joints[3] += joint4;
-              move_group.setJointValueTarget(joints);
-              bool success = static_cast<bool>(move_group.plan(my_plan));
-              RCLCPP_INFO(LOGGER, " (baseRelativeMovementQuad) %s", success ? "" : "FAILED");
+              this->move_group.setJointValueTarget(joints);
+              bool success = static_cast<bool>(this->move_group.plan(my_plan));
+              RCLCPP_INFO(LOGGER, " (realative joint movement) %s", success ? "" : "FAILED");
               if(success == true){
                   //move_group.move();
-                  move_group.execute(my_plan);
+                  this->move_group.execute(my_plan);
                   status = true;
 
                   
@@ -747,36 +784,36 @@ class RobotHandler : public rclcpp::Node
               {
                   status = false;
               }
-              executor.cancel();
+              //executor.cancel();
               return status;
     }
 
     bool absoluteMovementQuadCrustBaseWOrientationTolerance(double x, double y, double z, double q_x, double q_y, double q_z, double q_w, double orientation_tolerance)
       {
               bool status;
-              rclcpp::NodeOptions node_options;
-              node_options.automatically_declare_parameters_from_overrides(true);
-              auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
-              rclcpp::executors::MultiThreadedExecutor executor;
-              executor.add_node(move_group_node);
-              std::thread([&executor]() { executor.spin(); }).detach();
-              static const std::string PLANNING_GROUP = "manipulator";
-              moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
-              moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
-              const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+              // rclcpp::NodeOptions node_options;
+              // node_options.automatically_declare_parameters_from_overrides(true);
+              // auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
+              // rclcpp::executors::MultiThreadedExecutor executor;
+              // executor.add_node(move_group_node);
+              // std::thread([&executor]() { executor.spin(); }).detach();
+              // static const std::string PLANNING_GROUP = "manipulator";
+              // moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
+              // moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+              // const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
               auto const LOGGER = rclcpp::get_logger("absoluteMovementQuadCrustbase");
              
-              move_group.setNumPlanningAttempts(5);
+              this->move_group.setNumPlanningAttempts(5);
 
-              move_group.setPlanningTime(10.0);
-              move_group.setGoalOrientationTolerance(orientation_tolerance);
+              this->move_group.setPlanningTime(10.0);
+              this->move_group.setGoalOrientationTolerance(orientation_tolerance);
 
-              moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+              // moveit::planning_interface::MoveGroupInterface::Plan my_plan;
 
-              move_group.setPoseReferenceFrame("crust_base_link");
+              this->move_group.setPoseReferenceFrame("crust_base_link");
               geometry_msgs::msg::PoseStamped current_pose;
               
-              move_group.setStartStateToCurrentState();
+              //this->move_group.setStartStateToCurrentState();
               
               geometry_msgs::msg::Pose pos;
               pos.orientation.x = q_x;
@@ -786,12 +823,12 @@ class RobotHandler : public rclcpp::Node
               pos.position.x = x;
               pos.position.y = y;
               pos.position.z = z;
-              move_group.setPoseTarget(pos);
-              bool success = static_cast<bool>(move_group.plan(my_plan));
-              RCLCPP_INFO(LOGGER, " (baseRelativeMovementQuad) %s", success ? "" : "FAILED");
+              this->move_group.setPoseTarget(pos);
+              bool success = static_cast<bool>(this->move_group.plan(my_plan));
+              RCLCPP_INFO(LOGGER, " (absolute qoud base with tolerance) %s", success ? "" : "FAILED");
               if(success == true){
                   //move_group.move();
-                  move_group.execute(my_plan);
+                  this->move_group.execute(my_plan);
                   status = true;
 
                   
@@ -800,36 +837,36 @@ class RobotHandler : public rclcpp::Node
               {
                   status = false;
               }
-              executor.cancel();
+              //executor.cancel();
               return status;
       }
 
     bool absoluteMovementQuadCrustBase(double x, double y, double z, double q_x, double q_y, double q_z, double q_w)
       {
               bool status;
-              rclcpp::NodeOptions node_options;
-              node_options.automatically_declare_parameters_from_overrides(true);
-              auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
-              rclcpp::executors::MultiThreadedExecutor executor;
-              executor.add_node(move_group_node);
-              std::thread([&executor]() { executor.spin(); }).detach();
-              static const std::string PLANNING_GROUP = "manipulator";
-              moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
-              moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
-              const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+              // rclcpp::NodeOptions node_options;
+              // node_options.automatically_declare_parameters_from_overrides(true);
+              // auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
+              // rclcpp::executors::MultiThreadedExecutor executor;
+              // executor.add_node(move_group_node);
+              // std::thread([&executor]() { executor.spin(); }).detach();
+              // static const std::string PLANNING_GROUP = "manipulator";
+              // moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
+              // moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+              // const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
               auto const LOGGER = rclcpp::get_logger("absoluteMovementQuadCrustbase");
              
-              move_group.setNumPlanningAttempts(5);
+              this->move_group.setNumPlanningAttempts(5);
 
-              move_group.setPlanningTime(10.0);
+              this->move_group.setPlanningTime(10.0);
               //move_group.setGoalOrientationTolerance(0.5);
 
-              moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+              // moveit::planning_interface::MoveGroupInterface::Plan my_plan;
 
-              move_group.setPoseReferenceFrame("crust_base_link");
+              this->move_group.setPoseReferenceFrame("crust_base_link");
               geometry_msgs::msg::PoseStamped current_pose;
               
-              move_group.setStartStateToCurrentState();
+              //this->move_group.setStartStateToCurrentState();
               
               geometry_msgs::msg::Pose pos;
               pos.orientation.x = q_x;
@@ -839,12 +876,12 @@ class RobotHandler : public rclcpp::Node
               pos.position.x = x;
               pos.position.y = y;
               pos.position.z = z;
-              move_group.setPoseTarget(pos);
-              bool success = static_cast<bool>(move_group.plan(my_plan));
-              RCLCPP_INFO(LOGGER, " (baseRelativeMovementQuad) %s", success ? "" : "FAILED");
+              this->move_group.setPoseTarget(pos);
+              bool success = static_cast<bool>(this->move_group.plan(my_plan));
+              RCLCPP_INFO(LOGGER, " (absoluteMovementQuadCrustBase) %s", success ? "" : "FAILED");
               if(success == true){
                   //move_group.move();
-                  move_group.execute(my_plan);
+                  this->move_group.execute(my_plan);
                   status = true;
 
                   
@@ -853,38 +890,38 @@ class RobotHandler : public rclcpp::Node
               {
                   status = false;
               }
-              executor.cancel();
+              //executor.cancel();
               return status;
       }
 
     bool absoluteMovementRPYCrustBase(double x, double y, double z, double rot_r, double rot_p, double rot_y){
               bool status;
-              rclcpp::NodeOptions node_options;
-              node_options.automatically_declare_parameters_from_overrides(true);
-              auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
-              rclcpp::executors::MultiThreadedExecutor executor;
-              executor.add_node(move_group_node);
-              std::thread([&executor]() { executor.spin(); }).detach();
-              static const std::string PLANNING_GROUP = "manipulator";
-              moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
-              moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
-              const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+              // rclcpp::NodeOptions node_options;
+              // node_options.automatically_declare_parameters_from_overrides(true);
+              // auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
+              // rclcpp::executors::MultiThreadedExecutor executor;
+              // executor.add_node(move_group_node);
+              // std::thread([&executor]() { executor.spin(); }).detach();
+              // static const std::string PLANNING_GROUP = "manipulator";
+              // moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
+              // moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+              // const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
               auto const LOGGER = rclcpp::get_logger("Relative movement quad rpy");
              
-              move_group.setNumPlanningAttempts(5);
+              this->move_group.setNumPlanningAttempts(5);
 
-              move_group.setPlanningTime(10.0);
-              move_group.setGoalOrientationTolerance(0.1);
+              this->move_group.setPlanningTime(10.0);
+              this->move_group.setGoalOrientationTolerance(0.1);
               //std::vector< double > current_rpy =	move_group.getCurrentRPY();
-              moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+              // moveit::planning_interface::MoveGroupInterface::Plan my_plan;
              
               
-              move_group.setPoseReferenceFrame("crust_base_link");
+              this->move_group.setPoseReferenceFrame("crust_base_link");
               //geometry_msgs::msg::PoseStamped current_pose;
               //current_pose = move_group.getCurrentPose();
               
               
-              move_group.setStartStateToCurrentState();
+              //this->move_group.setStartStateToCurrentState();
               geometry_msgs::msg::Pose pos;
               tf2::Quaternion q_rot;
               //q_orig.setRPY(current_rpy[0],current_rpy[1],current_rpy[2]);
@@ -900,10 +937,10 @@ class RobotHandler : public rclcpp::Node
               pos.position.z = z;
               //move_group.setPositionTarget(x,y,z);
               //move_group.setRPYTarget(rot_r, rot_p, rot_y);
-              move_group.setPoseTarget(pos);
+              this->move_group.setPoseTarget(pos);
               
-              bool success = static_cast<bool>(move_group.plan(my_plan));
-              RCLCPP_INFO(LOGGER, " (baseRelativeMovementQuad) %s", success ? "" : "FAILED");
+              bool success = static_cast<bool>(this->move_group.plan(my_plan));
+              RCLCPP_INFO(LOGGER, " (absoluteMovementRPYCrustBase) %s", success ? "" : "FAILED");
               if(success == true){
                   //move_group.move();
                   move_group.execute(my_plan);
@@ -915,7 +952,7 @@ class RobotHandler : public rclcpp::Node
               {
                   status = false;
               }
-              executor.cancel();
+              //executor.cancel();
               return status;
     }
 
@@ -923,28 +960,28 @@ class RobotHandler : public rclcpp::Node
             std::shared_ptr<crust_msgs::srv::RobotCmdSrv::Response>      response)
             { 
 
-              rclcpp::NodeOptions node_options;
-              node_options.automatically_declare_parameters_from_overrides(true);
-              auto move_group_node = rclcpp::Node::make_shared("move_group_interface_tutorial", node_options);
-              // For current state monitor
-              rclcpp::executors::MultiThreadedExecutor executor;
-              //rclcpp::executors::SingleThreadedExecutor executor;
-              executor.add_node(move_group_node);
-              std::thread([&executor]() { executor.spin(); }).detach();
-              static const std::string PLANNING_GROUP = "manipulator";
+              // rclcpp::NodeOptions node_options;
+              // node_options.automatically_declare_parameters_from_overrides(true);
+              // auto move_group_node = rclcpp::Node::make_shared("move_group_interface_tutorial", node_options);
+              // // For current state monitor
+              // rclcpp::executors::MultiThreadedExecutor executor;
+              // //rclcpp::executors::SingleThreadedExecutor executor;
+              // executor.add_node(move_group_node);
+              // std::thread([&executor]() { executor.spin(); }).detach();
+              // static const std::string PLANNING_GROUP = "manipulator";
               auto const LOGGER = rclcpp::get_logger("hello_moveit");
-              moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
-              moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+              // moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
+              // moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
               //const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
               
-              RCLCPP_INFO(LOGGER, "Planning frame: %s", move_group.getPlanningFrame().c_str());
+              RCLCPP_INFO(LOGGER, "Planning frame: %s", this->move_group.getPlanningFrame().c_str());
 
               // We can also print the name of the end-effector link for this group.
-              RCLCPP_INFO(LOGGER, "End effector link: %s", move_group.getEndEffectorLink().c_str());
+              RCLCPP_INFO(LOGGER, "End effector link: %s", this->move_group.getEndEffectorLink().c_str());
 
               // We can get a list of all the groups in the robot:
               RCLCPP_INFO(LOGGER, "Available Planning Groups:");
-              std::copy(move_group.getJointModelGroupNames().begin(), move_group.getJointModelGroupNames().end(),std::ostream_iterator<std::string>(std::cout, ", "));
+              std::copy(move_group.getJointModelGroupNames().begin(), this->move_group.getJointModelGroupNames().end(),std::ostream_iterator<std::string>(std::cout, ", "));
               
               
               response->status =  request->cmd;
@@ -954,32 +991,32 @@ class RobotHandler : public rclcpp::Node
                             request->pose[0]);
 
               RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "sending back response: [%ld]", (long int)response->status);
-              executor.cancel();
+              //executor.cancel();
             }
 
     bool relativeMovementQuad(double x, double y, double z, double q_x, double q_y, double q_z, double q_w){
               bool status;
               
-              auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node");
-              rclcpp::executors::MultiThreadedExecutor executor;
-              executor.add_node(move_group_node);
-              std::thread([&executor]() { executor.spin(); }).detach();
-              static const std::string PLANNING_GROUP = "manipulator";
-              moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
-              moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
-              const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+              // auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node");
+              // rclcpp::executors::MultiThreadedExecutor executor;
+              // executor.add_node(move_group_node);
+              // std::thread([&executor]() { executor.spin(); }).detach();
+              // static const std::string PLANNING_GROUP = "manipulator";
+              // moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
+              // moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+              // const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
               auto const LOGGER = rclcpp::get_logger("Relative movement quad");
               //const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
     
-              move_group.setNumPlanningAttempts(5);
+              this->move_group.setNumPlanningAttempts(5);
 
-              move_group.setPlanningTime(10.0);
+              this->move_group.setPlanningTime(10.0);
 
-              moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+              // moveit::planning_interface::MoveGroupInterface::Plan my_plan;
 
-              move_group.setPoseReferenceFrame("tool_link");
+              this->move_group.setPoseReferenceFrame("tool_link");
               
-              move_group.setStartStateToCurrentState();
+              //this->move_group.setStartStateToCurrentState();
               
               geometry_msgs::msg::Pose relative_tool;
               relative_tool.orientation.x = q_x;
@@ -989,12 +1026,12 @@ class RobotHandler : public rclcpp::Node
               relative_tool.position.x = x;
               relative_tool.position.y = y;
               relative_tool.position.z = z;
-              move_group.setPoseTarget(relative_tool);
-              bool success = static_cast<bool>(move_group.plan(my_plan));
+              this->move_group.setPoseTarget(relative_tool);
+              bool success = static_cast<bool>(this->move_group.plan(my_plan));
               RCLCPP_INFO(LOGGER, " (relativeMovementQuad) %s", success ? "" : "FAILED");
               if(success == true){
                   //move_group.move();
-                  move_group.execute(my_plan);
+                  this->move_group.execute(my_plan);
                   status = true;
 
                   
@@ -1003,42 +1040,42 @@ class RobotHandler : public rclcpp::Node
               {
                   status = false;
               }
-              executor.cancel();
+              //executor.cancel();
               return status;
       }
 
     bool relativeMovementRPY(double x, double y, double z, double rot_r, double rot_p, double rot_y){
             bool status;
             
-            auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node");
-            rclcpp::executors::MultiThreadedExecutor executor;
-            executor.add_node(move_group_node);
-            std::thread([&executor]() { executor.spin(); }).detach();
-            static const std::string PLANNING_GROUP = "manipulator";
-            moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
-            moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
-            const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+            // auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node");
+            // rclcpp::executors::MultiThreadedExecutor executor;
+            // executor.add_node(move_group_node);
+            // std::thread([&executor]() { executor.spin(); }).detach();
+            // static const std::string PLANNING_GROUP = "manipulator";
+            // moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
+            // moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+            // const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
             auto const LOGGER = rclcpp::get_logger("Relative movement RPY");
             //const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
-            move_group.setPoseReferenceFrame("crust_base_link");
-            move_group.setNumPlanningAttempts(5);
+            this->move_group.setPoseReferenceFrame("crust_base_link");
+            this->move_group.setNumPlanningAttempts(5);
 
-            move_group.setPlanningTime(10.0);
+            this->move_group.setPlanningTime(10.0);
 
-            moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+            // moveit::planning_interface::MoveGroupInterface::Plan my_plan;
 
             geometry_msgs::msg::PoseStamped current_pose;
-            current_pose = move_group.getCurrentPose();
-            std::vector< double > current_rpy =	move_group.getCurrentRPY();
+            current_pose = this->move_group.getCurrentPose();
+            std::vector< double > current_rpy =	this->move_group.getCurrentRPY();
             tf2::Quaternion q_orig, q_rot, q_new;
             q_orig.setRPY(current_rpy[0],current_rpy[1],current_rpy[2]);
             q_rot.setRPY(rot_r, rot_p, rot_y);
             q_new = q_rot * q_orig;
             q_new.normalize();
             tf2::Vector3 vec_new = tf2::operator*({x,y,x},{current_pose.pose.position.x,current_pose.pose.position.y,current_pose.pose.position.z});
-            move_group.setPoseReferenceFrame("tool_link");
+            this->move_group.setPoseReferenceFrame("tool_link");
             
-            move_group.setStartStateToCurrentState();
+            //this->move_group.setStartStateToCurrentState();
             geometry_msgs::msg::Pose pos;
             pos.orientation.x = q_new.x();//q_new.x();
             pos.orientation.y = q_new.y();//q_new.y();
@@ -1061,12 +1098,12 @@ class RobotHandler : public rclcpp::Node
             RCLCPP_INFO(LOGGER,"rot w: %f", pos.orientation.w);
             //move_group.setPoseTarget(pos);
           
-            move_group.setRPYTarget(rot_r,rot_p,rot_y);
-            move_group.setPositionTarget(x,y,z);
-            bool success = static_cast<bool>(move_group.plan(my_plan));
+            this->move_group.setRPYTarget(rot_r,rot_p,rot_y);
+            this->move_group.setPositionTarget(x,y,z);
+            bool success = static_cast<bool>(this->move_group.plan(my_plan));
             RCLCPP_INFO(LOGGER, " (relativeMovementRPY) %s", success ? "" : "FAILED");
             if(success == true){
-                move_group.move();
+                this->move_group.execute(my_plan);
                 //move_group.execute(my_plan);
                 status = true;
 
@@ -1076,36 +1113,36 @@ class RobotHandler : public rclcpp::Node
             {
                 status = false;
             }
-            executor.cancel();
+            //executor.cancel();
             return status;
   }
 
     bool baseRelativeMovementQuad(double x, double y, double z, double q_x, double q_y, double q_z, double q_w)
     {
               bool status;
-              rclcpp::NodeOptions node_options;
-              node_options.automatically_declare_parameters_from_overrides(true);
-              auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
-              rclcpp::executors::MultiThreadedExecutor executor;
-              executor.add_node(move_group_node);
-              std::thread([&executor]() { executor.spin(); }).detach();
-              static const std::string PLANNING_GROUP = "manipulator";
-              moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
-              moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
-              const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+              // rclcpp::NodeOptions node_options;
+              // node_options.automatically_declare_parameters_from_overrides(true);
+              // auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
+              // rclcpp::executors::MultiThreadedExecutor executor;
+              // executor.add_node(move_group_node);
+              // std::thread([&executor]() { executor.spin(); }).detach();
+              // static const std::string PLANNING_GROUP = "manipulator";
+              // moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
+              // moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+              // const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
               auto const LOGGER = rclcpp::get_logger("Base Relative movement quad");
              
-              move_group.setNumPlanningAttempts(5);
+              this->move_group.setNumPlanningAttempts(5);
 
-              move_group.setPlanningTime(10.0);
+              this->move_group.setPlanningTime(10.0);
 
-              moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+              // moveit::planning_interface::MoveGroupInterface::Plan my_plan;
 
-              move_group.setPoseReferenceFrame("crust_base_link");
+              this->move_group.setPoseReferenceFrame("crust_base_link");
               geometry_msgs::msg::PoseStamped current_pose;
-              current_pose = move_group.getCurrentPose();
+              current_pose = this->move_group.getCurrentPose();
               
-              move_group.setStartStateToCurrentState();
+              //this->move_group.setStartStateToCurrentState();
               
               geometry_msgs::msg::Pose relative_tool;
               relative_tool.orientation.x = current_pose.pose.orientation.x+q_x;
@@ -1115,12 +1152,12 @@ class RobotHandler : public rclcpp::Node
               relative_tool.position.x = current_pose.pose.position.x+x;
               relative_tool.position.y = current_pose.pose.position.y+y;
               relative_tool.position.z = current_pose.pose.position.z+z;
-              move_group.setPoseTarget(relative_tool);
-              bool success = static_cast<bool>(move_group.plan(my_plan));
+              this->move_group.setPoseTarget(relative_tool);
+              bool success = static_cast<bool>(this->move_group.plan(my_plan));
               RCLCPP_INFO(LOGGER, " (baseRelativeMovementQuad) %s", success ? "" : "FAILED");
               if(success == true){
                   //move_group.move();
-                  move_group.execute(my_plan);
+                  this->move_group.execute(my_plan);
                   status = true;
 
                   
@@ -1129,35 +1166,35 @@ class RobotHandler : public rclcpp::Node
               {
                   status = false;
               }
-              executor.cancel();
+              //executor.cancel();
               return status;
     }
 
     bool baseRelativeMovementRPY(double x, double y, double z, double rot_r, double rot_p, double rot_y)
     {
               bool status;
-              rclcpp::NodeOptions node_options;
-              node_options.automatically_declare_parameters_from_overrides(true);
-              auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
-              rclcpp::executors::MultiThreadedExecutor executor;
-              executor.add_node(move_group_node);
-              std::thread([&executor]() { executor.spin(); }).detach();
-              static const std::string PLANNING_GROUP = "manipulator";
-              moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
-              moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
-              const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+              // rclcpp::NodeOptions node_options;
+              // node_options.automatically_declare_parameters_from_overrides(true);
+              // auto move_group_node = rclcpp::Node::make_shared("robot_server_com_node", node_options);
+              // rclcpp::executors::MultiThreadedExecutor executor;
+              // executor.add_node(move_group_node);
+              // std::thread([&executor]() { executor.spin(); }).detach();
+              // static const std::string PLANNING_GROUP = "manipulator";
+              // moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
+              // moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+              // const moveit::core::JointModelGroup* joint_model_group = move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
               auto const LOGGER = rclcpp::get_logger("BaseRelative movement RPY");
              
-              move_group.setNumPlanningAttempts(10);
-              move_group.setPoseReferenceFrame("crust_base_link");
-              move_group.setPlanningTime(10.0);
-              move_group.setGoalOrientationTolerance(0.005);
-              move_group.setGoalPositionTolerance(0.005);
+              this->move_group.setNumPlanningAttempts(10);
+              this->move_group.setPoseReferenceFrame("crust_base_link");
+              this->move_group.setPlanningTime(10.0);
+              this->move_group.setGoalOrientationTolerance(0.005);
+              this->move_group.setGoalPositionTolerance(0.005);
 
               //move_group.setMaxVelocityScalingFactor(0.05);
               //move_group.setMaxAccelerationScalingFactor(0.05);
-              std::vector< double > current_rpy =	move_group.getCurrentRPY();
-              moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+              std::vector< double > current_rpy =	this->move_group.getCurrentRPY();
+              // moveit::planning_interface::MoveGroupInterface::Plan my_plan;
               tf2::Quaternion q_orig, q_rot, q_new;
               q_orig.setRPY(current_rpy[0],current_rpy[1],current_rpy[2]);
               q_rot.setRPY(rot_r, rot_p, rot_y);
@@ -1168,10 +1205,10 @@ class RobotHandler : public rclcpp::Node
               
               
               geometry_msgs::msg::PoseStamped current_pose;
-              current_pose = move_group.getCurrentPose();
+              current_pose = this->move_group.getCurrentPose();
               
               
-              move_group.setStartStateToCurrentState();
+              //this->move_group.setStartStateToCurrentState();
               
               geometry_msgs::msg::Pose pos;
               pos.orientation.x = q_new.x();//q_new.x();
@@ -1186,12 +1223,12 @@ class RobotHandler : public rclcpp::Node
               pos.position.x = current_pose.pose.position.x+x;
               pos.position.y = current_pose.pose.position.y+y;
               pos.position.z = current_pose.pose.position.z+z;
-              move_group.setPoseTarget(pos);
-              bool success = static_cast<bool>(move_group.plan(my_plan));
+              this->move_group.setPoseTarget(pos);
+              bool success = static_cast<bool>(this->move_group.plan(my_plan));
               RCLCPP_INFO(LOGGER, " (baseRelativeMovementRPY) %s", success ? "" : "FAILED");
               if(success == true){
                   //move_group.move();
-                  move_group.execute(my_plan);
+                  this->move_group.execute(my_plan);
                   status = true;
 
                   
@@ -1200,7 +1237,7 @@ class RobotHandler : public rclcpp::Node
               {
                   status = false;
               }
-              executor.cancel();
+              //executor.cancel();
               return status;
     }
   private:
@@ -1249,6 +1286,14 @@ class RobotHandler : public rclcpp::Node
 int main(int argc, char **argv)
 {
   rclcpp::init(argc, argv);
+ // test 
+  auto target_follower = std::make_shared<RobotHandler>();
+  //rclcpp::executors::SingleThreadedExecutor executor;
+  rclcpp::executors::SingleThreadedExecutor executor;
+  executor.add_node(target_follower);
+  executor.spin();
+  rclcpp::shutdown();
+// test
 
   // rclcpp::NodeOptions node_options;
   // node_options.automatically_declare_parameters_from_overrides(true);
@@ -1311,8 +1356,8 @@ int main(int argc, char **argv)
   // rclcpp::Service<crust_msgs::srv::RobotCmdSrv>::SharedPtr service =
   //   node->create_service<crust_msgs::srv::RobotCmdSrv>("robot_cmd_srv", &robot_handler);
 
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Server Ready.");
-  rclcpp::spin(std::make_shared<RobotHandler>());
+  //RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Server Ready.");
+  //rclcpp::spin(std::make_shared<RobotHandler>());
   
-  rclcpp::shutdown();
+  //rclcpp::shutdown();
 }
