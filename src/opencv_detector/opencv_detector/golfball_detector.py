@@ -74,7 +74,7 @@ class ImageSubscriberNode(Node):
             contours, hierarchy = cv2.findContours(mask_closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             #cv2.imshow("bruh", frame)
             self.publisher_.publish(self.bridge.cv2_to_imgmsg(mask_closed))
-            cv2.imshow("mask", mask)
+            #cv2.imshow("mask", mask)
             #averages = []
             # loop through each contour
             for contour in contours:
@@ -103,7 +103,7 @@ class ImageSubscriberNode(Node):
                         #circle found!
                         cv2.circle(frame, center, radius, color[7], 2)
                         #save
-                        cv2.imshow("ball", frame)
+                        #cv2.imshow("ball", frame)
 
                         return 0, mask, contour, color[6], x, y 
 

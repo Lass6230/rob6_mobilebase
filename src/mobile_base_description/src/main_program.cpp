@@ -484,9 +484,38 @@ class MainProgram : public rclcpp::Node
                 sfc = 2111;
 
                 break;
+
+            case 2111: // send command to pack down robot
+                robot_msg.cmd = 3;//6;//3;
+                robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};//{0.29200,0.0,-0.12,0.0,1.45,0.0};//{0.0,0.0,0.0,0.0,0.0,0.0};
+                pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds();
+                sfc = 2112;
+                break;
+            
+            case 2112: // wait for robot to be packed down
+                if(robot_status == 1){ // check if robot is done
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 2113;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >25.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    
+                    sfc = 2111; // go back and resend the robot cmd
+                    if(robot_attempts == 5){
+                       
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
+                }
+                break;
             
             
-            case 2111:
+            case 2113:
                 //linefollow_msg.data = 7;
                 //pub_linefollow_->publish(linefollow_msg);
                 pub_mobile_->publish(golfball_sheach_pose);
