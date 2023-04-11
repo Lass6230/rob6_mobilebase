@@ -275,7 +275,7 @@ class MainProgram : public rclcpp::Node
             {
             case 0:
                
-                sfc = 4000;//6000;//4000;//155;//1100;
+                sfc = 2000;//6000;//4000;//155;//1100;
 
                 break;
             
@@ -388,40 +388,44 @@ class MainProgram : public rclcpp::Node
                 break;
             
 
-            // case 2062:
-            //     RCLCPP_INFO(this->get_logger(), "nav one meter");
-            //     target_pose.pose.position.x = 1.0;//update mig!!!
-            //     target_pose.pose.position.y = 0.0;
-            //     pub_mobile_relative_->publish(target_pose);
-            //     sfc = 2063;
-            //     break;
+            case 2062:
+                RCLCPP_INFO(this->get_logger(), "nav one meter");
+                target_pose.pose.position.x = 1.0;//update mig!!!
+                target_pose.pose.position.y = 0.0;
+                pub_mobile_relative_->publish(target_pose);
+                sfc = 2063;
+                break;
             
-            // case 2063:
-            //     if(status_mobile == 1){
-            //         status_mobile = 0;
-            //         sfc = 2064;
-            //     }
+            case 2063:
+                if(status_mobile == 1){
+                    status_mobile = 0;
+                    sfc = 2064;
+                }
+                break;
+
+            // case 2062:
+            //     linefollow_msg.data = 10;
+            //     pub_linefollow_->publish(linefollow_msg);
+            //     linefollow_msg.data = 6;
+            //     sfc = 20621;
             //     break;
 
-            case 2062:
-                linefollow_msg.data = 10;
-                pub_linefollow_->publish(linefollow_msg);
-                linefollow_msg.data = 6;
-                pub_linefollow_->publish(linefollow_msg);
-                m_lastTime1 = m_clock->now().seconds();
-                sfc= 2063;
-                break;
+            // case 20621:
+            //     pub_linefollow_->publish(linefollow_msg);
+            //     m_lastTime1 = m_clock->now().seconds();
+            //     sfc= 2063;
+            //     break;
             
-            case 2063: // waitting for line follower to be done
-                if (status_linefollow == 60){ //line following har fundet en sammenfletning eller skarpt sving og venter på en svar fra ros
-                    status_linefollow = 0;
-                    sfc = 2064;  // Ændres tilbage til 2070 
-                }
-                m_lastTime2 = m_clock->now().seconds();
-                if ((m_lastTime2-m_lastTime1)> 45.0){
-                    RCLCPP_INFO(this->get_logger(),"timed out");
-                }
-                break;
+            // case 2063: // waitting for line follower to be done
+            //     if (status_linefollow == 60){ //line following har fundet en sammenfletning eller skarpt sving og venter på en svar fra ros
+            //         status_linefollow = 0;
+            //         sfc = 2064;  // Ændres tilbage til 2070 
+            //     }
+            //     m_lastTime2 = m_clock->now().seconds();
+            //     if ((m_lastTime2-m_lastTime1)> 45.0){
+            //         RCLCPP_INFO(this->get_logger(),"timed out");
+            //     }
+            //     break;
 
             case 2064:
                 RCLCPP_INFO(this->get_logger(), "nav golf release");
