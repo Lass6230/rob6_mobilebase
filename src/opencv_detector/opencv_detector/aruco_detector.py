@@ -127,13 +127,14 @@ class ImageSubscriberNode(Node):
         tf.transform.rotation.y = 0.0
         tf.transform.rotation.z = 0.0
         tf.transform.rotation.w = 1.0
-        self.tf_broadcaster.sendTransform(tf)
+        #self.tf_broadcaster.sendTransform(tf)
         self.found_aruco_counter += 1
         
         try: # gør så den også publisher nummer to hvis der er det
             if self.found_aruco_counter >= 10 and int(id[0]) != 53:
                 msg = Int8()
                 msg.data = int(id[0])
+                self.tf_broadcaster.sendTransform(tf)
                 self.status_publisher.publish(msg)
                 self.found_aruco_counter = 0
         except:

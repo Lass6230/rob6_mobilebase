@@ -1836,13 +1836,16 @@ class MainProgram : public rclcpp::Node
 
                 if(status_aruco == 5){ // aruco code green
                     pub_mobile_->publish(house_pose[0]);
+                    RCLCPP_INFO(this->get_logger(), "go to green");
                     sfc = 6270;
                 }
                 else if( status_aruco == 20){ // aruco code yellow
+                    RCLCPP_INFO(this->get_logger(), "go to yellow"); 
                     pub_mobile_->publish(house_pose[1]);
                     sfc = 6270;
-                }
+                }       
                 else if( status_aruco == 6){ // aruco code red
+                    RCLCPP_INFO(this->get_logger(), "go to red");
                     pub_mobile_->publish(house_pose[2]);
                     sfc = 6270;
                 }
