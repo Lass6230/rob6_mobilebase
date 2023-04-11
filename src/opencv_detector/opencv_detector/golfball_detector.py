@@ -74,7 +74,7 @@ class ImageSubscriberNode(Node):
             contours, hierarchy = cv2.findContours(mask_closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             #cv2.imshow("bruh", frame)
             self.publisher_.publish(self.bridge.cv2_to_imgmsg(mask_closed))
-            #cv2.imshow("mask", mask)
+            cv2.imshow("mask", mask)
             #averages = []
             # loop through each contour
             for contour in contours:
@@ -103,7 +103,7 @@ class ImageSubscriberNode(Node):
                         #circle found!
                         cv2.circle(frame, center, radius, color[7], 2)
                         #save
-                        #cv2.imshow("ball", frame)
+                        cv2.imshow("ball", frame)
 
                         return 0, mask, contour, color[6], x, y 
 
@@ -117,16 +117,17 @@ class ImageSubscriberNode(Node):
         if self.search == 1:
             colors_to_detect = [
                 #(Lhue, Lsat, Lval, Hhue, Hsat, Hval, color, color in BGR)
-                (113, 119, 97, 142, 255, 255, "red", (0, 0, 255)), # Red works well
-                (88, 38, 139, 102, 255, 255, "yellow", (0, 255, 255)), # Yellow good
-                (24, 101, 120, 65, 255, 255, "green", (0, 255, 0)) #green good? (32, 62, 88, 94, 186, 255, "green", (0, 255, 0))
+                (87, 81, 228, 127, 255, 255, "red", (0, 0, 255)), # Red works well
+                (81, 3, 189, 103, 255, 255, "yellow", (0, 255, 255)), # Yellow good
+                (73, 13, 174, 93, 255, 255, "green", (0, 255, 0)) #green good? (32, 62, 88, 94, 186, 255, "green", (0, 255, 0))
                 ]
             status, mask, contour, color, x, y, = self.detector(cv_image, colors_to_detect)
     
         elif self.search == 2:
             colors_to_detect = [
                 #(Lhue, Lsat, Lval, Hhue, Hsat, Hval, color, color in BGR)
-                (115, 33, 158, 134, 98, 255, "pink", (147, 112, 219)), # Pink decent
+                (0, 0, 168, 156, 159, 255, "pink", (147, 112, 219)), # Pink high
+                (117, 78, 33, 156, 207, 255, "pink", (147, 112, 219)), #pink low
                 (88, 49, 20, 119, 255, 255, "orange", (0, 165, 255)) # Orange DTU light (wide)#(110, 110, 114, 119, 195, 255, "orange", (0, 165, 255)), # Orange decent
                 ]
             status, mask, contour, color, x, y = self.detector(cv_image, colors_to_detect)
