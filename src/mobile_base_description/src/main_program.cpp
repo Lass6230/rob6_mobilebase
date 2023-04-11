@@ -375,28 +375,35 @@ class MainProgram : public rclcpp::Node
                 }
                 break;
             
+            case 2061: // start line follower
+                linefollow_msg.data = 0;
+                pub_linefollow_->publish(linefollow_msg);
+                //m_lastTime1 = m_clock->now().seconds();
+                sfc= 2062;
+                break;
+            
 
-            case 2061:
+            case 2062:
                 target_pose.pose.position.x = 1.0;
                 target_pose.pose.position.y = 0.0;
                 pub_mobile_relative_->publish(target_pose);
-                sfc = 2062;
+                sfc = 2063;
                 break;
             
-            case 2062:
+            case 2063:
                 if(status_mobile == 1){
                     status_mobile = 0;
-                    sfc = 2063;
+                    sfc = 2064;
                 }
                 break;
 
-            case 2063:
+            case 2064:
                 pub_mobile_->publish(golfball_release_pose);
-                sfc = 2064;
+                sfc = 2065;
 
                 break;
             
-            case 2064:
+            case 2065:
                 if(status_mobile == 1){
                     status_mobile = 0;
                     sfc = 2070;
@@ -435,26 +442,26 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 2090: // start line following igen vi vil gerne have den til at køre til venstre i sammenfletningen
-                linefollow_msg.data = 5; // set linefollowing til og kør til venstre i sammenfletning
+                linefollow_msg.data = 1; // set linefollowing til og kør til venstre i sammenfletning
                 pub_linefollow_->publish(linefollow_msg);
-                sfc = 2095;
+                sfc = 2100;
 
                 break;
             
-            
+            // not used
             case 2095:
                 linefollow_msg.data = 6;
                 pub_linefollow_->publish(linefollow_msg);
                 sfc = 2096;
                 break;
-
+            // not used
             case 2096:
                 if (status_linefollow == 15){
                     status_linefollow = 0;
                     sfc = 2099;
                 }
                 break;
-
+            // not used
             case 2099: // start line following igen vi vil gerne have den til at køre til venstre i sammenfletningen
                 linefollow_msg.data = 5; // set linefollowing til og kør til venstre i sammenfletning
                 pub_linefollow_->publish(linefollow_msg);
@@ -471,20 +478,27 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 2110:
-                linefollow_msg.data = 4;
+                linefollow_msg.data = 0;
                 pub_linefollow_->publish(linefollow_msg);
                 sfc = 2111;
 
                 break;
+            
+            
             case 2111:
-                linefollow_msg.data = 7;
-                pub_linefollow_->publish(linefollow_msg);
+                //linefollow_msg.data = 7;
+                //pub_linefollow_->publish(linefollow_msg);
+                pub_mobile_->publish(golfball_sheach_pose);
                 sfc = 2115;
                 break;
             case 2115:
-                linefollow_msg.data = 6;
-                pub_linefollow_->publish(linefollow_msg);
-                sfc = 2116;
+                //linefollow_msg.data = 6;
+                //pub_linefollow_->publish(linefollow_msg);
+                if(status_mobile == 1){
+                    status_mobile = 0;
+                    sfc = 2999;
+                }
+                //sfc = 2116;
                 break;
             
             case 2116:
