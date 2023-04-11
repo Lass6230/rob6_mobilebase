@@ -384,7 +384,7 @@ class MainProgram : public rclcpp::Node
             
 
             case 2062:
-                target_pose.pose.position.x = 1.0;
+                target_pose.pose.position.x = 1.0;//update mig!!!
                 target_pose.pose.position.y = 0.0;
                 pub_mobile_relative_->publish(target_pose);
                 sfc = 2063;
@@ -441,8 +441,9 @@ class MainProgram : public rclcpp::Node
                 }
                 break;
             
-            case 2090: // start line following igen vi vil gerne have den til at køre til venstre i sammenfletningen
-                linefollow_msg.data = 1; // set linefollowing til og kør til venstre i sammenfletning
+            case 2090: 
+                //linefollow_msg.data = 1; // set linefollowing til og kør til venstre i sammenfletning
+                linefollow_msg.data = 11; //start line follow igen, led mod højre
                 pub_linefollow_->publish(linefollow_msg);
                 sfc = 2100;
 
@@ -621,7 +622,7 @@ class MainProgram : public rclcpp::Node
             
             case 4050: // start søgning
                 ball_msg.data = 2;
-                pub_camera_ball_->publish(ball_msg); // setting the ball camera off
+                pub_camera_ball_->publish(ball_msg); // setting the ball camera on to orange and pink
                 status_ball = 0;
 
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
@@ -681,7 +682,7 @@ class MainProgram : public rclcpp::Node
             
             case 4090:// start søgning
                 ball_msg.data = 2;
-                pub_camera_ball_->publish(ball_msg); // setting the ball camera off
+                pub_camera_ball_->publish(ball_msg); // setting the ball camera on orange and pink
                 status_ball = 0;
                 
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
@@ -742,7 +743,7 @@ class MainProgram : public rclcpp::Node
 
             case 4130: // start søgning
                 ball_msg.data = 2;
-                pub_camera_ball_->publish(ball_msg); // setting the ball camera off
+                pub_camera_ball_->publish(ball_msg); // setting the ball camera on orange and pink
                 status_ball = 0;
 
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
@@ -803,7 +804,7 @@ class MainProgram : public rclcpp::Node
 
             case 4170:
                 ball_msg.data = 2;
-                pub_camera_ball_->publish(ball_msg); // setting the ball camera off
+                pub_camera_ball_->publish(ball_msg); // setting the ball camera on orange and pink
                 status_ball = 0;
 
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
@@ -865,7 +866,7 @@ class MainProgram : public rclcpp::Node
             
             case 4210: // send command to søg
                 ball_msg.data = 2;
-                pub_camera_ball_->publish(ball_msg); // setting the ball camera off
+                pub_camera_ball_->publish(ball_msg); // setting the ball camera on orange and pink
                 status_ball = 0;
 
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
@@ -927,7 +928,7 @@ class MainProgram : public rclcpp::Node
             
             case 4260: // send command to søg
                 ball_msg.data = 2;
-                pub_camera_ball_->publish(ball_msg); // setting the ball camera off
+                pub_camera_ball_->publish(ball_msg); // setting the ball camera on orange and pink
                 status_ball = 0;
 
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
