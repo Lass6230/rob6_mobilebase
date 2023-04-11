@@ -54,7 +54,7 @@ class MainProgram : public rclcpp::Node
             auto sub2_opt = rclcpp::SubscriptionOptions();
             sub2_opt.callback_group = callback_group_subscriber2_;
             
-            timer_ = this->create_wall_timer(100ms, std::bind(&MainProgram::timer_callback, this),callback_group_subscriber2_ );
+            timer_ = this->create_wall_timer(1000ms, std::bind(&MainProgram::timer_callback, this),callback_group_subscriber2_ );
             //sub_vac_ = this->create_subscription<std_msgs::msg::Int8>("vaccumControl", 10, std::bind(&MainProgram::vacCallback, this, _1), sub1_opt);
             pub_vac_ = this->create_publisher<std_msgs::msg::Int8>("vaccumControl",10);
 
@@ -275,7 +275,7 @@ class MainProgram : public rclcpp::Node
             {
             case 0:
                
-                sfc = 2000;//6000;//4000;//155;//1100;
+                sfc = 4000;//6000;//4000;//155;//1100;
 
                 break;
             
@@ -388,18 +388,38 @@ class MainProgram : public rclcpp::Node
                 break;
             
 
+            // case 2062:
+            //     RCLCPP_INFO(this->get_logger(), "nav one meter");
+            //     target_pose.pose.position.x = 1.0;//update mig!!!
+            //     target_pose.pose.position.y = 0.0;
+            //     pub_mobile_relative_->publish(target_pose);
+            //     sfc = 2063;
+            //     break;
+            
+            // case 2063:
+            //     if(status_mobile == 1){
+            //         status_mobile = 0;
+            //         sfc = 2064;
+            //     }
+            //     break;
+
             case 2062:
-                RCLCPP_INFO(this->get_logger(), "nav one meter");
-                target_pose.pose.position.x = 1.0;//update mig!!!
-                target_pose.pose.position.y = 0.0;
-                pub_mobile_relative_->publish(target_pose);
-                sfc = 2063;
+                linefollow_msg.data = 10;
+                pub_linefollow_->publish(linefollow_msg);
+                linefollow_msg.data = 6;
+                pub_linefollow_->publish(linefollow_msg);
+                m_lastTime1 = m_clock->now().seconds();
+                sfc= 2063;
                 break;
             
-            case 2063:
-                if(status_mobile == 1){
-                    status_mobile = 0;
-                    sfc = 2064;
+            case 2063: // waitting for line follower to be done
+                if (status_linefollow == 60){ //line following har fundet en sammenfletning eller skarpt sving og venter på en svar fra ros
+                    status_linefollow = 0;
+                    sfc = 2064;  // Ændres tilbage til 2070 
+                }
+                m_lastTime2 = m_clock->now().seconds();
+                if ((m_lastTime2-m_lastTime1)> 45.0){
+                    RCLCPP_INFO(this->get_logger(),"timed out");
                 }
                 break;
 
@@ -1102,7 +1122,7 @@ class MainProgram : public rclcpp::Node
                 if(robot_status == 1){ // check if robot is done
                     robot_status = 0;
                     robot_attempts = 0;
-                    sfc = 4640;
+                    sfc = 4620;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >25.0){ // if timeout 
@@ -1519,7 +1539,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6110;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >25.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) > 35.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
@@ -1882,7 +1902,7 @@ class MainProgram : public rclcpp::Node
 
                 break;
             
-            case 6320: // move robot to shearch pose
+            case 6320: // move robot to search pose
                 robot_msg.cmd = 6;
                 robot_msg.pose = {0.34,0.0,0.13129,0.0,1.4,0.0};
                 pub_robot_->publish(robot_msg);
@@ -1917,6 +1937,7 @@ class MainProgram : public rclcpp::Node
             
             case 6335: // add one to packages count
                 package_count ++;
+                sfc = 6340;
                 break;
 
             case 6340: // make mobile robot to go back to next pose at "pakkeleveringen"
@@ -1962,6 +1983,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 7010:
+                //pack down arm
                 robot_msg.cmd = 3;
                 robot_msg.pose = {0.34,0.0,0.168,0.0,1.45,0.0};
                 pub_robot_->publish(robot_msg);
@@ -1974,17 +1996,18 @@ class MainProgram : public rclcpp::Node
                 if(robot_status == 1){// Wait for gripper to be open
                     robot_status = 0;
                     robot_attempts = 0;
-                    sfc = 7010;
+                    sfc = 7030;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
-                    sfc = 7030; // go back and resend the robot cmd
+                    sfc = 7010; // go back and resend the robot cmd
                 }
                 break;  
 
             case 7030:
+                //oekse port
                 pub_mobile_->publish(task_10_pose);
                 sfc = 7040;
                 break;
@@ -2045,7 +2068,9 @@ class MainProgram : public rclcpp::Node
                 sfc = 8010;
                 break;
             
-            case 8010: // start line follow
+            case 8010: // start line follow 
+                //LAV LIDAR STUFF!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
                 linefollow_msg.data = 2; // Start line following hvor den forsætter efter den mister linje
                 pub_linefollow_->publish(linefollow_msg);
                 sfc = 8020;
@@ -2061,28 +2086,24 @@ class MainProgram : public rclcpp::Node
                 break;
             
             
-            case 8030:
-                if (status_linefollow == 50){ // når robotten har mistet linjen vil vi gerne have den til at bare køre lige så stille frem for at finde linjen igen
-                    status_linefollow = 0;
-                    sfc = 8999;
-                }
-                RCLCPP_INFO(this->get_logger(), "Publishing: '%i'", status_linefollow);
-                break;
+            // case 8030:
+            //     if (status_linefollow == 50){ // når robotten har mistet linjen vil vi gerne have den til at bare køre lige så stille frem for at finde linjen igen
+            //         status_linefollow = 0;
+            //         sfc = 8999;
+            //     }
+            //     RCLCPP_INFO(this->get_logger(), "Publishing: '%i'", status_linefollow);
+            //     break;
             
-            // NOT USED
+            // // NOT USED
             case 8040:
                 RCLCPP_INFO(this->get_logger(), "Publishing: '%i'", status_linefollow);
                 if (status_linefollow == 50){
                     status_linefollow = 0;
-                    sfc = 8050;
+                    sfc = 8999;
                 }
                 break;
              /// NOT USED   
-            case 8050: // måske tilføje en måde at bestemme hvilken vej vi drejer i tilfælde af linjen er horizontal som den ville være i dette tilfælde
-                linefollow_msg.data = 1; // her slår vi normal line mode til igen så den vil prøve at finde linjen igen 
-                pub_linefollow_->publish(linefollow_msg);
-                sfc = 8999;
-                break;
+         
 
 
 
@@ -2106,11 +2127,18 @@ class MainProgram : public rclcpp::Node
                 sfc = 9020;
                 break;
             
-            case 9020:// muligvis også lav en mode hvor robotten ikke laver error correction når den mister linjen hvis den kan følge linjen godt nok
-                linefollow_msg.data = 1; // tilføj en mpde hvor der kører fast af og ændre den her værdi accordingly
+            case 9020: // måske tilføje en måde at bestemme hvilken vej vi drejer i tilfælde af linjen er horizontal som den ville være i dette tilfælde
+                linefollow_msg.data = 9; // her slår vi normal line mode til igen så den vil prøve at finde linjen igen 
                 pub_linefollow_->publish(linefollow_msg);
-                sfc = 9020;
+                sfc = 9025;
                 break;
+
+            case 9025: // måske tilføje en måde at bestemme hvilken vej vi drejer i tilfælde af linjen er horizontal som den ville være i dette tilfælde
+                linefollow_msg.data = 1; // her slår vi normal line mode til igen så den vil prøve at finde linjen igen 
+                pub_linefollow_->publish(linefollow_msg);
+                sfc = 9030;
+                break;
+            
             
             case 9030:
                 if (status_linefollow == 90){
@@ -2122,7 +2150,7 @@ class MainProgram : public rclcpp::Node
             
             case 9040: // her vil vi gerne finde ud af hvornår vi er færdige med at køre banen
                 m_lastTime2 = m_clock->now().seconds(); // ideen er at robotten vil bruge lang tid på at finde linjen igen når den er færdig med 9
-                if (status_linefollow == 90 || (m_lastTime2 - m_lastTime1) > 5.0 ){  // derfor vil jeg tjekke om den har mistet linjen og om der er gået mere end 5 sekunder
+                if (status_linefollow == 90 && (m_lastTime2 - m_lastTime1) > 5.0 ){  // derfor vil jeg tjekke om den har mistet linjen og om der er gået mere end 5 sekunder
                     status_linefollow = 0;
                     sfc = 9050;
                 }
@@ -2245,6 +2273,7 @@ class MainProgram : public rclcpp::Node
             // Her kan nr 5 sættes ind hvis det er
 
             case 11500:
+                //kør ned af bakken
                  linefollow_msg.data = 6;    
                 pub_linefollow_->publish(linefollow_msg);
                 sfc = 11999;
