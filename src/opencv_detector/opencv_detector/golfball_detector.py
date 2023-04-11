@@ -163,7 +163,7 @@ class ImageSubscriberNode(Node):
         #calculate cartesian coordinates in m
         cartesian_x = np.sin(np.deg2rad(x_angle)) * z / 1000
         cartesian_y = np.sin(np.deg2rad(y_angle)) * z / 1000
-        cartesian_z = np.cos(np.deg2rad(z_angle)) * z / 1000
+        cartesian_z = np.cos(np.deg2rad(z_angle)) * z #/ 1000
         #new_z = np.cos(np.deg2rad(z_angle)) * range2 / 1000
         #self.get_logger().info('cartesian z: "%f"' % cartesian_z)
         #self.get_logger().info('new cartesian z: "%f"' % new_z)
