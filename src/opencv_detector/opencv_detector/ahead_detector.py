@@ -4,7 +4,8 @@ from rclpy.node import Node
 
 from std_msgs.msg import String, Int32
 
-from sensor_msgs.msg import Laserscan
+# from sensor_msgs.msg import Laserscan
+from sensor_msgs.msg import LaserScan
 class AheadDetector(Node):
 
     def __init__(self):
@@ -17,27 +18,38 @@ class AheadDetector(Node):
         )
         self.sub_command
         self.subscription = self.create_subscription(
-            Laserscan,
+            LaserScan,
             '/scan',
             self.listener_callback,
             10)
         self.subscription  # prevent unused variable warning
 
         self.publisher_ = self.create_publisher(Int32, 'ahead_status', 10)
-
-        self.status = 0
-        self.search_angle = 0.0872664626 # 5 degrees
-        self.distance_threshold = 1.5
+        self.state = 0
+        self.status = 1
+        self.search_ranges = 560
+        self.distance_threshold = 1.0
+        self.angle_increment = 0.0029088
 
     def listener_callback(self, msg):
-        self.get_logger().info('I heard:')
+        #self.get_logger().info('I heard:')
+
+        #print(msg.ranges[560])
+        #print(self.state)
         if self.status == 1:
-            # for i in range(int(msg.angle_increment/self.search_angle))
-            #     msg.ranges[i] 
-            if msg.ranges[i] > self.distance_threshold or msg.ranges[i] == 0.0:
+            if msg.ranges[self.search_ranges] > self.distance_threshold and self.state == 0:
+                self.state = 1
+                #print(self.state)
+            if msg.ranges[self.search_ranges] < self.distance_threshold and self.state == 1:
+                self.state = 2
+                #print(self.state)
+            if msg.ranges[self.search_ranges] > self.distance_threshold and self.state == 2:
                 return_status = Int32()
                 return_status.data = 1
                 self.publisher_.publish(return_status)
+                print("john")
+                self.status = 0
+                
                 
     
     def aheadDetector(self, msg):
