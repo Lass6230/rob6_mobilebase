@@ -186,7 +186,8 @@ class ImageSubscriberNode(Node):
 
         self.tf_broadcaster.sendTransform(tf)
         self.found_ball_counter += 1
-        if self.found_ball_counter == 10:
+        if self.found_ball_counter >= 5:
+            self.get_logger().info('ball found and transform sent!')
             msg = Int8()
             msg.data = 1
             self.status_publisher.publish(msg)

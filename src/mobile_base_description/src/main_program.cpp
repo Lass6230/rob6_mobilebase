@@ -28,6 +28,7 @@
 #include <vector>
 #include <sensor_msgs/msg/joy.hpp>
 
+
 using std::placeholders::_1;
 using std::placeholders::_2;
 
@@ -53,7 +54,7 @@ class MainProgram : public rclcpp::Node
             auto sub2_opt = rclcpp::SubscriptionOptions();
             sub2_opt.callback_group = callback_group_subscriber2_;
             
-            timer_ = this->create_wall_timer(100ms, std::bind(&MainProgram::timer_callback, this),callback_group_subscriber2_ );
+            timer_ = this->create_wall_timer(1000ms, std::bind(&MainProgram::timer_callback, this),callback_group_subscriber2_ );
             //sub_vac_ = this->create_subscription<std_msgs::msg::Int8>("vaccumControl", 10, std::bind(&MainProgram::vacCallback, this, _1), sub1_opt);
             pub_vac_ = this->create_publisher<std_msgs::msg::Int8>("vaccumControl",10);
 
@@ -274,7 +275,7 @@ class MainProgram : public rclcpp::Node
             {
             case 0:
                
-                sfc = 2000;//6000;//4000;//155;//1100;
+                sfc = 4000;//6000;//4000;//155;//1100;
 
                 break;
             
@@ -287,7 +288,8 @@ class MainProgram : public rclcpp::Node
                 break;
 
             case 2009:
-
+                linefollow_msg.data = 0;
+                pub_linefollow_ -> publish(linefollow_msg);
                 aruco_msg.data = false; 
                 pub_camera_aruco_->publish(aruco_msg); // setting the aruco camera off
                 ball_msg.data = 0;
@@ -329,6 +331,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 2030: // send command to pack down robot
+                RCLCPP_INFO(this->get_logger(), "send command to pack down robot");
                 robot_msg.cmd = 3;//6;//3;
                 robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};//{0.29200,0.0,-0.12,0.0,1.45,0.0};//{0.0,0.0,0.0,0.0,0.0,0.0};
                 pub_robot_->publish(robot_msg);
@@ -358,6 +361,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 2050: // start line follower
+                RCLCPP_INFO(this->get_logger(), "start line follower");
                 linefollow_msg.data = 1;
                 pub_linefollow_->publish(linefollow_msg);
                 m_lastTime1 = m_clock->now().seconds();
@@ -375,7 +379,8 @@ class MainProgram : public rclcpp::Node
                 }
                 break;
             
-            case 2061: // start line follower
+            case 2061: // stop line follower
+                RCLCPP_INFO(this->get_logger(), "stop line follow");
                 linefollow_msg.data = 0;
                 pub_linefollow_->publish(linefollow_msg);
                 //m_lastTime1 = m_clock->now().seconds();
@@ -383,21 +388,43 @@ class MainProgram : public rclcpp::Node
                 break;
             
 
+            // case 2062:
+            //     RCLCPP_INFO(this->get_logger(), "nav one meter");
+            //     target_pose.pose.position.x = 1.0;//update mig!!!
+            //     target_pose.pose.position.y = 0.0;
+            //     pub_mobile_relative_->publish(target_pose);
+            //     sfc = 2063;
+            //     break;
+            
+            // case 2063:
+            //     if(status_mobile == 1){
+            //         status_mobile = 0;
+            //         sfc = 2064;
+            //     }
+            //     break;
+
             case 2062:
-                target_pose.pose.position.x = 1.0;//update mig!!!
-                target_pose.pose.position.y = 0.0;
-                pub_mobile_relative_->publish(target_pose);
-                sfc = 2063;
+                linefollow_msg.data = 10;
+                pub_linefollow_->publish(linefollow_msg);
+                linefollow_msg.data = 6;
+                pub_linefollow_->publish(linefollow_msg);
+                m_lastTime1 = m_clock->now().seconds();
+                sfc= 2063;
                 break;
             
-            case 2063:
-                if(status_mobile == 1){
-                    status_mobile = 0;
-                    sfc = 2064;
+            case 2063: // waitting for line follower to be done
+                if (status_linefollow == 60){ //line following har fundet en sammenfletning eller skarpt sving og venter på en svar fra ros
+                    status_linefollow = 0;
+                    sfc = 2064;  // Ændres tilbage til 2070 
+                }
+                m_lastTime2 = m_clock->now().seconds();
+                if ((m_lastTime2-m_lastTime1)> 45.0){
+                    RCLCPP_INFO(this->get_logger(),"timed out");
                 }
                 break;
 
             case 2064:
+                RCLCPP_INFO(this->get_logger(), "nav golf release");
                 pub_mobile_->publish(golfball_release_pose);
                 sfc = 2065;
 
@@ -412,6 +439,7 @@ class MainProgram : public rclcpp::Node
 
             
             case 2070: // set robot down in front of the mobile base ready for the ball releaser
+                RCLCPP_INFO(this->get_logger(), "arm to release");
                 robot_msg.cmd = 6;
                 robot_msg.pose = {0.29200,0.0,-0.12,0.0,1.45,0.0};
                 pub_robot_->publish(robot_msg);
@@ -443,6 +471,7 @@ class MainProgram : public rclcpp::Node
             
             case 2090: 
                 //linefollow_msg.data = 1; // set linefollowing til og kør til venstre i sammenfletning
+                RCLCPP_INFO(this->get_logger(), "start line follow 11");
                 linefollow_msg.data = 11; //start line follow igen, led mod højre
                 pub_linefollow_->publish(linefollow_msg);
                 sfc = 2100;
@@ -479,6 +508,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 2110:
+                RCLCPP_INFO(this->get_logger(), "stop line follow");
                 linefollow_msg.data = 0;
                 pub_linefollow_->publish(linefollow_msg);
                 sfc = 2111;
@@ -486,6 +516,7 @@ class MainProgram : public rclcpp::Node
                 break;
 
             case 2111: // send command to pack down robot
+                RCLCPP_INFO(this->get_logger(), "arm to 0,0,0");
                 robot_msg.cmd = 3;//6;//3;
                 robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};//{0.29200,0.0,-0.12,0.0,1.45,0.0};//{0.0,0.0,0.0,0.0,0.0,0.0};
                 pub_robot_->publish(robot_msg);
@@ -518,6 +549,7 @@ class MainProgram : public rclcpp::Node
             case 2113:
                 //linefollow_msg.data = 7;
                 //pub_linefollow_->publish(linefollow_msg);
+                RCLCPP_INFO(this->get_logger(), "nav to search pose");
                 pub_mobile_->publish(golfball_sheach_pose);
                 sfc = 2115;
                 break;
@@ -586,6 +618,7 @@ class MainProgram : public rclcpp::Node
                 break;
 
             case 4010: // open gripper
+                RCLCPP_INFO(this->get_logger(), "open gripper, camera off");
                 robot_msg.cmd = 19; // set gripper off and setting the cameras off
                 robot_msg.pose = {0.37336,-0.007814,0.24958,0.0,1.57,0.0}; // pos do not matter
                 pub_robot_->publish(robot_msg); // send to robot to set gripper off
@@ -619,6 +652,7 @@ class MainProgram : public rclcpp::Node
                 break;
 
             case 4030: // set pose for robot søg ned lige foran
+                RCLCPP_INFO(this->get_logger(), "look in front");
                 robot_msg.cmd = 6;
                 robot_msg.pose = {0.34,0.0,0.168,0.0,1.57,0.0};
                 pub_robot_->publish(robot_msg);
@@ -650,6 +684,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 4050: // start søgning
+                RCLCPP_INFO(this->get_logger(), "looking for ball");
                 ball_msg.data = 2;
                 pub_camera_ball_->publish(ball_msg); // setting the ball camera on to orange and pink
                 status_ball = 0;
@@ -659,9 +694,10 @@ class MainProgram : public rclcpp::Node
                 sfc = 4060;
                 break;
 
-            case 4060: // waiiting for ball  IF timeout jump to 4600
+            case 4060: // waiiting for ball  IF ball jump to 4600
                 if(status_ball == 1)
                 {
+                    RCLCPP_INFO(this->get_logger(), "ball found");
                     status_ball = 0;
                     sfc = 4600;
                 }
@@ -680,6 +716,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 4070: // send to robot to go to pose right looking down
+                RCLCPP_INFO(this->get_logger(), "looking right");
                 robot_msg.cmd = 6;
                 robot_msg.pose = {0.23319,-0.24479,0.15955,0.0,1.57,-0.785398};
                 pub_robot_->publish(robot_msg);
@@ -710,6 +747,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 4090:// start søgning
+                RCLCPP_INFO(this->get_logger(), "start search");
                 ball_msg.data = 2;
                 pub_camera_ball_->publish(ball_msg); // setting the ball camera on orange and pink
                 status_ball = 0;
@@ -721,6 +759,7 @@ class MainProgram : public rclcpp::Node
             case 4100: // søgning       if found jump to 4600
                 if(status_ball == 1)
                 {
+                    RCLCPP_INFO(this->get_logger(), "ball found");
                     status_ball = 0;
                     sfc = 4600;
                 }
@@ -739,6 +778,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 4110: // set robot pose to look down left
+                RCLCPP_INFO(this->get_logger(), "looking left");
                 robot_msg.cmd = 6;
                 robot_msg.pose = {0.23319,0.24479,0.15955,0.0,1.57,0.785398};
                 pub_robot_->publish(robot_msg);
@@ -771,6 +811,7 @@ class MainProgram : public rclcpp::Node
                 break;
 
             case 4130: // start søgning
+                RCLCPP_INFO(this->get_logger(), "start search");
                 ball_msg.data = 2;
                 pub_camera_ball_->publish(ball_msg); // setting the ball camera on orange and pink
                 status_ball = 0;
@@ -783,6 +824,7 @@ class MainProgram : public rclcpp::Node
             case 4140: // søgning
                 if(status_ball == 1)
                 {
+                    RCLCPP_INFO(this->get_logger(), "ball found");
                     status_ball = 0;
                     sfc = 4600;
                 }
@@ -801,6 +843,7 @@ class MainProgram : public rclcpp::Node
                 break;
 
             case 4150: // send command to robot to look long midt
+                RCLCPP_INFO(this->get_logger(), "look long");
                 robot_msg.cmd = 6;
                 robot_msg.pose = {0.3430,0.0,0.15955,0.0,0.785398,0.0};
                 pub_robot_->publish(robot_msg);
@@ -845,6 +888,7 @@ class MainProgram : public rclcpp::Node
             case 4180:
                 if(status_ball == 1)
                 {
+                    RCLCPP_INFO(this->get_logger(), "ball found");
                     status_ball = 0;
                     sfc = 4300;
                 }
@@ -863,6 +907,7 @@ class MainProgram : public rclcpp::Node
                 break;
 
             case 4190:// robot go to look long right
+                RCLCPP_INFO(this->get_logger(), "look long right");
                 robot_msg.cmd = 21;
                 robot_msg.pose = {-0.785398,0.0,0.0,0.0};
                 pub_robot_->publish(robot_msg);
@@ -906,6 +951,7 @@ class MainProgram : public rclcpp::Node
             case 4230: // søgning
                 if(status_ball == 1)
                 {
+                    RCLCPP_INFO(this->get_logger(), "ball found");
                     status_ball = 0;
                     sfc = 4300;
                 }
@@ -923,6 +969,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 4240: // robot to go to pose look long left
+                RCLCPP_INFO(this->get_logger(), "look long left");
                 robot_msg.cmd = 21;
                 robot_msg.pose = {1.57,0.0,0.0,0.0};
                 pub_robot_->publish(robot_msg);
@@ -968,6 +1015,7 @@ class MainProgram : public rclcpp::Node
             case 4270:
                 if(status_ball == 1)
                 {
+                    RCLCPP_INFO(this->get_logger(), "ball found");
                     status_ball = 0;
                     sfc = 4300;
                 }
@@ -994,6 +1042,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 4300: // ball found long look, send command to mobile to drive to ball
+                RCLCPP_INFO(this->get_logger(), "nav to ball");
                 transform_pose = tf_buffer_->lookupTransform(
                     "workspace_center", "ball",
                     tf2::TimePointZero);
@@ -1013,6 +1062,7 @@ class MainProgram : public rclcpp::Node
 
             case 4310: // waitting for mobile base to drive to ball pose
                 if(status_mobile == 1){
+                    RCLCPP_INFO(this->get_logger(), "nav complete");
                     status_mobile = 0;
                     sfc = 4010; // send the back to the shearch function hopefully it will catch it when lokking down in midt
                 }
@@ -1021,7 +1071,7 @@ class MainProgram : public rclcpp::Node
 
 
             case 4400: // søg der hvor den er
-                 ball_msg.data = 2;
+                ball_msg.data = 2;
                 pub_camera_ball_->publish(ball_msg); // setting the ball camera off
                 status_ball = 0;
 
@@ -1034,6 +1084,7 @@ class MainProgram : public rclcpp::Node
             case 4410:
                 if(status_ball == 1)
                 {
+                    RCLCPP_INFO(this->get_logger(), "ball found");
                     status_ball = 0;
                     sfc = 4600;
                 }
@@ -1053,8 +1104,9 @@ class MainProgram : public rclcpp::Node
 
 
             case 4600: // ball found, send command to go to ball
+                RCLCPP_INFO(this->get_logger(), "go to ball and close");
                 robot_msg.cmd = 16; // go to ball
-                robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};
+                robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0}; 
                 pub_robot_->publish(robot_msg);
                 ball_msg.data = false;
                 pub_camera_ball_->publish(ball_msg);
@@ -1070,7 +1122,7 @@ class MainProgram : public rclcpp::Node
                 if(robot_status == 1){ // check if robot is done
                     robot_status = 0;
                     robot_attempts = 0;
-                    sfc = 4640;
+                    sfc = 4620;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >25.0){ // if timeout 
@@ -1088,6 +1140,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 4620: // send command to close gripper (Not used)
+
                 robot_msg.cmd = 18; // close gripper
                 robot_msg.pose = {-0.3,-0.3};
                 pub_robot_->publish(robot_msg); // send to robot to set gripper close
@@ -1120,6 +1173,7 @@ class MainProgram : public rclcpp::Node
                 break;
 
             case 4640: // send command for robot to go up agian
+                RCLCPP_INFO(this->get_logger(), "arm up");
                 robot_msg.cmd = 6;
                 robot_msg.pose = {0.34,0.0,0.168,0.0,1.45,0.0};
                 pub_robot_->publish(robot_msg);
@@ -1153,6 +1207,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 4660: // send command to go to golf hole
+                RCLCPP_INFO(this->get_logger(), "nav golf hole pose");
                 pub_mobile_->publish(golf_hole_pose);
                 sfc = 4670;
                 break;
@@ -1165,6 +1220,7 @@ class MainProgram : public rclcpp::Node
                 break;
 
             case 4680: // send command for robot to move to to the floor
+                RCLCPP_INFO(this->get_logger(), "arm down");
                 robot_msg.cmd = 6;
                 robot_msg.pose = {0.34,0.0,-0.08,0.0,1.30,0.0};
                 pub_robot_->publish(robot_msg);
@@ -1198,6 +1254,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 4700: // open gripper
+                RCLCPP_INFO(this->get_logger(), "open gripper");
                 robot_msg.cmd = 19; // set gripper off and setting the cameras off
                 robot_msg.pose = {0.37336,-0.007814,0.24958,0.0,1.57,0.0}; // pos do not matter
                 pub_robot_->publish(robot_msg); // send to robot to set gripper off
@@ -1221,6 +1278,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 4720: // send command to robot to go up from golf hole
+                RCLCPP_INFO(this->get_logger(), "arm up");
                 robot_msg.cmd = 6;
                 robot_msg.pose = {0.34,0.0,0.168,0.0,1.45,0.0};
                 pub_robot_->publish(robot_msg);
@@ -1258,10 +1316,12 @@ class MainProgram : public rclcpp::Node
             case 4750:
                 if(golfball_counter == 4)
                 {
+                    RCLCPP_INFO(this->get_logger(), "four balls");
                     sfc = 4999;
                 }
                 else
                 {
+                    RCLCPP_INFO(this->get_logger(), "get another ball");
                     sfc = 4760;
                 }
 
@@ -1479,7 +1539,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6110;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >25.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) > 35.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
@@ -1842,7 +1902,7 @@ class MainProgram : public rclcpp::Node
 
                 break;
             
-            case 6320: // move robot to shearch pose
+            case 6320: // move robot to search pose
                 robot_msg.cmd = 6;
                 robot_msg.pose = {0.34,0.0,0.13129,0.0,1.4,0.0};
                 pub_robot_->publish(robot_msg);
@@ -1877,6 +1937,7 @@ class MainProgram : public rclcpp::Node
             
             case 6335: // add one to packages count
                 package_count ++;
+                sfc = 6340;
                 break;
 
             case 6340: // make mobile robot to go back to next pose at "pakkeleveringen"
@@ -1922,6 +1983,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 7010:
+                //pack down arm
                 robot_msg.cmd = 3;
                 robot_msg.pose = {0.34,0.0,0.168,0.0,1.45,0.0};
                 pub_robot_->publish(robot_msg);
@@ -1934,17 +1996,18 @@ class MainProgram : public rclcpp::Node
                 if(robot_status == 1){// Wait for gripper to be open
                     robot_status = 0;
                     robot_attempts = 0;
-                    sfc = 7010;
+                    sfc = 7030;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
-                    sfc = 7030; // go back and resend the robot cmd
+                    sfc = 7010; // go back and resend the robot cmd
                 }
                 break;  
 
             case 7030:
+                //oekse port
                 pub_mobile_->publish(task_10_pose);
                 sfc = 7040;
                 break;
@@ -2005,7 +2068,9 @@ class MainProgram : public rclcpp::Node
                 sfc = 8010;
                 break;
             
-            case 8010: // start line follow
+            case 8010: // start line follow 
+                //LAV LIDAR STUFF!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
                 linefollow_msg.data = 2; // Start line following hvor den forsætter efter den mister linje
                 pub_linefollow_->publish(linefollow_msg);
                 sfc = 8020;
@@ -2021,28 +2086,24 @@ class MainProgram : public rclcpp::Node
                 break;
             
             
-            case 8030:
-                if (status_linefollow == 50){ // når robotten har mistet linjen vil vi gerne have den til at bare køre lige så stille frem for at finde linjen igen
-                    status_linefollow = 0;
-                    sfc = 8999;
-                }
-                RCLCPP_INFO(this->get_logger(), "Publishing: '%i'", status_linefollow);
-                break;
+            // case 8030:
+            //     if (status_linefollow == 50){ // når robotten har mistet linjen vil vi gerne have den til at bare køre lige så stille frem for at finde linjen igen
+            //         status_linefollow = 0;
+            //         sfc = 8999;
+            //     }
+            //     RCLCPP_INFO(this->get_logger(), "Publishing: '%i'", status_linefollow);
+            //     break;
             
-            // NOT USED
+            // // NOT USED
             case 8040:
                 RCLCPP_INFO(this->get_logger(), "Publishing: '%i'", status_linefollow);
                 if (status_linefollow == 50){
                     status_linefollow = 0;
-                    sfc = 8050;
+                    sfc = 8999;
                 }
                 break;
              /// NOT USED   
-            case 8050: // måske tilføje en måde at bestemme hvilken vej vi drejer i tilfælde af linjen er horizontal som den ville være i dette tilfælde
-                linefollow_msg.data = 1; // her slår vi normal line mode til igen så den vil prøve at finde linjen igen 
-                pub_linefollow_->publish(linefollow_msg);
-                sfc = 8999;
-                break;
+         
 
 
 
@@ -2066,11 +2127,18 @@ class MainProgram : public rclcpp::Node
                 sfc = 9020;
                 break;
             
-            case 9020:// muligvis også lav en mode hvor robotten ikke laver error correction når den mister linjen hvis den kan følge linjen godt nok
-                linefollow_msg.data = 1; // tilføj en mpde hvor der kører fast af og ændre den her værdi accordingly
+            case 9020: // måske tilføje en måde at bestemme hvilken vej vi drejer i tilfælde af linjen er horizontal som den ville være i dette tilfælde
+                linefollow_msg.data = 9; // her slår vi normal line mode til igen så den vil prøve at finde linjen igen 
                 pub_linefollow_->publish(linefollow_msg);
-                sfc = 9020;
+                sfc = 9025;
                 break;
+
+            case 9025: // måske tilføje en måde at bestemme hvilken vej vi drejer i tilfælde af linjen er horizontal som den ville være i dette tilfælde
+                linefollow_msg.data = 1; // her slår vi normal line mode til igen så den vil prøve at finde linjen igen 
+                pub_linefollow_->publish(linefollow_msg);
+                sfc = 9030;
+                break;
+            
             
             case 9030:
                 if (status_linefollow == 90){
@@ -2082,7 +2150,7 @@ class MainProgram : public rclcpp::Node
             
             case 9040: // her vil vi gerne finde ud af hvornår vi er færdige med at køre banen
                 m_lastTime2 = m_clock->now().seconds(); // ideen er at robotten vil bruge lang tid på at finde linjen igen når den er færdig med 9
-                if (status_linefollow == 90 || (m_lastTime2 - m_lastTime1) > 5.0 ){  // derfor vil jeg tjekke om den har mistet linjen og om der er gået mere end 5 sekunder
+                if (status_linefollow == 90 && (m_lastTime2 - m_lastTime1) > 5.0 ){  // derfor vil jeg tjekke om den har mistet linjen og om der er gået mere end 5 sekunder
                     status_linefollow = 0;
                     sfc = 9050;
                 }
@@ -2205,6 +2273,7 @@ class MainProgram : public rclcpp::Node
             // Her kan nr 5 sættes ind hvis det er
 
             case 11500:
+                //kør ned af bakken
                  linefollow_msg.data = 6;    
                 pub_linefollow_->publish(linefollow_msg);
                 sfc = 11999;
