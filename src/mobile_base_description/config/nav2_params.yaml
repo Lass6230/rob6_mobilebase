@@ -43,7 +43,7 @@ amcl: #
     save_pose_rate: 1.0 #0.5
     sigma_hit: 0.2
     tf_broadcast: true
-    transform_tolerance: 1.0 #0.2 #1.0
+    transform_tolerance: 0.5 #1.0 #0.2 #1.0
     update_min_a: 0.2
     update_min_d: 0.25
     z_hit: 0.7 #0.9 
@@ -72,7 +72,7 @@ bt_navigator:
     groot_zmq_publisher_port: 1666
     groot_zmq_server_port: 1667
     transform_tolerance: 0.2
-    goal_reached_tol: 0.1 #0.25
+    goal_reached_tol: 0.05 #0.25
     # 'default_nav_through_poses_bt_xml' and 'default_nav_to_pose_bt_xml' are use defaults:
     # nav2_bt_navigator/navigate_to_pose_w_replanning_and_recovery.xml
     # nav2_bt_navigator/navigate_through_poses_w_replanning_and_recovery.xml

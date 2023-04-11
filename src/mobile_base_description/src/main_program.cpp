@@ -1863,7 +1863,7 @@ class MainProgram : public rclcpp::Node
                 pub_robot_->publish(robot_msg);
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
 
-                sfc = 6250;
+                sfc = 6290;
                 break;
             
             case 6290: // waitting for robot to go to pose
