@@ -154,12 +154,12 @@ class MainProgram : public rclcpp::Node
             
             tf2::Quaternion quat_house[3];
 
-            quat_house[0].setRPY(0.0, 0.0, 0.0); // grøn
-            house_pose[0].pose.position.x = 5.823143482208252;
-            house_pose[0].pose.position.y = 4.915400505065918;
+            quat_house[2].setRPY(0.0, 0.0, 0.0); // grøn
+            house_pose[2].pose.position.x = 5.823143482208252;
+            house_pose[2].pose.position.y = 4.915400505065918;
             //house_pose[0].pose.orientation = tf2::toMsg(quat_house[0]);
-            house_pose[0].pose.orientation.z = -0.7921972265226599;
-            house_pose[0].pose.orientation.w = 0.6102651508072582;
+            house_pose[2].pose.orientation.z = -0.7921972265226599;
+            house_pose[2].pose.orientation.w = 0.6102651508072582;
 
             quat_house[1].setRPY(0.0, 0.0, 0.0); //gul
             house_pose[1].pose.position.x = 6.074102878570557;
@@ -168,12 +168,12 @@ class MainProgram : public rclcpp::Node
             house_pose[1].pose.orientation.z = -0.7811356671048362;
             house_pose[1].pose.orientation.w = 0.6243613293411777;
 
-            quat_house[2].setRPY(0.0, 0.0, 0.0); //rød
-            house_pose[2].pose.position.x = 6.307386875152588;
-            house_pose[2].pose.position.y = -4.949221611022949;
+            quat_house[0].setRPY(0.0, 0.0, 0.0); //rød
+            house_pose[0].pose.position.x = 6.307386875152588;
+            house_pose[0].pose.position.y = -4.949221611022949;
             //house_pose[2].pose.orientation = tf2::toMsg(quat_house[2]);
-            house_pose[2].pose.orientation.z = -0.809115591304415;
-            house_pose[2].pose.orientation.w = 0.5876495213204098;
+            house_pose[0].pose.orientation.z = -0.809115591304415;
+            house_pose[0].pose.orientation.w = 0.5876495213204098;
 
             // init task_10_pose
             tf2::Quaternion quat_task10;
@@ -1862,7 +1862,7 @@ class MainProgram : public rclcpp::Node
             
             case 6280: // move robot to the floor (to drop of ball)
                 robot_msg.cmd = 6;
-                robot_msg.pose = {0.28,0.0,0.0,0.0,1.57,0.0};
+                robot_msg.pose = {0.28,0.0,-0.1,0.0,1.57,0.0};
                 pub_robot_->publish(robot_msg);
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
 
