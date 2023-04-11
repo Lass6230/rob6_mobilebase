@@ -9,7 +9,7 @@ pose:
     x: 7.710514068603516
     y: -1.424069881439209
     z: 0.0
-  orientation:
+  orientation: 
     x: 0.0
     y: 0.0
     z: -0.7901300711777252
@@ -207,3 +207,6 @@ pose:
     z: -0.7979435037636673
     w: 0.6027322496775516
 ---
+
+
+ The inscribed radius of the footprint specified for TEB optimization (0.000000) + min_obstacle_dist (0.180000) are smaller than the inscribed radius of the robot's footprint in the costmap parameters (0.180000, including 'footprint_padding'). Infeasible optimziation results might occur frequently

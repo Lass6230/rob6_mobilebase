@@ -131,7 +131,7 @@ class ImageSubscriberNode(Node):
         self.found_aruco_counter += 1
         
         try: # gør så den også publisher nummer to hvis der er det
-            if self.found_aruco_counter == 10 and int(id[0]) != 53:
+            if self.found_aruco_counter >= 10 and int(id[0]) != 53:
                 msg = Int8()
                 msg.data = int(id[0])
                 self.status_publisher.publish(msg)
