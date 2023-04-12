@@ -222,22 +222,6 @@ class MainProgram : public rclcpp::Node
             golfball_sheach_pose.pose.orientation.z = 0.5665723056213117;
             golfball_sheach_pose.pose.orientation.w = 0.8240120281300213;
 
-            header:
-  stamp:
-    sec: 1681259780
-    nanosec: 493738628
-  frame_id: map
-pose:
-  position:
-    x: 7.370445251464844
-    y: -3.407285690307617
-    z: 0.0
-  orientation:
-    x: 0.0
-    y: 0.0
-    z: 0.5665723056213117
-    w: 0.8240120281300213
----
 
 
 
