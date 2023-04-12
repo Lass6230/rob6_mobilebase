@@ -125,32 +125,34 @@ class MainProgram : public rclcpp::Node
             // INIT poseStamped values for
             tf2::Quaternion quat_trolly[3];
 
-            //gobal pose for the wall diretly outside group room in maps/0_04res/map.pgm
+            //lefmost
             quat_trolly[0].setRPY(0.0, 0.0, 0.0);
-            trolly_pose[0].pose.position.x = 4.812;
-            trolly_pose[0].pose.position.y = -3.79;
-            trolly_pose[0].pose.orientation.z = -0.8026999780103126;
-            trolly_pose[0].pose.orientation.w = 0.5963830524941531; //tf2::toMsg(quat_trolly[0]);
+            trolly_pose[0].pose.position.x = 4.944066047668457;
+            trolly_pose[0].pose.position.y = -3.817056179046631;
+            trolly_pose[0].pose.orientation.z = -0.8025089359591148;
+            trolly_pose[0].pose.orientation.w = 0.5966400989757304; //tf2::toMsg(quat_trolly[0]);
 
             //gobal pose for the wall diretly outside group room in maps/0_04res/map.pgm
 
 
-
-
+//middle
             quat_trolly[1].setRPY(0.0, 0.0, 0.0);
-            trolly_pose[1].pose.position.x = 4.728928565979004;
-            trolly_pose[1].pose.position.y = -3.7367677688598633;
+            trolly_pose[1].pose.position.x = 4.800691604614258;
+            trolly_pose[1].pose.position.y = -3.6708920001983643;
             //trolly_pose[1].pose.orientation = tf2::toMsg(quat_trolly[1]);
-            trolly_pose[1].pose.orientation.z = -0.8026999780103126;
-            trolly_pose[1].pose.orientation.w = 0.5963830524941531;
+            trolly_pose[1].pose.orientation.z = -0.8393374777152148;
+            trolly_pose[1].pose.orientation.w = 0.5436107049191188;
 
 
+
+//right
             quat_trolly[2].setRPY(0.0, 0.0, 0.0);
-            trolly_pose[2].pose.position.x = 4.637298107147217;
-            trolly_pose[2].pose.position.y = -3.852802276611328;
+            trolly_pose[2].pose.position.x = 4.596542835235596;
+            trolly_pose[2].pose.position.y = -3.7831780910491943;
             //trolly_pose[2].pose.orientation = tf2::toMsg(quat_trolly[2]);
-            trolly_pose[2].pose.orientation.z = -0.7844494034227334;
-            trolly_pose[2].pose.orientation.w = 0.6201928195889709;
+            trolly_pose[2].pose.orientation.z = -0.7448676148565601;
+            trolly_pose[2].pose.orientation.w = 0.6672122873103427;
+
 
             
             tf2::Quaternion quat_house[3];
@@ -238,7 +240,6 @@ class MainProgram : public rclcpp::Node
 
             speed.pose.position.x = 6.314323425292969;
             speed.pose.position.y = -7.268889427185059;
-            //golfball_sheach_pose.pose.orientation = tf2::toMsg(quat_golfball_sheach);
             speed.pose.orientation.z = -0.7979435037636673;
             speed.pose.orientation.w = 0.6027322496775516;
 
@@ -301,7 +302,7 @@ class MainProgram : public rclcpp::Node
             {
             case 0:
                
-                sfc = 10000;//6000;//4000;//155;//1100;
+                sfc = 2000;//6000;//4000;//155;//1100;
 
                 break;
             
@@ -400,7 +401,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 2061;  // Ændres tilbage til 2070 
                 }
                 m_lastTime2 = m_clock->now().seconds();
-                if ((m_lastTime2-m_lastTime1)> 45.0){
+                if ((m_lastTime2-m_lastTime1)> 20.0){
                     RCLCPP_INFO(this->get_logger(),"timed out");
                 }
                 break;
@@ -425,8 +426,8 @@ class MainProgram : public rclcpp::Node
             case 2063:
                 if(status_mobile == 1){
                     status_mobile = 0;
-                    sfc = 9000;
-                    //sfc = 2064;
+                   // sfc = 9000;
+                    sfc = 2064;
                 }
                 break;
 
@@ -546,17 +547,19 @@ class MainProgram : public rclcpp::Node
 
                 break;
 
-            case 2111: // send command to pack down robot
-                RCLCPP_INFO(this->get_logger(), "arm to 0,0,0");
-                robot_msg.cmd = 3;//6;//3;
-                robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0};//{0.29200,0.0,-0.12,0.0,1.45,0.0};//{0.0,0.0,0.0,0.0,0.0,0.0};
+            case 2111: // set pose for robot søg ned lige foran
+                RCLCPP_INFO(this->get_logger(), "look in front");
+                robot_msg.cmd = 6;
+                robot_msg.pose = {0.34,0.0,0.168,0.0,1.57,0.0};
                 pub_robot_->publish(robot_msg);
-                m_lastTime1 = m_clock->now().seconds();
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+
                 sfc = 2112;
+
                 break;
-            
-            case 2112: // wait for robot to be packed down
-                if(robot_status == 1){ // check if robot is done
+
+            case 2112: // waitting for robot to go to pose
+                if(robot_status == 1){
                     robot_status = 0;
                     robot_attempts = 0;
                     sfc = 2113;
@@ -575,6 +578,36 @@ class MainProgram : public rclcpp::Node
                     
                 }
                 break;
+
+            // case 2111: // send command to pack down robot
+            //     RCLCPP_INFO(this->get_logger(), "arm to 0,0,0");
+            //     robot_msg.cmd = 3;//6;//3;
+            //     robot_msg.pose = {0.0,0.0,0.0,0.0,0.0,0.0}; //go
+            //     pub_robot_->publish(robot_msg);
+            //     m_lastTime1 = m_clock->now().seconds();
+            //     sfc = 2112;
+            //     break;
+            
+            // case 2112: // wait for robot to be packed down
+            //     if(robot_status == 1){ // check if robot is done
+            //         robot_status = 0;
+            //         robot_attempts = 0;
+            //         sfc = 2113;
+            //     }
+            //     m_lastTime2 = m_clock->now().seconds(); // get time now
+            //     if((m_lastTime2-m_lastTime1) >25.0){ // if timeout 
+            //         RCLCPP_INFO(this->get_logger(), "timed out");
+            //         robot_attempts ++;
+                    
+            //         sfc = 2111; // go back and resend the robot cmd
+            //         if(robot_attempts == 5){
+                       
+            //            RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+            //         }
+                    
+            //     }
+            //     break;
             
             
             case 2113:
@@ -594,40 +627,40 @@ class MainProgram : public rclcpp::Node
                 //sfc = 2116;
                 break;
             
-            case 2116:
-                if (status_linefollow == 13){
-                    status_linefollow = 0;
-                    sfc = 2117;
-                }
-                break;
-            case 2117:
-                linefollow_msg.data = 4;
-                pub_linefollow_->publish(linefollow_msg);
-                sfc = 2120;
-                break;
-            case 2120:
-                if (status_linefollow == 20){ // når vi ser det næste cross burde vi være ved opgaven
-                    status_linefollow = 0;
-                    sfc = 2130; 
-                }
+            // case 2116:
+            //     if (status_linefollow == 13){
+            //         status_linefollow = 0;
+            //         sfc = 2117;
+            //     }
+            //     break;
+            // case 2117:
+            //     linefollow_msg.data = 4;
+            //     pub_linefollow_->publish(linefollow_msg);
+            //     sfc = 2120;
+            //     break;
+            // case 2120:
+            //     if (status_linefollow == 20){ // når vi ser det næste cross burde vi være ved opgaven
+            //         status_linefollow = 0;
+            //         sfc = 2130; 
+            //     }
 
-                break;
+            //     break;
             
-            case 2130:
-                linefollow_msg.data = 0; // sluk for line following så vi kan begynde at bruge navigation
-                pub_linefollow_->publish(linefollow_msg);
+            // case 2130:
+            //     linefollow_msg.data = 0; // sluk for line following så vi kan begynde at bruge navigation
+            //     pub_linefollow_->publish(linefollow_msg);
                 
-                sfc = 2999;
-                break;
+            //     sfc = 2999;
+            //     break;
             
-            case 2140:      
-                // Indsæt muligvis et punkt som er bedre egnet til at se all golf bolde før vi stater med at løse Task 12
+            // case 2140:      
+            //     // Indsæt muligvis et punkt som er bedre egnet til at se all golf bolde før vi stater med at løse Task 12
 
-                break;
+            //     break;
             
-            case 2150:
+            // case 2150:
 
-                break;
+            //     break;
             
             case 2999:
                 sfc = 4000;
@@ -867,7 +900,7 @@ class MainProgram : public rclcpp::Node
                    
                     status_ball = 0;
                     
-                    sfc = 4150;
+                    sfc = 4145;
                     
                 }
         
@@ -1165,7 +1198,7 @@ class MainProgram : public rclcpp::Node
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
-                    sfc = 4400; // go back and resend the robot cmd
+                    sfc = 4000; // go back and resend the robot cmd
                     if(robot_attempts == 5){
                        // sfc = 6030;
                        RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
@@ -1576,7 +1609,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6110;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) > 35.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) > 40.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
@@ -1643,7 +1676,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6130;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >20.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
@@ -1675,7 +1708,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6150;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >20.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
@@ -1707,7 +1740,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6170;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >7.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
                     sfc = 6150; // go back and resend the robot cmd
@@ -1734,14 +1767,14 @@ class MainProgram : public rclcpp::Node
                     sfc = 6190;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >20.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
                     robot_attempts ++;
                     
                     
                     if(robot_attempts == 5){
-                       // sfc = 6030;
+                       //sfc = 6030;
                        RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
 
                     }
@@ -1771,7 +1804,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6210;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out, No golfball found");
                     
                     //sfc = 6190;
@@ -1802,7 +1835,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6240;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >25.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >35.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
                     sfc = 6190; // go back and resend the robot cmd
@@ -1845,7 +1878,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6260;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
                     robot_attempts ++;
@@ -1976,7 +2009,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 6332: // aruco or ball not found
-                pub_mobile_->publish(golfball_sheach_pose);
+                pub_mobile_->publish(golf_hole_pose);
                 sfc = 6333;
                 break;
             
