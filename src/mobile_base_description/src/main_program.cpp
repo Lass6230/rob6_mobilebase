@@ -1546,7 +1546,8 @@ class MainProgram : public rclcpp::Node
                 if((m_lastTime2-m_lastTime1) >7.0){ // check if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out, no aruco code found");
                     
-                    sfc = 6050;
+                    //sfc = 6050;
+                    sfc = 6332;
                     
                     
                 }
@@ -1771,8 +1772,8 @@ class MainProgram : public rclcpp::Node
                 if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out, No golfball found");
                     
-                    sfc = 6190;
-                    
+                    //sfc = 6190;
+                    sfc = 6332;
                     
                     
                 }
@@ -1970,6 +1971,19 @@ class MainProgram : public rclcpp::Node
                     sfc = 6320; // go back and resend the robot cmd
                     
                 }
+                break;
+            
+            case 6332: // aruco or ball not found
+                pub_mobile_->publish(golfball_sheach_pose);
+                sfc = 6333;
+                break;
+            
+            case 6333:
+                if(status_mobile == 1){
+                    status_mobile = 0;
+                    sfc = 6335;
+                }
+
                 break;
             
             case 6335: // add one to packages count
