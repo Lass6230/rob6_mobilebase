@@ -534,6 +534,7 @@ class RobotHandler : public rclcpp::Node
           tf2::Matrix3x3 m(quat_tf);
           m.getRPY(rot_r, rot_p, rot_y);
           quat_tf.setRPY(0.0,1.57,atan2(target_pose.transform.translation.y, target_pose.transform.translation.x));
+          quat_tf.normalize();
           RCLCPP_INFO(LOGGER,"R: %f", rot_r);
           RCLCPP_INFO(LOGGER,"P: %f", rot_p);
           RCLCPP_INFO(LOGGER,"Y: %f", rot_y);
