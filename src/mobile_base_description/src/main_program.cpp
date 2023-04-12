@@ -403,6 +403,9 @@ class MainProgram : public rclcpp::Node
                 m_lastTime2 = m_clock->now().seconds();
                 if ((m_lastTime2-m_lastTime1)> 20.0){
                     RCLCPP_INFO(this->get_logger(),"timed out");
+                    linefollow_msg.data = 0;
+                    pub_linefollow_->publish(linefollow_msg);
+                    sfc = 2064;
                 }
                 break;
             
@@ -428,6 +431,21 @@ class MainProgram : public rclcpp::Node
                     status_mobile = 0;
                    // sfc = 9000;
                     sfc = 2064;
+                }
+                break;
+
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >25.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+                    
+                    sfc = 2064; // go back and resend the robot cmd
+                    if(robot_attempts == 5){
+                       
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+                    }
+                    
                 }
                 break;
 
@@ -2076,13 +2094,15 @@ class MainProgram : public rclcpp::Node
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
 
                 sfc = 7020;
+                
                 break;
             
             case 7020:
                 if(robot_status == 1){// Wait for gripper to be open
                     robot_status = 0;
                     robot_attempts = 0;
-                    sfc = 7030;
+                    // sfc = 7030;
+                    sfc = 9000;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
