@@ -230,6 +230,17 @@ class MainProgram : public rclcpp::Node
             //golfball_sheach_pose.pose.orientation = tf2::toMsg(quat_golfball_sheach);
             golfball_release_pose.pose.orientation.z = -0.17158369066287102;
             golfball_release_pose.pose.orientation.w = 0.9851695473868994;
+
+
+
+
+            speed.pose.position.x = 6.314323425292969;
+            speed.pose.position.y = -7.268889427185059;
+            //golfball_sheach_pose.pose.orientation = tf2::toMsg(quat_golfball_sheach);
+            speed.pose.orientation.z = -0.7979435037636673;
+            speed.pose.orientation.w = 0.6027322496775516;
+
+           
         }
     
     private:
@@ -288,7 +299,7 @@ class MainProgram : public rclcpp::Node
             {
             case 0:
                
-                sfc = 2000;//6000;//4000;//155;//1100;
+                sfc = 10000;//6000;//4000;//155;//1100;
 
                 break;
             
@@ -412,7 +423,7 @@ class MainProgram : public rclcpp::Node
             case 2063:
                 if(status_mobile == 1){
                     status_mobile = 0;
-                    sfc = 5030;
+                    sfc = 9000;
                     //sfc = 2064;
                 }
                 break;
@@ -2136,7 +2147,6 @@ class MainProgram : public rclcpp::Node
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
             //////////////////Begin  case 9000-9999 ///////////////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2145,11 +2155,20 @@ class MainProgram : public rclcpp::Node
                 break;
 
             case 9010: // ved ikke om armen er ned på dette tidspunkt har efterladt denne case i det tilfælde
-                sfc = 9020;
+
+                pub_mobile_->publish(speed);
+                sfc = 9015;
                 break;
             
+            case 9015:
+                if(status_mobile == 1){
+                    status_mobile = 0;
+                    sfc = 9020;
+                }
+                break;
+
             case 9020: // måske tilføje en måde at bestemme hvilken vej vi drejer i tilfælde af linjen er horizontal som den ville være i dette tilfælde
-                linefollow_msg.data = 9; // her slår vi normal line mode til igen så den vil prøve at finde linjen igen 
+                linefollow_msg.data = 8; // her slår vi normal line mode til igen så den vil prøve at finde linjen igen 
                 pub_linefollow_->publish(linefollow_msg);
                 sfc = 9025;
                 break;
@@ -2283,23 +2302,38 @@ class MainProgram : public rclcpp::Node
                 sfc = 11040;
                 break;
             
+            case 11035:
+                linefollow_msg.data = 1;
+                pub_linefollow_->publish(linefollow_msg);
+                sfc = 11040;
+                break;
+            
             case 11040: 
                   if(status_linefollow == 20)
                   {
                     status_linefollow = 0;
-                    sfc = 11500;
+                    sfc = 11495;
                   }
                 break;
 
             // Her kan nr 5 sættes ind hvis det er
+            case 11495:
+                linefollow_msg.data = 7;
+                pub_linefollow_->publish(linefollow_msg);
+                sfc = 11500;
+                break;
 
             case 11500:
                 //kør ned af bakken
                  linefollow_msg.data = 6;    
                 pub_linefollow_->publish(linefollow_msg);
+                sfc = 11505;
+                break;
+            case 11505:
+                linefollow_msg.data = 2;
+                pub_linefollow_->publish(linefollow_msg);
                 sfc = 11999;
                 break;
-            
         
             case 11999:
                 sfc = 12000;
@@ -2711,6 +2745,9 @@ class MainProgram : public rclcpp::Node
         geometry_msgs::msg::PoseStamped golf_hole_pose;
 
         geometry_msgs::msg::PoseStamped golfball_release_pose;
+
+        geometry_msgs::msg::PoseStamped speed;
+
 
         int32_t golfball_counter = 0;
 
