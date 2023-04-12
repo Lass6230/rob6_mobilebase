@@ -1,4 +1,4 @@
-image: /home/simon/galactic_ws/src/rob6_mobilebase/src/mobile_base_description/maps/robocup_hall/map_refined.pgm
+image: /home/simon/galactic_ws/src/rob6_mobilebase/src/mobile_base_description/maps/robocup_hall/map_refined1.pgm
 mode: trinary
 resolution: 0.04
 origin: [-2.91, -12.4, 0]
