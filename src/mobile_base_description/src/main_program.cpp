@@ -870,6 +870,11 @@ class MainProgram : public rclcpp::Node
                 }
         
                 break;
+            
+            case 4145:
+                sfc = 4999;
+
+                break;
 
             case 4150: // send command to robot to look long midt
                 RCLCPP_INFO(this->get_logger(), "look long");
