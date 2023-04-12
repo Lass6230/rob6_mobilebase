@@ -146,34 +146,45 @@ class MainProgram : public rclcpp::Node
 
 
             quat_trolly[2].setRPY(0.0, 0.0, 0.0);
-            trolly_pose[2].pose.position.x = 4.728928565979004;
-            trolly_pose[2].pose.position.y = -3.7367677688598633;
+            trolly_pose[2].pose.position.x = 4.637298107147217;
+            trolly_pose[2].pose.position.y = -3.852802276611328;
             //trolly_pose[2].pose.orientation = tf2::toMsg(quat_trolly[2]);
-            trolly_pose[2].pose.orientation.z = -0.8026999780103126;
-            trolly_pose[2].pose.orientation.w = 0.5963830524941531;
+            trolly_pose[2].pose.orientation.z = -0.7844494034227334;
+            trolly_pose[2].pose.orientation.w = 0.6201928195889709;
+
             
             tf2::Quaternion quat_house[3];
 
-            quat_house[0].setRPY(0.0, 0.0, 0.0); // grøn
-            house_pose[0].pose.position.x = 5.823143482208252;
-            house_pose[0].pose.position.y = 4.915400505065918;
+            quat_house[2].setRPY(0.0, 0.0, 0.0); // grøn
+            house_pose[2].pose.position.x = 5.874170780181885;
+            house_pose[2].pose.position.y = -4.7942585945129395;
             //house_pose[0].pose.orientation = tf2::toMsg(quat_house[0]);
-            house_pose[0].pose.orientation.z = -0.7921972265226599;
-            house_pose[0].pose.orientation.w = 0.6102651508072582;
+            house_pose[2].pose.orientation.z = -0.8087978459540437;
+            house_pose[2].pose.orientation.w = 0.5880867660304038;
+
+
 
             quat_house[1].setRPY(0.0, 0.0, 0.0); //gul
-            house_pose[1].pose.position.x = 6.074102878570557;
-            house_pose[1].pose.position.y = -4.910430908203125;
+            house_pose[1].pose.position.x = 6.1005940437316895;
+            house_pose[1].pose.position.y = -4.889570236206055;
             //house_pose[1].pose.orientation = tf2::toMsg(quat_house[1]);
-            house_pose[1].pose.orientation.z = -0.7811356671048362;
-            house_pose[1].pose.orientation.w = 0.6243613293411777;
+            house_pose[1].pose.orientation.z = -0.798157318060768;
+            house_pose[1].pose.orientation.w = 0.6024490813554636;
 
-            quat_house[2].setRPY(0.0, 0.0, 0.0); //rød
-            house_pose[2].pose.position.x = 6.307386875152588;
-            house_pose[2].pose.position.y = -4.949221611022949;
+
+
+
+
+            quat_house[0].setRPY(0.0, 0.0, 0.0); //rød
+            house_pose[0].pose.position.x = 6.2147216796875;
+            house_pose[0].pose.position.y = -4.94196891784668;
             //house_pose[2].pose.orientation = tf2::toMsg(quat_house[2]);
-            house_pose[2].pose.orientation.z = -0.809115591304415;
-            house_pose[2].pose.orientation.w = 0.5876495213204098;
+            house_pose[0].pose.orientation.z = -0.8032736794291202;
+            house_pose[0].pose.orientation.w = 0.5956101039576168;
+
+
+
+
 
             // init task_10_pose
             tf2::Quaternion quat_task10;
@@ -1862,7 +1873,7 @@ class MainProgram : public rclcpp::Node
             
             case 6280: // move robot to the floor (to drop of ball)
                 robot_msg.cmd = 6;
-                robot_msg.pose = {0.28,0.0,0.0,0.0,1.57,0.0};
+                robot_msg.pose = {0.28,0.0,-0.1,0.0,1.57,0.0};
                 pub_robot_->publish(robot_msg);
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
 
