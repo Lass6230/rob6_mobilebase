@@ -918,7 +918,7 @@ class MainProgram : public rclcpp::Node
                    
                     status_ball = 0;
                     
-                    sfc = 4145;
+                    sfc = 4150;//4145;
                     
                 }
         
