@@ -126,9 +126,13 @@ class ImageSubscriberNode(Node):
         elif self.search == 2:
             colors_to_detect = [
                 #(Lhue, Lsat, Lval, Hhue, Hsat, Hval, color, color in BGR)
-                (0, 0, 168, 156, 159, 255, "pink", (147, 112, 219)), # Pink high
-                (117, 78, 33, 156, 207, 255, "pink", (147, 112, 219)), #pink low
-                (88, 49, 20, 119, 255, 255, "orange", (0, 165, 255)) # Orange DTU light (wide)#(110, 110, 114, 119, 195, 255, "orange", (0, 165, 255)), # Orange decent
+
+                # (0, 0, 168, 156, 159, 255, "pink", (147, 112, 219)), # Pink high
+                # (117, 78, 33, 156, 207, 255, "pink", (147, 112, 219)), #pink low
+                # (88, 49, 20, 119, 255, 255, "orange", (0, 165, 255)) # Orange DTU light (wide)#(110, 110, 114, 119, 195, 255, "orange", (0, 165, 255)), # Orange decent
+                (87, 81, 228, 127, 255, 255, "red", (0, 0, 255)), # Red works well
+                (81, 3, 189, 103, 255, 255, "yellow", (0, 255, 255)), # Yellow good
+                (73, 13, 174, 93, 255, 255, "green", (0, 255, 0)) #green good? (32, 62, 88, 94, 186, 255, "green", (0, 255, 0))
                 ]
             status, mask, contour, color, x, y = self.detector(cv_image, colors_to_detect)
         
