@@ -304,7 +304,7 @@ class MainProgram : public rclcpp::Node
             {
             case 0:
                
-                sfc = 4000;//6000;//4000;//155;//1100;
+                sfc = 2113;//4000;//6000;//4000;//155;//1100;
 
                 break;
             
@@ -1142,7 +1142,7 @@ class MainProgram : public rclcpp::Node
                 
                 matrix.setRotation(quat_tf_lookup);
                 matrix.getRPY(rot_r_lookup, rot_p_lookup, rot_y_lookup);
-                quat_tf_lookup.setRPY(0.0,0.0,rot_y_lookup);
+                quat_tf_lookup.setRPY(0.0,0.0,atan2(target_pose.pose.position.y, target_pose.pose.position.x));
                 target_pose.pose.orientation = tf2::toMsg(quat_tf_lookup);
                 pub_mobile_relative_->publish(target_pose);
                 sfc = 4310;
