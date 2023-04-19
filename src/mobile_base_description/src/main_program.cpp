@@ -1596,7 +1596,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6070;
                 }
                
-                if((m_lastTime2-m_lastTime1) >7.0){ // check if timeout 
+                if((m_lastTime2-m_lastTime1) >10.0){ // check if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out, no aruco code found");
                     
                     //sfc = 6050;
