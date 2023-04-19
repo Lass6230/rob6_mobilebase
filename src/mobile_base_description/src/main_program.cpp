@@ -209,11 +209,29 @@ class MainProgram : public rclcpp::Node
             // init golf_hole_pose
             tf2::Quaternion quat_golf_hole;
             quat_task4.setRPY(0.0, 0.0, 0.0);
-            golf_hole_pose.pose.position.x = 6.758194923400879;
-            golf_hole_pose.pose.position.y = -4.097546100616455;
+            golf_hole_pose.pose.position.x = 3.1724042892456055;
+            golf_hole_pose.pose.position.y = 6.028823375701904;
             //golf_hole_pose.pose.orientation = tf2::toMsg(quat_golf_hole);
-            golf_hole_pose.pose.orientation.z = 0.6340538789350814;
-            golf_hole_pose.pose.orientation.w = 0.7732888713846703;
+            golf_hole_pose.pose.orientation.z = 0.8530449026245668;
+            golf_hole_pose.pose.orientation.w = 0.5218375169592959;
+
+            header:
+  stamp:
+    sec: 1681907233
+    nanosec: 441074272
+  frame_id: map
+pose:
+  position:
+    x: 3.1724042892456055
+    y: 6.028823375701904
+    z: 0.0
+  orientation:
+    x: 0.0
+    y: 0.0
+    z: 0.8530449026245668
+    w: 0.5218375169592959
+---
+
 
             // init golfball_sheach_pose
             tf2::Quaternion quat_golfball_sheach;
