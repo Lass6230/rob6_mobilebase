@@ -28,6 +28,7 @@ ament_target_dependencies(
   nav_msgs
   sensor_msgs
   crust_msgs 
+  tf2_geometry_msgs
 )
 
 add_executable(joy_listner src/joy_control.cpp)
