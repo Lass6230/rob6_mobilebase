@@ -13,7 +13,7 @@ amcl:
     do_beamskip: false
     global_frame_id: "map"
     lambda_short: 0.1
-    laser_likelihood_max_dist: 6
+    laser_likelihood_max_dist: 6.0
     laser_max_range: 20
     laser_min_range: -1.0
     laser_model_type: "likelihood_field_prob"
