@@ -14,6 +14,7 @@ find_package(nav_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(message_filters REQUIRED)
 find_package(crust_msgs REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 
 
 # uncomment the following section in order to fill in
