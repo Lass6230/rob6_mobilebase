@@ -1137,12 +1137,15 @@ class MainProgram : public rclcpp::Node
                     tf2::TimePointZero);
                 target_pose.pose.position.x = transform_pose.transform.translation.x;
                 target_pose.pose.position.y = transform_pose.transform.translation.y;
-                
+
+                transform_pose = tf_buffer_->lookupTransform(
+                    "base_link", "ball",
+                    tf2::TimePointZero);
                 tf2::fromMsg(transform_pose.transform.rotation, quat_tf_lookup);
                 
                 matrix.setRotation(quat_tf_lookup);
                 matrix.getRPY(rot_r_lookup, rot_p_lookup, rot_y_lookup);
-                quat_tf_lookup.setRPY(0.0,0.0,atan2(target_pose.pose.position.y, target_pose.pose.position.x));
+                quat_tf_lookup.setRPY(0.0,0.0,rot_y_lookup);
                 target_pose.pose.orientation = tf2::toMsg(quat_tf_lookup);
                 pub_mobile_relative_->publish(target_pose);
                 sfc = 4310;
