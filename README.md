@@ -3,7 +3,7 @@ This is the repository for AAU Robotics bachelor project. This project aims to c
 
 ## Install dependencies
 ```
-sudo apt install ros-galactic-slam-toolbox ros-galactic-ros2-control ros-galactic-ros2-controllers ros-galactic-xacro ros-galactic-joint-state-publisher-gui ros-galactic-twist-mux ros-galactic-sick-safetyscanners-base ros-galactic-sick-safetyscanners2-interfaces ros-galactic-dynamixel-workbench-toolbox ros-galactic-moveit ros-galactic-bondcpp ros-galactic-behaviortree-cpp-v3 ros-galactic-test-msgs ros-galactic-realsense2* ros-galactic-navigation2 
+sudo apt install ros-galactic-slam-toolbox ros-galactic-ros2-control ros-galactic-ros2-controllers ros-galactic-xacro ros-galactic-joint-state-publisher-gui ros-galactic-twist-mux ros-galactic-sick-safetyscanners-base ros-galactic-sick-safetyscanners2-interfaces ros-galactic-dynamixel-workbench-toolbox ros-galactic-moveit ros-galactic-bondcpp ros-galactic-behaviortree-cpp-v3 ros-galactic-test-msgs ros-galactic-realsense2* ros-galactic-navigation2 ros-galactic-nav2-simple-commander pip ros-galactic-backward-ros ros-galactic-librealsense2*
 
 pip install opencv-python
 ```
@@ -35,6 +35,13 @@ rosdep update --include-eol
 rosdep install -y -r -q --from-paths src --ignore-src --rosdistro galactic
 colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 # remember to source the workspace!
+```
+
+## Switch to Cyclone DDS
+```
+sudo apt install ros-humble-rmw-cyclonedds-cpp
+# Export the cyclonedds as your RMW automatically with: 
+echo export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp >> .bashrc
 ```
 
 
