@@ -46,9 +46,11 @@ class ImageSubscriberNode(Node):
         if self.search == 1 or self.search == 2:
             cv_image = self.bridge.imgmsg_to_cv2(rgb_image, desired_encoding='bgr8')
             cv_depth = self.bridge.imgmsg_to_cv2(depth_image, desired_encoding="passthrough")
-            cv2.waitKey(1)
+            
             #time.sleep(1)
-            self.process_image(cv_image, cv_depth)
+            cv2.imshow("lol",cv_image)
+            # cv2.waitKey(1)
+            #self.process_image(cv_image, cv_depth)
 
     
     def detector(self, frame, colors_to_detect):
@@ -72,7 +74,7 @@ class ImageSubscriberNode(Node):
             
             # find the contours of the golf balls in the mask
             contours, hierarchy = cv2.findContours(mask_closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            #cv2.imshow("bruh", frame)
+            cv2.imshow("bruh", frame)
             self.publisher_.publish(self.bridge.cv2_to_imgmsg(mask_closed))
             #cv2.imshow("mask", mask)
             #averages = []
@@ -117,9 +119,10 @@ class ImageSubscriberNode(Node):
         if self.search == 1:
             colors_to_detect = [
                 #(Lhue, Lsat, Lval, Hhue, Hsat, Hval, color, color in BGR)
-                (87, 81, 228, 127, 255, 255, "red", (0, 0, 255)), # Red works well
+                (17, 120, 90, 31, 255, 255, "blue", (255,0,0)), #blue grupperum
+                (108, 87, 132, 138, 255, 255, "red", (0, 0, 255)), # Red works well
                 (81, 3, 189, 103, 255, 255, "yellow", (0, 255, 255)), # Yellow good
-                (73, 13, 174, 93, 255, 255, "green", (0, 255, 0)) #green good? (32, 62, 88, 94, 186, 255, "green", (0, 255, 0))
+                (30, 69, 117, 54, 255, 255, "green", (0, 255, 0)) #green good? (32, 62, 88, 94, 186, 255, "green", (0, 255, 0))
                 ]
             status, mask, contour, color, x, y, = self.detector(cv_image, colors_to_detect)
     
@@ -130,9 +133,10 @@ class ImageSubscriberNode(Node):
                 # (0, 0, 168, 156, 159, 255, "pink", (147, 112, 219)), # Pink high
                 # (117, 78, 33, 156, 207, 255, "pink", (147, 112, 219)), #pink low
                 # (88, 49, 20, 119, 255, 255, "orange", (0, 165, 255)) # Orange DTU light (wide)#(110, 110, 114, 119, 195, 255, "orange", (0, 165, 255)), # Orange decent
-                (87, 81, 228, 127, 255, 255, "red", (0, 0, 255)), # Red works well
+                (17, 120, 90, 31, 255, 255, "blue", (255,0,0)), #blue grupperum
+                (108, 87, 132, 138, 255, 255, "red", (0, 0, 255)), # Red works well
                 (81, 3, 189, 103, 255, 255, "yellow", (0, 255, 255)), # Yellow good
-                (73, 13, 174, 93, 255, 255, "green", (0, 255, 0)) #green good? (32, 62, 88, 94, 186, 255, "green", (0, 255, 0))
+                (30, 69, 117, 54, 255, 255, "green", (0, 255, 0)) #green good? (32, 62, 88, 94, 186, 255, "green", (0, 255, 0))
                 ]
             status, mask, contour, color, x, y = self.detector(cv_image, colors_to_detect)
         
