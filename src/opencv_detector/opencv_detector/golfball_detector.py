@@ -48,9 +48,9 @@ class ImageSubscriberNode(Node):
             cv_depth = self.bridge.imgmsg_to_cv2(depth_image, desired_encoding="passthrough")
             
             #time.sleep(1)
-            cv2.imshow("lol",cv_image)
+            #cv2.imshow("lol",cv_image)
             # cv2.waitKey(1)
-            #self.process_image(cv_image, cv_depth)
+            self.process_image(cv_image, cv_depth)
 
     
     def detector(self, frame, colors_to_detect):
@@ -74,7 +74,7 @@ class ImageSubscriberNode(Node):
             
             # find the contours of the golf balls in the mask
             contours, hierarchy = cv2.findContours(mask_closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            cv2.imshow("bruh", frame)
+            #cv2.imshow("bruh", frame)
             self.publisher_.publish(self.bridge.cv2_to_imgmsg(mask_closed))
             #cv2.imshow("mask", mask)
             #averages = []
