@@ -138,7 +138,8 @@ controller_server:
       plugin: "teb_local_planner::TebLocalPlannerROS"
       footprint_model: 
         type: "polygon"
-        vertices: "[ [0.3, 0.06], [0.3, -0.14], [0.13, -0.17], [-0.43, -0.17], [-0.43, 0.17], [0.13, 0.17], [0.2, 0.17]]"
+        #vertices: "[ [0.3, 0.06], [0.3, -0.14], [0.13, -0.17], [-0.43, -0.17], [-0.43, 0.17], [0.13, 0.17], [0.2, 0.17]]"
+        vertices: "[ [0.3, 0.18], [0.3, -0.18], [-0.43, -0.18], [-0.43, 0.18] ]"
       min_obstacle_dist: 0.05
       inflation_dist: 0.18
       costmap_converter_plugin: "costmap_converter::CostmapToPolygonsDBSMCCH"
@@ -181,7 +182,8 @@ local_costmap:
       width: 4
       height: 4
       resolution: 0.04 #increase
-      footprint: "[ [0.3, 0.06], [0.3, -0.14], [0.13, -0.17], [-0.43, -0.17], [-0.43, 0.17], [0.13, 0.17], [0.2, 0.17] ]"
+      #footprint: "[ [0.3, 0.06], [0.3, -0.14], [0.13, -0.17], [-0.43, -0.17], [-0.43, 0.17], [0.13, 0.17], [0.2, 0.17] ]"
+      footprint: "[ [0.3, 0.18], [0.3, -0.18], [-0.43, -0.18], [-0.43, 0.18] ]"
       plugins: ["voxel_layer", "inflation_layer"]
       filters: ["keepout_filter", "inflation_layer"]
       keepout_filter:

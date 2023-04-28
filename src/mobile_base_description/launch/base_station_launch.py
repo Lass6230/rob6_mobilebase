@@ -50,7 +50,7 @@ def generate_launch_description():
     launch_dir = os.path.join(bringup_dir, 'launch')
 
 
-    launch_file_dir = os.path.join(get_package_share_directory('turtlebot3_gazebo'), 'launch')
+    #launch_file_dir = os.path.join(get_package_share_directory('turtlebot3_gazebo'), 'launch')
     #pkg_gazebo_ros = get_package_share_directory('gazebo_ros')
 
     # x_pose = LaunchConfiguration('x_pose', default='-2.0')

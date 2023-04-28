@@ -39,7 +39,7 @@ colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
 ## Switch to Cyclone DDS
 ```
-sudo apt install ros-humble-rmw-cyclonedds-cpp
+sudo apt install ros-galactic-rmw-cyclonedds-cpp
 # Export the cyclonedds as your RMW automatically with: 
 echo export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp >> .bashrc
 ```
