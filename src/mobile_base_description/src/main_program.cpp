@@ -935,7 +935,7 @@ class MainProgram : public rclcpp::Node
             case 4150: // send command to robot to look long midt
                 RCLCPP_INFO(this->get_logger(), "look long");
                 robot_msg.cmd = 6;
-                robot_msg.pose = {0.3430,0.0,0.15955,0.0,0.785398,0.0};
+                robot_msg.pose = {0.3430,0.0,0.15955,0.0,0.610865238,0.0}; //0.785398
                 pub_robot_->publish(robot_msg);
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
 
