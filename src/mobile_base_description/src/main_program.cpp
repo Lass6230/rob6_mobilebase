@@ -980,7 +980,7 @@ class MainProgram : public rclcpp::Node
                 {
                     RCLCPP_INFO(this->get_logger(), "ball found");
                     status_ball = 0;
-                    sfc = 4300;
+                    sfc = 4290;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
@@ -1043,7 +1043,7 @@ class MainProgram : public rclcpp::Node
                 {
                     RCLCPP_INFO(this->get_logger(), "ball found");
                     status_ball = 0;
-                    sfc = 4300;
+                    sfc = 4290;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
@@ -1107,7 +1107,7 @@ class MainProgram : public rclcpp::Node
                 {
                     RCLCPP_INFO(this->get_logger(), "ball found");
                     status_ball = 0;
-                    sfc = 4300;
+                    sfc = 4290;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
@@ -1127,10 +1127,24 @@ class MainProgram : public rclcpp::Node
 
                 break;
 
-            case 4290:
-
+            case 4290: // robot cmd 8 pack up inden kørsel
+                RCLCPP_INFO(this->get_logger(), "pack down before driving");
+                robot_msg.cmd = 8;
+                robot_msg.pose = {0.0,-0.785398163,1.57,1.57};
+                pub_robot_->publish(robot_msg);
+                
+                sfc = 4291;
                 break;
             
+            case 4291:
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 4300;
+                }
+
+                break;
+
             case 4300: // ball found long look, send command to mobile to drive to ball
                 RCLCPP_INFO(this->get_logger(), "nav to ball");
                 transform_pose = tf_buffer_->lookupTransform(
@@ -1279,7 +1293,7 @@ class MainProgram : public rclcpp::Node
                 if(robot_status == 1){
                     robot_status = 0;
                     robot_attempts = 0;
-                    sfc = 4660;   //4660 /// husk sæt rigitgt
+                    sfc = 4651;   //4660 /// husk sæt rigitgt
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
@@ -1297,6 +1311,23 @@ class MainProgram : public rclcpp::Node
                     sfc = 4640; // go back and resend the robot cmd
                     
                 }
+                break;
+            case 4651: // robot cmd 8 pack up inden kørsel
+                RCLCPP_INFO(this->get_logger(), "pack down before driving");
+                robot_msg.cmd = 8;
+                robot_msg.pose = {0.0,-0.785398163,1.57,1.57};
+                pub_robot_->publish(robot_msg);
+                
+                sfc = 4652;
+                break;
+            
+            case 4652:
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 4660;
+                }
+
                 break;
             
             case 4660: // send command to go to golf hole
@@ -1384,7 +1415,7 @@ class MainProgram : public rclcpp::Node
                 if(robot_status == 1){
                     robot_status = 0;
                     robot_attempts = 0;
-                    sfc = 4740;
+                    sfc = 4731;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
@@ -1399,6 +1430,23 @@ class MainProgram : public rclcpp::Node
                     }
                     
                 }
+                break;
+            case 4731: // robot cmd 8 pack up inden kørsel
+                RCLCPP_INFO(this->get_logger(), "pack down before driving");
+                robot_msg.cmd = 8;
+                robot_msg.pose = {0.0,-0.785398163,1.57,1.57};
+                pub_robot_->publish(robot_msg);
+                
+                sfc = 4731;
+                break;
+            
+            case 4732:
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 4740;
+                }
+
                 break;
 
             case 4740:
