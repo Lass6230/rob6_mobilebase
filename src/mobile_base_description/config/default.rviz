@@ -7,6 +7,7 @@ Panels:
         - /Global Options1
         - /TF1/Frames1
         - /TF1/Tree1
+        - /teb_markers1/Namespaces1
       Splitter Ratio: 0.5833333134651184
     Tree Height: 546
   - Class: rviz_common/Selection
@@ -57,7 +58,8 @@ Visualization Manager:
         Value: /robot_description
       Enabled: false
       Links:
-        All Links Enabled: true
+        All Links Enabled:
+          {}
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
@@ -96,9 +98,9 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 0
+      Max Intensity: 210
       Min Color: 0; 0; 0
-      Min Intensity: 0
+      Min Intensity: 1
       Name: LaserScan
       Position Transformer: XYZ
       Selectable: true
@@ -173,7 +175,7 @@ Visualization Manager:
     - Alpha: 1
       Class: nav2_rviz_plugins/ParticleCloud
       Color: 0; 180; 0
-      Enabled: false
+      Enabled: true
       Max Arrow Length: 0.30000001192092896
       Min Arrow Length: 0.019999999552965164
       Name: Amcl Particle Swarm
@@ -185,7 +187,7 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Best Effort
         Value: /particle_cloud
-      Value: false
+      Value: true
     - Class: rviz_common/Group
       Displays:
         - Alpha: 0.30000001192092896
@@ -523,11 +525,38 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /goal
       Value: true
+    - Alpha: 1
+      Axes Length: 1
+      Axes Radius: 0.10000000149011612
+      Class: rviz_default_plugins/Pose
+      Color: 255; 25; 0
+      Enabled: true
+      Head Length: 0.30000001192092896
+      Head Radius: 0.10000000149011612
+      Name: goal_relative
+      Shaft Length: 1
+      Shaft Radius: 0.05000000074505806
+      Shape: Arrow
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /goal_relative
+      Value: true
     - Class: rviz_default_plugins/Marker
       Enabled: true
-      Name: Marker
+      Name: teb_markers
       Namespaces:
-        {}
+        GraphEdges: true
+        GraphVertices: true
+        InfeasibleRobotPoses: true
+        LineObstacles: true
+        PointObstacles: true
+        PolyObstacles: true
+        RobotFootprintModel: true
+        TebContainer: true
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -588,7 +617,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -1.5399975776672363
+      Angle: -1.1749982833862305
       Class: rviz_default_plugins/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -598,11 +627,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 177.04940795898438
+      Scale: 200.29766845703125
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz_default_plugins)
-      X: -2.7689754962921143
-      Y: 3.9322028160095215
+      X: 2.3426513671875
+      Y: 4.1847686767578125
     Saved: ~
 Window Geometry:
   Displays:

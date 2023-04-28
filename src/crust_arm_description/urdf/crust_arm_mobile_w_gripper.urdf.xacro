@@ -390,7 +390,7 @@
     name="workspace_center_joint"
     type="fixed">
     <origin
-      xyz="0.32 0 0"
+      xyz="0.37 0 0"
       rpy="0 0 0" />
     <parent
       link="crust_base_link" />
