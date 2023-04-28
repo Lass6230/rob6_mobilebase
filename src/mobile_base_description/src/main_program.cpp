@@ -1437,7 +1437,7 @@ class MainProgram : public rclcpp::Node
                 robot_msg.pose = {0.0,-0.785398163,1.57,1.57};
                 pub_robot_->publish(robot_msg);
                 
-                sfc = 4731;
+                sfc = 4732;
                 break;
             
             case 4732:
