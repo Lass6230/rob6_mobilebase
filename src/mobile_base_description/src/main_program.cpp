@@ -20,6 +20,7 @@
 #include "crust_msgs/msg/robot_cmd_msg.hpp"
 #include <time.h>
 #include <geometry_msgs/msg/pose_stamped.hpp>
+#include "geometry_msgs/msg/twist.hpp"
 #include <tf2/LinearMath/Quaternion.h>
 #include "tf2/exceptions.h"
 #include "tf2_ros/transform_listener.h"
@@ -78,6 +79,12 @@ class MainProgram : public rclcpp::Node
             sub_joy_status_ = this->create_subscription<std_msgs::msg::Bool>("/joy_status",10,std::bind(&MainProgram::subJoyStatus, this, _1), sub1_opt);
             //sub_joy_ = this->create_subscription<sensor_msgs::msg::Joy>("/joy",10,std::bind(&MainProgram::subJoyStatus, this, _1), sub1_opt);
             
+
+            cmd_vel_pub_ = this ->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
+
+
+
+
             ///////////// Line status og cmd koder ////////////////////////////
 
                 //STATUS MED KOMMANDO NØDVENDIG
@@ -190,8 +197,8 @@ class MainProgram : public rclcpp::Node
 
 
             // init task_10_pose
-            tf2::Quaternion quat_task10;
-            quat_task10.setRPY(0.0, 0.0, 0.0);
+            //tf2::Quaternion quat_task10;
+            //quat_task10.setRPY(0.0, 0.0, 0.0);
             task_10_pose.pose.position.x = 4.693809986114502;
             task_10_pose.pose.position.y = -5.980169296264648;
             //task_10_pose.pose.orientation = tf2::toMsg(quat_task10);
@@ -200,7 +207,7 @@ class MainProgram : public rclcpp::Node
 
             // init task_4_pose
             tf2::Quaternion quat_task4;
-            quat_task4.setRPY(0.0, 0.0, 0.0);
+            //quat_task4.setRPY(0.0, 0.0, 0.0);
             task_4_pose.pose.position.x = 3.079353094100952;
             task_4_pose.pose.position.y = -0.5278006196022034;
             //task_4_pose.pose.orientation = tf2::toMsg(quat_task4);
@@ -208,35 +215,62 @@ class MainProgram : public rclcpp::Node
             task_4_pose.pose.orientation.w = 0.09396143303678546;
 
             // init golf_hole_pose
-            tf2::Quaternion quat_golf_hole;
+            //tf2::Quaternion quat_golf_hole;
+            // quat_task4.setRPY(0.0, 0.0, 0.0);
+            // golf_hole_pose.pose.position.x = 3.1724042892456055;
+            // golf_hole_pose.pose.position.y = 6.028823375701904;
+            // //golf_hole_pose.pose.orientation = tf2::toMsg(quat_golf_hole);
+            // golf_hole_pose.pose.orientation.z = 0.8530449026245668;
+            // golf_hole_pose.pose.orientation.w = 0.5218375169592959;
+
             quat_task4.setRPY(0.0, 0.0, 0.0);
-            golf_hole_pose.pose.position.x = 3.1724042892456055;
-            golf_hole_pose.pose.position.y = 6.028823375701904;
+            golf_hole_pose.pose.position.x = 2.0;
+            golf_hole_pose.pose.position.y = 0.0;
             //golf_hole_pose.pose.orientation = tf2::toMsg(quat_golf_hole);
-            golf_hole_pose.pose.orientation.z = 0.8530449026245668;
-            golf_hole_pose.pose.orientation.w = 0.5218375169592959;
+            golf_hole_pose.pose.orientation.z = 0.0;
+            golf_hole_pose.pose.orientation.w = 0.5;
 
 
 
             // init golfball_sheach_pose
-            tf2::Quaternion quat_golfball_sheach;
+            // tf2::Quaternion quat_golfball_sheach;
+            // quat_task4.setRPY(0.0, 0.0, 0.0);
+            // golfball_sheach_pose.pose.position.x = 0.8845028281211853;
+            // golfball_sheach_pose.pose.position.y = 4.587519645690918;
+            // //golfball_sheach_pose.pose.orientation = tf2::toMsg(quat_golfball_sheach);
+            // golfball_sheach_pose.pose.orientation.z = 0.2488187044406537;
+            // golfball_sheach_pose.pose.orientation.w = 0.968550077342661;
+
+            //tf2::Quaternion quat_golfball_sheach;
             quat_task4.setRPY(0.0, 0.0, 0.0);
-            golfball_sheach_pose.pose.position.x = 0.8845028281211853;
-            golfball_sheach_pose.pose.position.y = 4.587519645690918;
+            //golfball_sheach_pose.header.frame_id = "map";
+            golfball_sheach_pose.pose.position.x = 0.01;
+            golfball_sheach_pose.pose.position.y = 0.0;
             //golfball_sheach_pose.pose.orientation = tf2::toMsg(quat_golfball_sheach);
-            golfball_sheach_pose.pose.orientation.z = 0.2488187044406537;
-            golfball_sheach_pose.pose.orientation.w = 0.968550077342661;
+            golfball_sheach_pose.pose.orientation.z = 0.0;
+            golfball_sheach_pose.pose.orientation.w = 1.0;
 
 
 
 
 
             // golfball release
-            golfball_release_pose.pose.position.x = 5.028180122375488;
-            golfball_release_pose.pose.position.y = -3.191586971282959;
+            //golfball_sheach_pose.header.frame_id = "map";
+            golfball_release_pose.pose.position.x = 2.0;
+            golfball_release_pose.pose.position.y = 0.0;
             //golfball_sheach_pose.pose.orientation = tf2::toMsg(quat_golfball_sheach);
-            golfball_release_pose.pose.orientation.z = -0.17158369066287102;
-            golfball_release_pose.pose.orientation.w = 0.9851695473868994;
+            golfball_release_pose.pose.orientation.z = 0.0;
+            golfball_release_pose.pose.orientation.w = 1.0;
+
+
+            //tf2::Quaternion quat_messe;
+            //quat_messe.setRPY(0.0, 0.0, 0.0);
+            //golfball_sheach_pose.header.frame_id = "map";
+            messe.pose.position.x = 0.5;
+            messe.pose.position.y = 0.0;
+            //golfball_sheach_pose.pose.orientation = tf2::toMsg(quat_golfball_sheach);
+            messe.pose.orientation.z = 0.0;
+            messe.pose.orientation.w = 1.0;
 
 
 
@@ -305,13 +339,38 @@ class MainProgram : public rclcpp::Node
             {
             case 0:
                
-                sfc = 2113;//4000;//6000;//4000;//155;//1100;
+                sfc = 1000;//1000;//4000;//6000;//4000;//155;//1100;
 
                 break;
             
             //////////////////BEGINING Start first gate (3) from case 2000-2999 /////////////////////////////////////////////////////
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+           
+
+
+
+            case 1000: //turn in place
+                message.angular.z = 0.2; // Set the angular velocity to 1 rad/s to turn in place
+                cmd_vel_pub_->publish(message);
+                
+                m_lastTime1 = m_clock->now().seconds();
+                sfc = 1001;
+                break;
+
+
+            case 1001:
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >6.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "finished spin");
+                    message.angular.z = 0.0; // Set the angular velocity to 1 rad/s to turn in place
+                    cmd_vel_pub_->publish(message);
+                    
+                    sfc = 2113; // go back and resend the robot cmd
+                    
+                }
+                break;
+
 
             case 2000:
                 sfc = 2009;
@@ -1117,14 +1176,57 @@ class MainProgram : public rclcpp::Node
                    
                     status_ball = 0;
                     
-                    sfc = 4260;
+                    sfc = 4280;
                     
                 }
 
                 break;
             
             case 4280:
+                if(messe_status == false){
 
+                    messe_status = true;
+                    sfc = 4281;
+
+                }
+                else{
+
+                    messe_status = false;
+                    sfc = 4651;
+                }
+
+
+                break;
+            case 4281:
+                RCLCPP_INFO(this->get_logger(), "pack down before driving");
+                robot_msg.cmd = 8;
+                robot_msg.pose = {0.0,-0.785398163,1.57,1.57};
+                pub_robot_->publish(robot_msg);
+                
+                sfc = 4282;
+                break;
+            
+            case 4282:
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 4284;
+                }
+
+                break;
+            
+            case 4284:
+                pub_mobile_->publish(messe);
+                sfc = 4285;
+
+                break;
+
+            
+            case 4285:
+                if(status_mobile == 1){
+                    status_mobile = 0;
+                    sfc = 4010;
+                }
                 break;
 
             case 4290: // robot cmd 8 pack up inden kørsel
@@ -1450,7 +1552,7 @@ class MainProgram : public rclcpp::Node
                 break;
 
             case 4740:
-                golfball_counter ++;
+                //golfball_counter ++; //disable timeout of ball finding
                 sfc = 4750;
                 break;
             
@@ -2877,6 +2979,8 @@ class MainProgram : public rclcpp::Node
 
         geometry_msgs::msg::PoseStamped speed;
 
+        geometry_msgs::msg::Twist message;
+
 
         int32_t golfball_counter = 0;
 
@@ -2893,6 +2997,11 @@ class MainProgram : public rclcpp::Node
         // rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr sub_joy_;
         bool joy_status = true; 
         rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr sub_joy_status_;
+
+        bool messe_status = false;
+        geometry_msgs::msg::PoseStamped messe;
+
+        rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_pub_;
 
 
 };
