@@ -1,5 +1,5 @@
 #image: /home/user/amr_ws/src/rob6_mobilebase/src/mobile_base_description/maps/0_04res/headless/map.pgm
-image: /root/rob6_mobilebase/src/mobile_base_description/maps/0_04res/headless/map.pgm
+image: /home/user/rob6_mobilebase/src/mobile_base_description/maps/0_04res/headless/map.pgm
 mode: trinary
 resolution: 0.04
 origin: [-3.02, -2.68, 0]

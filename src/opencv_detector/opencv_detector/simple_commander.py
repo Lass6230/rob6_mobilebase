@@ -36,13 +36,15 @@ class NavigationClient(Node):
         # initial_pose = PoseStamped()
         # initial_pose.header.frame_id = 'map'
         # initial_pose.header.stamp = self.navigator.get_clock().now().to_msg()
-        # initial_pose.pose.position.x = 7.71
-        # initial_pose.pose.position.y = -1.42
-        # initial_pose.pose.orientation.z = -0.79
-        # initial_pose.pose.orientation.w = 0.61
+        # initial_pose.pose.position.x = 0
+        # initial_pose.pose.position.y = 0
+        # initial_pose.pose.orientation.z = 0
+        # initial_pose.pose.orientation.w = 0
         # self.navigator.setInitialPose(initial_pose)
 
-        self.navigator.waitUntilNav2Active()
+        # self.navigator.lifecycleStartup()
+        # self.navigator.waitUntilNav2Active()
+
         self._goal_subscriber = self.create_subscription(
             PoseStamped,
             '/goal',
@@ -57,13 +59,13 @@ class NavigationClient(Node):
         timer_period = 0.5  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
         self.i = 0
-
+        
         # self.goal_reached = True
         # self.count = 0
         self.goal_recieved = False
         self.goal_in_progress = False
         
-
+       
     
 
         # # # Set our demo's initial pose
@@ -147,10 +149,12 @@ class NavigationClient(Node):
 def main(args=None):
     rclpy.init(args=args)
     navigation = NavigationClient()
-    rclpy.spin(navigation)
-    print("here")
-    while not navigation._feedback_received:
-        pass
+    while rclpy.ok():
+        rclpy.spin_once(navigation)
+    #print("here")
+    # while not navigation._feedback_received and rospy_ok():
+    #     pass
+
     navigation.destroy_node()
     rclpy.shutdown()
 
