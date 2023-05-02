@@ -252,6 +252,20 @@ def generate_launch_description():
         }.items()
     )
 
+    joystick = IncludeLaunchDescription(
+                PythonLaunchDescriptionSource([os.path.join(
+                    mobile_base_dir,'launch','joystick_launch.py'
+                )]), launch_arguments={'use_sim_time': 'true'}.items()
+    )
+
+    twist_mux_params = os.path.join(mobile_base_dir,'config','twist_mux.yaml')
+    twist_mux = Node(
+            package="twist_mux",
+            executable="twist_mux",
+            parameters=[twist_mux_params, {'use_sim_time': True}],
+            remappings=[('/cmd_vel_out','/cmd_vel_mux')]
+        )
+
     # Create the launch description and populate
     ld = LaunchDescription()
 
@@ -289,4 +303,6 @@ def generate_launch_description():
     ld.add_action(start_map_server_cmd)
     ld.add_action(start_costmap_filter_info_server_cmd)
 
+    ld.add_action(joystick)
+    ld.add_action(twist_mux)
     return ld
