@@ -141,7 +141,7 @@ controller_server:
         #vertices: "[ [0.3, 0.06], [0.3, -0.14], [0.13, -0.17], [-0.43, -0.17], [-0.43, 0.17], [0.13, 0.17], [0.2, 0.17]]"
         vertices: "[ [0.3, 0.18], [0.3, -0.18], [-0.43, -0.18], [-0.43, 0.18] ]"
       min_obstacle_dist: 0.05
-      inflation_dist: 0.18
+      inflation_dist: 0.4 #0.18
       costmap_converter_plugin: "costmap_converter::CostmapToPolygonsDBSMCCH"
       costmap_converter_spin_thread: True
       costmap_converter_rate: 15
