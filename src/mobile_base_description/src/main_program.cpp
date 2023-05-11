@@ -2408,8 +2408,8 @@ class MainProgram : public rclcpp::Node
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             case 8000: // bruger vi lidaren til at se hvornår vi kan køre?
-                
-                pub_ahead_detector->publish()
+                ahead_detector_msg.data = 1;
+                pub_ahead_detector->publish(ahead_detector_msg);
                 sfc = 8010;
                 break;
             
@@ -3083,6 +3083,9 @@ class MainProgram : public rclcpp::Node
         rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr pub_linefollow_;
         int32_t status_linefollow = 0;
         std_msgs::msg::Int32 linefollow_msg;
+
+        rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr pub_ahead_detector;
+        std_msgs::msg::Int8 ahead_detector_msg;
 
 
         // joystick
