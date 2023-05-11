@@ -3085,8 +3085,9 @@ class MainProgram : public rclcpp::Node
         std_msgs::msg::Int32 linefollow_msg;
 
         rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr pub_ahead_detector;
-        std_msgs::msg::Int8 ahead_detector_msg;
         rclcpp::Subscription<std_msgs::msg::Int8>::SharedPtr sub_ahead_status;
+        //int8_t ahead_detector_msg = 0;
+        std_msgs::msg::Int8 ahead_detector_msg;
 
 
         // joystick

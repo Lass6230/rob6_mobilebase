@@ -133,14 +133,14 @@ def generate_launch_description():
     aruco_detector = launch_ros.actions.Node(
         package='opencv_detector',
         executable='aruco_detector',
-        name='aruco_publisher',
+        #name='aruco_publisher',
         output='screen'
     )
     
     golfball_detector = launch_ros.actions.Node(
         package='opencv_detector',
         executable='golfball_detector',
-        name='golfball_publisher',
+        #name='golfball_publisher',
         output='screen'
     )
 
