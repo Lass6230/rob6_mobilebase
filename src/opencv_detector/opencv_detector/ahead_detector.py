@@ -50,12 +50,11 @@ class AheadDetector(Node):
                 self.get_logger().info('go!')
                 print(return_status)
                 self.status = 0
-                
-                
-    
+                self.state = 0
+
     def aheadDetector(self, msg):
         self.get_logger().info('aheadDetector callback')
-        self.status = msg.data    
+        self.status = msg.data
 
 
 
