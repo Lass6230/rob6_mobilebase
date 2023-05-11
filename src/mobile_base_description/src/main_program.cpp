@@ -267,7 +267,7 @@ class MainProgram : public rclcpp::Node
             test_pose0.pose.position.x = 0.01;
             test_pose0.pose.position.y = 0.0;
             test_pose0.pose.orientation.z = 0.0;
-            test_pose0.pose.orientation.w = 0.0;
+            test_pose0.pose.orientation.w = 1.0;
 
             test_pose1.pose.position.x = 2.0;
             test_pose1.pose.position.y = 0.0;
