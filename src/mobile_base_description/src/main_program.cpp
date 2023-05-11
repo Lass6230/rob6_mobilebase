@@ -368,7 +368,7 @@ class MainProgram : public rclcpp::Node
             case 0:
 		linefollow_msg.data = 0; // Start line following hvor den forsætter efter den mister linje
                 pub_linefollow_->publish(linefollow_msg);               
-                sfc = 7030;//1000;//4000;//6000;//4000;//155;//1100;
+                sfc = 6000;//1000;//4000;//6000;//4000;//155;//1100;
 
                 break;
             
