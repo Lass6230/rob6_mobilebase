@@ -58,8 +58,7 @@ Visualization Manager:
         Value: /robot_description
       Enabled: false
       Links:
-        All Links Enabled:
-          {}
+        All Links Enabled: true
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
@@ -98,9 +97,9 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 210
+      Max Intensity: 207
       Min Color: 0; 0; 0
-      Min Intensity: 1
+      Min Intensity: 33
       Name: LaserScan
       Position Transformer: XYZ
       Selectable: true
@@ -307,7 +306,7 @@ Visualization Manager:
             Reliability Policy: Reliable
             Value: /global_costmap/published_footprint
           Value: false
-      Enabled: true
+      Enabled: false
       Name: Global Planner
     - Class: rviz_common/Group
       Displays:
@@ -551,7 +550,6 @@ Visualization Manager:
       Namespaces:
         GraphEdges: true
         GraphVertices: true
-        InfeasibleRobotPoses: true
         LineObstacles: true
         PointObstacles: true
         PolyObstacles: true
@@ -627,11 +625,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 200.29766845703125
+      Scale: 116.05270385742188
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz_default_plugins)
-      X: 2.3426513671875
-      Y: 4.1847686767578125
+      X: 0.37225568294525146
+      Y: -0.7013770341873169
     Saved: ~
 Window Geometry:
   Displays:

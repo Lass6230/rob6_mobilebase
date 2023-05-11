@@ -2423,7 +2423,8 @@ class MainProgram : public rclcpp::Node
                 RCLCPP_INFO(this->get_logger(), "Publishing: '%i'", status_linefollow);
                 if (status_linefollow == 90){ // vent på at robotten mister linjen
                     status_linefollow = 0;
-                    sfc = 8040;
+                   // sfc = 8040;
+                    sfc = 7030;
 
                 }
                 break;
