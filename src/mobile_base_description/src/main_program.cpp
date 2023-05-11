@@ -263,6 +263,27 @@ class MainProgram : public rclcpp::Node
             golfball_release_pose.pose.orientation.w = 1.0;
 
 
+
+            test_pose0.pose.position.x = 0.01;
+            test_pose0.pose.position.y = 0.0;
+            test_pose0.pose.orientation.z = 0.0;
+            test_pose0.pose.orientation.w = 0.0;
+
+            test_pose1.pose.position.x = 2.0;
+            test_pose1.pose.position.y = 0.0;
+            test_pose1.pose.orientation.z = 0.0;
+            test_pose1.pose.orientation.w = 0.5;
+
+
+            test_pose2.pose.position.x = 3.0;
+            test_pose2.pose.position.y = 0.0;
+            test_pose2.pose.orientation.z = 0.0;
+            test_pose2.pose.orientation.w = 0.5;
+
+            
+
+
+
             //tf2::Quaternion quat_messe;
             //quat_messe.setRPY(0.0, 0.0, 0.0);
             //golfball_sheach_pose.header.frame_id = "map";
@@ -361,7 +382,7 @@ class MainProgram : public rclcpp::Node
 
             case 1001:
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >6.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >20.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "finished spin");
                     message.angular.z = 0.0; // Set the angular velocity to 1 rad/s to turn in place
                     cmd_vel_pub_->publish(message);
@@ -691,22 +712,71 @@ class MainProgram : public rclcpp::Node
             
             
             case 2113:
-                //linefollow_msg.data = 7;
-                //pub_linefollow_->publish(linefollow_msg);
-                RCLCPP_INFO(this->get_logger(), "nav to search pose");
-                pub_mobile_->publish(golfball_sheach_pose);
+                RCLCPP_INFO(this->get_logger(), "nav to test pose 0");
+                //pub_mobile_->publish(golfball_sheach_pose);
+                pub_mobile_->publish(test_pose0); //testing
                 sfc = 2115;
                 break;
+
             case 2115:
-                //linefollow_msg.data = 6;
-                //pub_linefollow_->publish(linefollow_msg);
                 if(status_mobile == 1){
                     status_mobile = 0;
-                    sfc = 2999;
+                    //sfc = 2999;
+
+                    m_lastTime2 = m_clock->now().seconds(); 
+                    if((m_lastTime2-m_lastTime1) >20.0){ 
+                        RCLCPP_INFO(this->get_logger(), "timer done");
+                        
+                        sfc = 2120; 
+                        }
                 }
-                //sfc = 2116;
+                break;
+
+
+
+            case 2120:
+                RCLCPP_INFO(this->get_logger(), "nav to test pose 1");
+                pub_mobile_->publish(test_pose1); 
+                sfc = 2121;
+                break;
+
+            case 2121:
+                if(status_mobile == 1){
+                    status_mobile = 0;
+                    m_lastTime2 = m_clock->now().seconds(); 
+                    if((m_lastTime2-m_lastTime1) >20.0){ 
+                        RCLCPP_INFO(this->get_logger(), "timer done");
+                        
+                        sfc = 2130; 
+                        
+
+                    }
+                }
                 break;
             
+
+            case 2130:
+                RCLCPP_INFO(this->get_logger(), "nav to test pose 2");
+                pub_mobile_->publish(test_pose2); 
+                sfc = 2131;
+                break;
+
+            case 2131:
+                if(status_mobile == 1){
+                    status_mobile = 0;
+                    m_lastTime2 = m_clock->now().seconds(); 
+                    if((m_lastTime2-m_lastTime1) >20.0){ 
+                        RCLCPP_INFO(this->get_logger(), "timer done");
+                        
+                        sfc = 2113; 
+                        
+
+                    }
+                }
+
+                break;
+
+
             // case 2116:
             //     if (status_linefollow == 13){
             //         status_linefollow = 0;
@@ -2976,6 +3046,10 @@ class MainProgram : public rclcpp::Node
         geometry_msgs::msg::PoseStamped golf_hole_pose;
 
         geometry_msgs::msg::PoseStamped golfball_release_pose;
+
+        geometry_msgs::msg::PoseStamped test_pose0;
+        geometry_msgs::msg::PoseStamped test_pose1;
+        geometry_msgs::msg::PoseStamped test_pose2;
 
         geometry_msgs::msg::PoseStamped speed;
 
