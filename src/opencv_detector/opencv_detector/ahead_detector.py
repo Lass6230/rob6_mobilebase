@@ -24,7 +24,7 @@ class AheadDetector(Node):
             10)
         self.subscription  # prevent unused variable warning
 
-        self.publisher_ = self.create_publisher(Int8, 'ahead_status', 10)
+        self.publisher_ = self.create_publisher(Int8, '/ahead_status', 10)
         self.state = 0
         self.status = 1
         self.search_range = 560
@@ -47,7 +47,8 @@ class AheadDetector(Node):
                 return_status = Int8()
                 return_status.data = 1
                 self.publisher_.publish(return_status)
-                print("john")
+                self.get_logger().info('go!')
+                print(return_status)
                 self.status = 0
                 
                 
