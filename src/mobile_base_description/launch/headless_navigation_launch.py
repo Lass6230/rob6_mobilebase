@@ -94,12 +94,12 @@ def generate_launch_description():
     declare_map_yaml_cmd = DeclareLaunchArgument(
         'map',
         default_value=os.path.join(
-            mobile_base_dir, 'maps/0_04res/headless', 'map.yaml'),
+            mobile_base_dir, 'maps/hall2/headless', 'map.yaml'),
         description='Full path to map file to load')
     
     declare_mask_yaml_file_cmd = DeclareLaunchArgument(
         'mask',
-        default_value=os.path.join(mobile_base_dir, 'maps/0_04res/headless', 'map_keepout.yaml'),
+        default_value=os.path.join(mobile_base_dir, 'maps/hall2/headless', 'map_keepout.yaml'),
         description='Full path to filter mask yaml file to load')
     
     declare_use_sim_time_cmd = DeclareLaunchArgument(
