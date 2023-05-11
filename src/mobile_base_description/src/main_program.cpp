@@ -56,7 +56,7 @@ class MainProgram : public rclcpp::Node
             auto sub2_opt = rclcpp::SubscriptionOptions();
             sub2_opt.callback_group = callback_group_subscriber2_;
             
-            timer_ = this->create_wall_timer(100ms, std::bind(&MainProgram::timer_callback, this),callback_group_subscriber2_ );
+            timer_ = this->create_wall_timer(1000ms, std::bind(&MainProgram::timer_callback, this),callback_group_subscriber2_ );
             //sub_vac_ = this->create_subscription<std_msgs::msg::Int8>("vaccumControl", 10, std::bind(&MainProgram::vacCallback, this, _1), sub1_opt);
             pub_vac_ = this->create_publisher<std_msgs::msg::Int8>("vaccumControl",10);
 
@@ -83,7 +83,7 @@ class MainProgram : public rclcpp::Node
             cmd_vel_pub_ = this ->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
 
             pub_ahead_detector = this->create_publisher<std_msgs::msg::Int8>("/ahead_detector", 10);
-            sub_robot_ = this->create_subscription<std_msgs::msg::Int8>("/ahead_status",10,std::bind(&MainProgram::subAheadStatus, this, _1), sub1_opt);
+            sub_ahead_status = this->create_subscription<std_msgs::msg::Int8>("/ahead_status",10,std::bind(&MainProgram::subAheadStatus, this, _1), sub1_opt);
 
 
 
@@ -3086,6 +3086,7 @@ class MainProgram : public rclcpp::Node
 
         rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr pub_ahead_detector;
         std_msgs::msg::Int8 ahead_detector_msg;
+        rclcpp::Subscription<std_msgs::msg::Int8>::SharedPtr sub_ahead_status;
 
 
         // joystick
