@@ -82,7 +82,7 @@ class MainProgram : public rclcpp::Node
 
             cmd_vel_pub_ = this ->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
 
-            pub_camera_ball_ = this->create_publisher<std_msgs::msg::Int8>("/ahead_detector", 10);
+            pub_ahead_detector = this->create_publisher<std_msgs::msg::Int8>("/ahead_detector", 10);
             sub_robot_ = this->create_subscription<std_msgs::msg::Int8>("/ahead_status",10,std::bind(&MainProgram::subAheadStatus, this, _1), sub1_opt);
 
 
@@ -2407,11 +2407,14 @@ class MainProgram : public rclcpp::Node
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             case 8000: // bruger vi lidaren til at se hvornår vi kan køre?
+                
+                pub_ahead_detector->publish()
                 sfc = 8010;
                 break;
             
             case 8010: // start line follow 
                 //LAV LIDAR STUFF!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                
                 if(ahead_status == 1){ //kør for helevede
                     linefollow_msg.data = 2; // Start line following hvor den forsætter efter den mister linje
                     pub_linefollow_->publish(linefollow_msg);
