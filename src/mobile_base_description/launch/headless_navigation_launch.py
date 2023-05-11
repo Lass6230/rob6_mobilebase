@@ -101,7 +101,6 @@ def generate_launch_description():
         'mask',
         default_value=os.path.join(mobile_base_dir, 'maps/0_04res/headless', 'map_keepout.yaml'),
         description='Full path to filter mask yaml file to load')
-
     
     declare_use_sim_time_cmd = DeclareLaunchArgument(
         'use_sim_time',
