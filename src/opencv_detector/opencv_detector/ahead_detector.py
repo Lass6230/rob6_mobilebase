@@ -2,7 +2,7 @@
 import rclpy
 from rclpy.node import Node
 
-from std_msgs.msg import String, Int32
+from std_msgs.msg import String, Int8
 
 # from sensor_msgs.msg import Laserscan
 from sensor_msgs.msg import LaserScan
@@ -11,8 +11,8 @@ class AheadDetector(Node):
     def __init__(self):
         super().__init__('ahead_detector')
         self.sub_command = self.create_subscription(
-            Int32,
-            'ahead_detector',
+            Int8,
+            '/ahead_detector',
             self.aheadDetector,
             10
         )
@@ -24,11 +24,11 @@ class AheadDetector(Node):
             10)
         self.subscription  # prevent unused variable warning
 
-        self.publisher_ = self.create_publisher(Int32, 'ahead_status', 10)
+        self.publisher_ = self.create_publisher(Int8, 'ahead_status', 10)
         self.state = 0
         self.status = 1
-        self.search_ranges = 560
-        self.distance_threshold = 1.0
+        self.search_range = 560
+        self.distance_threshold = 0.5
         self.angle_increment = 0.0029088
 
     def listener_callback(self, msg):
@@ -37,14 +37,14 @@ class AheadDetector(Node):
         #print(msg.ranges[560])
         #print(self.state)
         if self.status == 1:
-            if msg.ranges[self.search_ranges] > self.distance_threshold and self.state == 0:
+            if msg.ranges[self.search_range] > self.distance_threshold and self.state == 0:
                 self.state = 1
                 #print(self.state)
-            if msg.ranges[self.search_ranges] < self.distance_threshold and self.state == 1:
+            if msg.ranges[self.search_range] < self.distance_threshold and self.state == 1:
                 self.state = 2
                 #print(self.state)
-            if msg.ranges[self.search_ranges] > self.distance_threshold and self.state == 2:
-                return_status = Int32()
+            if msg.ranges[self.search_range] > self.distance_threshold and self.state == 2:
+                return_status = Int8()
                 return_status.data = 1
                 self.publisher_.publish(return_status)
                 print("john")

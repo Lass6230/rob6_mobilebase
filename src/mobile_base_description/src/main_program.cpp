@@ -56,7 +56,7 @@ class MainProgram : public rclcpp::Node
             auto sub2_opt = rclcpp::SubscriptionOptions();
             sub2_opt.callback_group = callback_group_subscriber2_;
             
-            timer_ = this->create_wall_timer(1000ms, std::bind(&MainProgram::timer_callback, this),callback_group_subscriber2_ );
+            timer_ = this->create_wall_timer(100ms, std::bind(&MainProgram::timer_callback, this),callback_group_subscriber2_ );
             //sub_vac_ = this->create_subscription<std_msgs::msg::Int8>("vaccumControl", 10, std::bind(&MainProgram::vacCallback, this, _1), sub1_opt);
             pub_vac_ = this->create_publisher<std_msgs::msg::Int8>("vaccumControl",10);
 
@@ -80,7 +80,10 @@ class MainProgram : public rclcpp::Node
             //sub_joy_ = this->create_subscription<sensor_msgs::msg::Joy>("/joy",10,std::bind(&MainProgram::subJoyStatus, this, _1), sub1_opt);
             
 
-            cmd_vel_pub_ = this ->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
+            cmd_vel_pub_ = this ->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
+
+            pub_camera_ball_ = this->create_publisher<std_msgs::msg::Int8>("/ahead_detector", 10);
+            sub_robot_ = this->create_subscription<std_msgs::msg::Int8>("/ahead_status",10,std::bind(&MainProgram::subAheadStatus, this, _1), sub1_opt);
 
 
 
@@ -263,21 +266,22 @@ class MainProgram : public rclcpp::Node
             golfball_release_pose.pose.orientation.w = 1.0;
 
         
-            //test_pose0.setRPY(0.0, 0.0, 0.0);
+            //quat_trolly[0].setRPY(0.0, 0.0, 0.0);
             test_pose0.pose.position.x = 0.01;
             test_pose0.pose.position.y = 0.0;
             test_pose0.pose.orientation.z = 0.0;
             test_pose0.pose.orientation.w = 1.0;
 
+            //quat_trolly[1].setRPY(0.0, 0.0, 1.5708);
             test_pose1.pose.position.x = 2.0;
             test_pose1.pose.position.y = 0.0;
-            test_pose1.pose.orientation.z = 0.0;
+            test_pose1.pose.orientation.z = 0.707;
             test_pose1.pose.orientation.w = 0.707;
 
-
+            //quat_trolly[2].setRPY(0.0, 0.0, 1.5708);
             test_pose2.pose.position.x = 3.0;
             test_pose2.pose.position.y = 0.0;
-            test_pose2.pose.orientation.z = 0.0;
+            test_pose2.pose.orientation.z = 0.707;
             test_pose2.pose.orientation.w = 0.707;
 
             
@@ -328,6 +332,9 @@ class MainProgram : public rclcpp::Node
         void subRobotStatus(const std_msgs::msg::Int8 & msg){
             robot_status = msg.data;
         }
+        void subAheadStatus(const std_msgs::msg::Int8 & msg){
+            ahead_status = msg.data;
+        }
         void vacCallback(const std_msgs::msg::Int8 & msg){
             auto message = std_msgs::msg::String();
             message.data = "vacCallback" + std::to_string(msg.data);
@@ -360,7 +367,7 @@ class MainProgram : public rclcpp::Node
             {
             case 0:
                
-                sfc = 2113;//1000;//4000;//6000;//4000;//155;//1100;
+                sfc = 7030;//1000;//4000;//6000;//4000;//155;//1100;
 
                 break;
             
@@ -715,20 +722,21 @@ class MainProgram : public rclcpp::Node
                 RCLCPP_INFO(this->get_logger(), "nav to test pose 0");
                 //pub_mobile_->publish(golfball_sheach_pose);
                 pub_mobile_->publish(test_pose0); //testing
+                m_lastTime1 = m_clock->now().seconds();
                 sfc = 2115;
                 break;
 
             case 2115:
                 if(status_mobile == 1){
-                    status_mobile = 0;
+                    
                     //sfc = 2999;
 
                     m_lastTime2 = m_clock->now().seconds(); 
-                    if((m_lastTime2-m_lastTime1) >20.0){ 
+                    if((m_lastTime2-m_lastTime1) > 20.0){ 
                         RCLCPP_INFO(this->get_logger(), "timer done");
-                        
+                        status_mobile = 0;
                         sfc = 2120; 
-                        }
+                    }
                 }
                 break;
 
@@ -737,19 +745,18 @@ class MainProgram : public rclcpp::Node
             case 2120:
                 RCLCPP_INFO(this->get_logger(), "nav to test pose 1");
                 pub_mobile_->publish(test_pose1); 
+                m_lastTime1 = m_clock->now().seconds();
                 sfc = 2121;
                 break;
 
             case 2121:
                 if(status_mobile == 1){
-                    status_mobile = 0;
+                    
                     m_lastTime2 = m_clock->now().seconds(); 
                     if((m_lastTime2-m_lastTime1) >20.0){ 
                         RCLCPP_INFO(this->get_logger(), "timer done");
-                        
+                        status_mobile = 0;     
                         sfc = 2130; 
-                        
-
                     }
                 }
                 break;
@@ -758,16 +765,17 @@ class MainProgram : public rclcpp::Node
             case 2130:
                 RCLCPP_INFO(this->get_logger(), "nav to test pose 2");
                 pub_mobile_->publish(test_pose2); 
+                m_lastTime1 = m_clock->now().seconds();
                 sfc = 2131;
                 break;
 
             case 2131:
                 if(status_mobile == 1){
-                    status_mobile = 0;
+                    
                     m_lastTime2 = m_clock->now().seconds(); 
                     if((m_lastTime2-m_lastTime1) >20.0){ 
                         RCLCPP_INFO(this->get_logger(), "timer done");
-                        
+                        status_mobile = 0;
                         sfc = 2113; 
                         
 
@@ -2341,7 +2349,8 @@ class MainProgram : public rclcpp::Node
 
             case 7030:
                 //oekse port
-                pub_mobile_->publish(task_10_pose);
+                //pub_mobile_->publish(task_10_pose);
+                pub_mobile_->publish(test_pose0)
                 sfc = 7040;
                 break;
             
@@ -2403,17 +2412,18 @@ class MainProgram : public rclcpp::Node
             
             case 8010: // start line follow 
                 //LAV LIDAR STUFF!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-                linefollow_msg.data = 2; // Start line following hvor den forsætter efter den mister linje
-                pub_linefollow_->publish(linefollow_msg);
-                sfc = 8020;
+                if(ahead_status == 1){ //kør for helevede
+                    linefollow_msg.data = 2; // Start line following hvor den forsætter efter den mister linje
+                    pub_linefollow_->publish(linefollow_msg);
+                    sfc = 8020;
+                }
                 break;
             
             case 8020: // wait for line follow to be done
                 RCLCPP_INFO(this->get_logger(), "Publishing: '%i'", status_linefollow);
                 if (status_linefollow == 90){ // vent på at robotten mister linjen
-                status_linefollow = 0;
-                sfc = 8040;
+                    status_linefollow = 0;
+                    sfc = 8040;
 
                 }
                 break;
@@ -3008,6 +3018,7 @@ class MainProgram : public rclcpp::Node
         rclcpp::TimerBase::SharedPtr m_timer2;
         int8_t robot_status = 0;
         crust_msgs::msg::RobotCmdMsg robot_msg;
+        int8_t ahead_status = 0;
         int8_t robot_attempts = 0;
         int8_t package_count = 0;
 

@@ -270,6 +270,12 @@ def generate_launch_description():
             remappings=[('/cmd_vel_out','/cmd_vel_mux')]
     )
 
+    ahead_detector = Node( ##
+        package='opencv_detector',
+        executable='ahead_detector',
+        output='screen'
+    )
+
     
 
     # Create the launch description and populate
@@ -314,5 +320,6 @@ def generate_launch_description():
 
     ld.add_action(joystick)
     ld.add_action(twist_mux)
+    ld.add_action(ahead_detector)
 
     return ld
