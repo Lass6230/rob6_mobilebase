@@ -24,9 +24,9 @@ amcl:
     set_initial_pose: true
     initial_pose: 
       ## hall
-      x: 7.71
-      y: -1.42
-      yaw: -1.82
+      x: 0.0
+      y: 0.0
+      yaw: 1.0
       ## simulation
       # x: -2.0
       # y: 1.0
