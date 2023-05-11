@@ -2350,7 +2350,7 @@ class MainProgram : public rclcpp::Node
             case 7030:
                 //oekse port
                 //pub_mobile_->publish(task_10_pose);
-                pub_mobile_->publish(test_pose0)
+                pub_mobile_->publish(test_pose0);
                 sfc = 7040;
                 break;
             
