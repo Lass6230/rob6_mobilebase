@@ -43,7 +43,7 @@ class NavigationClient(Node):
         # self.navigator.setInitialPose(initial_pose)
 
         # self.navigator.lifecycleStartup()
-        # self.navigator.waitUntilNav2Active()
+        self.navigator.waitUntilNav2Active()
 
         self._goal_subscriber = self.create_subscription(
             PoseStamped,
