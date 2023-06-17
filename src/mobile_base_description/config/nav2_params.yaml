@@ -129,9 +129,14 @@ controller_server:
       movement_time_allowance: 10.0
     # Goal checker parameters
     goal_checker:
+    #   plugin: "nav2_controller::"
+    #     trans_stopped_velocity: 0.1
+    #     rot_stopped_velocity: 0.1
+
+
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.1
-      yaw_goal_tolerance: 0.1
+      xy_goal_tolerance: 0.05
+      yaw_goal_tolerance: 0.05
       stateful: True
     # TEB parameters
     FollowPath:
