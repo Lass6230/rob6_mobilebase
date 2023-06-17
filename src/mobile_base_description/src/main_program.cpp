@@ -722,7 +722,7 @@ class MainProgram : public rclcpp::Node
                 if(status_mobile == 1){
                     
                     //sfc = 2999;
-
+                    status_mobile = 0;
                     m_lastTime2 = m_clock->now().seconds(); 
                     if((m_lastTime2-m_lastTime1) > 50.0){ 
                         RCLCPP_INFO(this->get_logger(), "timer done");
@@ -842,6 +842,7 @@ class MainProgram : public rclcpp::Node
 
             case 4002:
                 if(status_mobile == 1){
+                    status_mobile = 0;
                     sfc = 4010;
                 }    
 
@@ -1418,7 +1419,7 @@ class MainProgram : public rclcpp::Node
                 sfc = 4610;
 
 
-                 break;
+                break;
 
             case 4610:
                 if(robot_status == 1){ // check if robot is done
