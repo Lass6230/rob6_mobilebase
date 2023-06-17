@@ -2524,7 +2524,7 @@ class MainProgram : public rclcpp::Node
                 //LAV LIDAR STUFF!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 
                 if(ahead_status == 1){ //kør for helevede
-                    linefollow_msg.data = 8; // Start line following hvor den forsætter efter den mister linje
+                    linefollow_msg.data = 2; // Start line following hvor den forsætter efter den mister linje
                     pub_linefollow_->publish(linefollow_msg);
                     sfc = 8020;
                 }
