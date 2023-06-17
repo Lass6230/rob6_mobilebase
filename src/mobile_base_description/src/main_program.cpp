@@ -1708,7 +1708,8 @@ class MainProgram : public rclcpp::Node
             
             case 5010:
                 robot_msg.cmd = 6;
-                robot_msg.pose = {0.34,0.0,0.168,0.0,1.45,0.0};
+                // robot_msg.pose = {0.34,0.0,0.168,0.0,1.45,0.0};
+                robot_msg.pose = {0.0,-0.785398163,1.57,1.57};
                 pub_robot_->publish(robot_msg);
                 m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
 
@@ -2146,25 +2147,52 @@ class MainProgram : public rclcpp::Node
                 if(robot_status == 1){
                     robot_status = 0;
                     robot_attempts = 0;
+                    sfc = 6251;
+                }
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
+                    robot_attempts ++;
+
+                    if(robot_attempts == 5){
+                       // sfc = 6030;
+                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+                    }
+                    sfc = 6240; // go back and resend the robot cmd
+                }
+                break;
+
+            case 6251: // robot move to pack down
+                robot_msg.cmd = 8;
+                robot_msg.pose = {0.0,-0.785398163,1.57,1.57};
+                pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+
+                sfc = 6252;
+                break;
+
+            case 6252: // waittting for robot to go to pose
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
                     sfc = 6260;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
-                    
                     robot_attempts ++;
-                    
                     
                     if(robot_attempts == 5){
                        // sfc = 6030;
                        RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
-
                     }
-                    
-                    sfc = 6240; // go back and resend the robot cmd
-                    
+                    sfc = 6240; // go back and resend the robot cm
                 }
                 break;
+
+
+
+                
             
             case 6260: // make mobile base move to acuco code drop off point
 
