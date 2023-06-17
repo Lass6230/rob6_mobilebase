@@ -2432,10 +2432,14 @@ class MainProgram : public rclcpp::Node
             
             case 7010:
                 //pack down arm
-                robot_msg.cmd = 3;
-                robot_msg.pose = {0.34,0.0,0.168,0.0,1.45,0.0};
+                RCLCPP_INFO(this->get_logger(), "pack down before driving");
+                robot_msg.cmd = 8;
+                robot_msg.pose = {0.0,-0.785398163,1.57,1.57};
                 pub_robot_->publish(robot_msg);
-                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+                //robot_msg.cmd = 3;
+                //robot_msg.pose = {0.34,0.0,0.168,0.0,1.45,0.0};
+                //pub_robot_->publish(robot_msg);
+                //m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
 
                 sfc = 7020;
                 
@@ -2465,9 +2469,25 @@ class MainProgram : public rclcpp::Node
             case 7040:
                 if(status_mobile == 1){
                     status_mobile = 0;
-                    sfc = 7050;
+                    sfc = 7041;
                 }
 
+                break;
+
+             case 7041:
+                robot_msg.cmd = 3;
+                robot_msg.pose = {0.34,0.0,0.168,0.0,1.45,0.0};
+                pub_robot_->publish(robot_msg);
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+                sfc = 7042;
+                break;
+            
+            case 7042:
+                if(robot_status == 1){// Wait for gripper to be open
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 7050;
+                }
                 break;
 
             case 7050:
