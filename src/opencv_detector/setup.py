@@ -29,6 +29,7 @@ setup(
             'golfhole_detector = opencv_detector.golfhole_detector:main',
             'simple_commander = opencv_detector.simple_commander:main',
             'ahead_detector = opencv_detector.ahead_detector:main',
+            'camera = opencv_detector.camera:main'
             #'unsimple_commander = opencv_detector.unsimple_commander:main'
         ],
     },
