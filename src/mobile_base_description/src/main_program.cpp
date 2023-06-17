@@ -166,32 +166,24 @@ class MainProgram : public rclcpp::Node
             
             tf2::Quaternion quat_house[3];
 
-            quat_house[2].setRPY(0.0, 0.0, 0.0); // grøn
-            house_pose[2].pose.position.x = 5.874170780181885;
-            house_pose[2].pose.position.y = -4.7942585945129395;
-            //house_pose[0].pose.orientation = tf2::toMsg(quat_house[0]);
-            house_pose[2].pose.orientation.z = -0.8087978459540437;
-            house_pose[2].pose.orientation.w = 0.5880867660304038;
+            house_pose[0].pose.position.x = 2.8;
+            house_pose[0].pose.position.y = 0.45;
+            house_pose[0].pose.orientation.z = 0.707;
+            house_pose[0].pose.orientation.w = 0.707;
 
 
 
-            quat_house[1].setRPY(0.0, 0.0, 0.0); //gul
-            house_pose[1].pose.position.x = 6.1005940437316895;
-            house_pose[1].pose.position.y = -4.889570236206055;
-            //house_pose[1].pose.orientation = tf2::toMsg(quat_house[1]);
-            house_pose[1].pose.orientation.z = -0.798157318060768;
-            house_pose[1].pose.orientation.w = 0.6024490813554636;
+            house_pose[1].pose.position.x = 3.0;
+            house_pose[1].pose.position.y = 0.45;
+            house_pose[1].pose.orientation.z = 0.707;
+            house_pose[1].pose.orientation.w = 0.707;
 
 
+            house_pose[2].pose.position.x = 3.2;
+            house_pose[2].pose.position.y = 0.45;
+            house_pose[2].pose.orientation.z = 0.707;
+            house_pose[2].pose.orientation.w = 0.707;
 
-
-
-            quat_house[0].setRPY(0.0, 0.0, 0.0); //rød
-            house_pose[0].pose.position.x = 6.2147216796875;
-            house_pose[0].pose.position.y = -4.94196891784668;
-            //house_pose[2].pose.orientation = tf2::toMsg(quat_house[2]);
-            house_pose[0].pose.orientation.z = -0.8032736794291202;
-            house_pose[0].pose.orientation.w = 0.5956101039576168;
 
 
 
@@ -226,10 +218,11 @@ class MainProgram : public rclcpp::Node
 
             quat_task4.setRPY(0.0, 0.0, 0.0);
             golf_hole_pose.pose.position.x = 1.0;
-            golf_hole_pose.pose.position.y = 0.5;
+            golf_hole_pose.pose.position.y = -0.2;
             //golf_hole_pose.pose.orientation = tf2::toMsg(quat_golf_hole);
-            golf_hole_pose.pose.orientation.z = 0.0;
-            golf_hole_pose.pose.orientation.w = 0.5;
+            golf_hole_pose.pose.orientation.z = -0.707;
+            golf_hole_pose.pose.orientation.w = 0.707;
+
 
 
 
