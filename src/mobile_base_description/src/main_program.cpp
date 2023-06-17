@@ -2445,8 +2445,7 @@ class MainProgram : public rclcpp::Node
                 if(robot_status == 1){// Wait for gripper to be open
                     robot_status = 0;
                     robot_attempts = 0;
-                    // sfc = 7030;
-                    sfc = 9000;
+                    sfc = 7030;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
