@@ -227,8 +227,8 @@ class MainProgram : public rclcpp::Node
             // golf_hole_pose.pose.orientation.w = 0.5218375169592959;
 
             quat_task4.setRPY(0.0, 0.0, 0.0);
-            golf_hole_pose.pose.position.x = 2.0;
-            golf_hole_pose.pose.position.y = 0.0;
+            golf_hole_pose.pose.position.x = 1.0;
+            golf_hole_pose.pose.position.y = 0.5;
             //golf_hole_pose.pose.orientation = tf2::toMsg(quat_golf_hole);
             golf_hole_pose.pose.orientation.z = 0.0;
             golf_hole_pose.pose.orientation.w = 0.5;
