@@ -425,7 +425,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 2030;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
@@ -455,7 +455,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 2050;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >25.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
@@ -587,7 +587,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 2090;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
@@ -665,7 +665,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 2113;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >25.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
@@ -724,7 +724,7 @@ class MainProgram : public rclcpp::Node
                     //sfc = 2999;
 
                     m_lastTime2 = m_clock->now().seconds(); 
-                    if((m_lastTime2-m_lastTime1) > 20.0){ 
+                    if((m_lastTime2-m_lastTime1) > 50.0){ 
                         RCLCPP_INFO(this->get_logger(), "timer done");
                         status_mobile = 0;
                         sfc = 2120; 
@@ -745,7 +745,7 @@ class MainProgram : public rclcpp::Node
                 if(status_mobile == 1){
                     
                     m_lastTime2 = m_clock->now().seconds(); 
-                    if((m_lastTime2-m_lastTime1) >20.0){ 
+                    if((m_lastTime2-m_lastTime1) >50.0){ 
                         RCLCPP_INFO(this->get_logger(), "timer done");
                         status_mobile = 0;     
                         sfc = 2130; 
@@ -765,7 +765,7 @@ class MainProgram : public rclcpp::Node
                 if(status_mobile == 1){
                     
                     m_lastTime2 = m_clock->now().seconds(); 
-                    if((m_lastTime2-m_lastTime1) >20.0){ 
+                    if((m_lastTime2-m_lastTime1) >50.0){ 
                         RCLCPP_INFO(this->get_logger(), "timer done");
                         status_mobile = 0;
                         sfc = 2113; 
@@ -846,7 +846,7 @@ class MainProgram : public rclcpp::Node
                 }    
 
                 m_lastTime2 = m_clock->now().seconds(); 
-                if((m_lastTime2-m_lastTime1) >20.0){ 
+                if((m_lastTime2-m_lastTime1) >50.0){ 
                     RCLCPP_INFO(this->get_logger(), "timer done");
                     status_mobile = 0;
                     sfc = 4001; 
@@ -879,7 +879,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 4030;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
                     sfc = 4010; // go back and resend the robot cmd
@@ -906,7 +906,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 4050;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
@@ -969,7 +969,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 4090;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
@@ -1032,7 +1032,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 4130;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
@@ -1066,7 +1066,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 4600;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >7.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out, No golfball found");
                     ball_msg.data = 0;
                     pub_camera_ball_->publish(ball_msg); // setting the ball camera off
@@ -1101,7 +1101,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 4170;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
@@ -1166,7 +1166,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 4210;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
@@ -1229,7 +1229,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 4260;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
@@ -1556,7 +1556,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 4700;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
                     robot_attempts ++;
@@ -1721,7 +1721,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 5030;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
                     sfc = 5010; // go back and resend the robot cmd
@@ -1791,7 +1791,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6030;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
                     sfc = 6010; // go back and resend the robot cmd
@@ -1816,7 +1816,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6050;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >20.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
@@ -1913,7 +1913,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6110;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
@@ -1946,7 +1946,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6130;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >20.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
@@ -1978,7 +1978,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6150;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >20.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
@@ -2010,7 +2010,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6170;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
                     sfc = 6150; // go back and resend the robot cmd
@@ -2037,7 +2037,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6190;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >20.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
                     robot_attempts ++;
@@ -2105,7 +2105,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6240;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >35.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
                     sfc = 6190; // go back and resend the robot cmd
@@ -2148,7 +2148,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6260;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
                     robot_attempts ++;
@@ -2209,7 +2209,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6300;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
                     robot_attempts ++;
@@ -2261,7 +2261,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 6335;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
                     robot_attempts ++;
@@ -2357,7 +2357,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 9000;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
                     sfc = 7010; // go back and resend the robot cmd
@@ -2711,7 +2711,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 12130;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
@@ -2940,7 +2940,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 18020;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     robot_attempts ++;
                     
