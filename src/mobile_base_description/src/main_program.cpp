@@ -368,7 +368,7 @@ class MainProgram : public rclcpp::Node
             case 0:
 		linefollow_msg.data = 0; // Start line following hvor den forsætter efter den mister linje
                 pub_linefollow_->publish(linefollow_msg);               
-                sfc = 6000;//1000;//4000;//6000;//4000;//155;//1100;
+                sfc = 2009;//1000;//4000;//6000;//4000;//155;//1100;
 
                 break;
             
@@ -492,7 +492,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 2061;  // Ændres tilbage til 2070 
                 }
                 m_lastTime2 = m_clock->now().seconds();
-                if ((m_lastTime2-m_lastTime1)> 20.0){
+                if ((m_lastTime2-m_lastTime1)> 50.0){
                     RCLCPP_INFO(this->get_logger(),"timed out");
                     linefollow_msg.data = 0;
                     pub_linefollow_->publish(linefollow_msg);
@@ -505,40 +505,40 @@ class MainProgram : public rclcpp::Node
                 linefollow_msg.data = 0;
                 pub_linefollow_->publish(linefollow_msg);
                 //m_lastTime1 = m_clock->now().seconds();
-                sfc= 2062;
+                sfc= 4000;
                 break;
             
 
-            case 2062:
-                RCLCPP_INFO(this->get_logger(), "nav one meter");
-                target_pose.pose.position.x = 0.5;//update mig!!!
-                target_pose.pose.position.y = 0.0;
-                pub_mobile_relative_->publish(target_pose);
-                sfc = 2063;
-                break;
+            // case 2062:
+            //     RCLCPP_INFO(this->get_logger(), "nav one meter");
+            //     target_pose.pose.position.x = 0.5;//update mig!!!
+            //     target_pose.pose.position.y = 0.0;
+            //     pub_mobile_relative_->publish(target_pose);
+            //     sfc = 2063;
+            //     break;
             
-            case 2063:
-                if(status_mobile == 1){
-                    status_mobile = 0;
-                   // sfc = 9000;
-                    sfc = 2064;
-                }
-                break;
+            // case 2063:
+            //     if(status_mobile == 1){
+            //         status_mobile = 0;
+            //        // sfc = 9000;
+            //         sfc = 2064;
+            //     }
+            //     break;
 
-                m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >25.0){ // if timeout 
-                    RCLCPP_INFO(this->get_logger(), "timed out");
-                    robot_attempts ++;
+            //     m_lastTime2 = m_clock->now().seconds(); // get time now
+            //     if((m_lastTime2-m_lastTime1) >25.0){ // if timeout 
+            //         RCLCPP_INFO(this->get_logger(), "timed out");
+            //         robot_attempts ++;
                     
-                    sfc = 2064; // go back and resend the robot cmd
-                    if(robot_attempts == 5){
+            //         sfc = 2064; // go back and resend the robot cmd
+            //         if(robot_attempts == 5){
                        
-                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+            //            RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
 
-                    }
+            //         }
                     
-                }
-                break;
+            //     }
+            //     break;
 
             // case 2062:
             //     linefollow_msg.data = 10;
@@ -1465,7 +1465,8 @@ class MainProgram : public rclcpp::Node
                 if(robot_status == 1){ // check if robot is done
                     robot_status = 0;
                     robot_attempts = 0;
-                    sfc = 4640;
+                    //sfc = 4640;
+                    sfc = 4651;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
                 if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
@@ -1483,39 +1484,39 @@ class MainProgram : public rclcpp::Node
 
                 break;
 
-            case 4640: // send command for robot to go up agian
-                RCLCPP_INFO(this->get_logger(), "arm up");
-                robot_msg.cmd = 6;
-                robot_msg.pose = {0.34,0.0,0.168,0.0,1.45,0.0};
-                pub_robot_->publish(robot_msg);
-                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+            // case 4640: // send command for robot to go up agian
+            //     RCLCPP_INFO(this->get_logger(), "arm up");
+            //     robot_msg.cmd = 6;
+            //     robot_msg.pose = {0.34,0.0,0.168,0.0,1.45,0.0};
+            //     pub_robot_->publish(robot_msg);
+            //     m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
 
-                sfc = 4650;
-                break;
+            //     sfc = 4650;
+            //     break;
             
-            case 4650: // waitting for robot to go to pose
-                if(robot_status == 1){
-                    robot_status = 0;
-                    robot_attempts = 0;
-                    sfc = 4651;   //4660 /// husk sæt rigitgt
-                }
-                m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
-                    RCLCPP_INFO(this->get_logger(), "timed out");
+            // case 4650: // waitting for robot to go to pose
+            //     if(robot_status == 1){
+            //         robot_status = 0;
+            //         robot_attempts = 0;
+            //         sfc = 4651;   //4660 /// husk sæt rigitgt
+            //     }
+            //     m_lastTime2 = m_clock->now().seconds(); // get time now
+            //     if((m_lastTime2-m_lastTime1) >10.0){ // if timeout 
+            //         RCLCPP_INFO(this->get_logger(), "timed out");
                     
-                    robot_attempts ++;
+            //         robot_attempts ++;
                     
                     
-                    if(robot_attempts == 5){
-                       // sfc = 6030;
-                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+            //         if(robot_attempts == 5){
+            //            // sfc = 6030;
+            //            RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
 
-                    }
+            //         }
                     
-                    sfc = 4640; // go back and resend the robot cmd
+            //         sfc = 4640; // go back and resend the robot cmd
                     
-                }
-                break;
+            //     }
+            //     break;
             case 4651: // robot cmd 8 pack up inden kørsel
                 RCLCPP_INFO(this->get_logger(), "pack down before driving");
                 robot_msg.cmd = 8;
@@ -1594,10 +1595,11 @@ class MainProgram : public rclcpp::Node
                 if(robot_status == 1){// Wait for gripper to be open
                     robot_status = 0;
                     robot_attempts = 0;
-                    sfc = 4720;
+                    // sfc = 4720;
+                    sfc = 4731;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >20.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
                     sfc = 4700; // go back and resend the robot cmd
@@ -1605,36 +1607,36 @@ class MainProgram : public rclcpp::Node
                 }
                 break;
             
-            case 4720: // send command to robot to go up from golf hole
-                RCLCPP_INFO(this->get_logger(), "arm up");
-                robot_msg.cmd = 6;
-                robot_msg.pose = {0.34,0.0,0.168,0.0,1.45,0.0};
-                pub_robot_->publish(robot_msg);
-                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+            // case 4720: // send command to robot to go up from golf hole
+            //     RCLCPP_INFO(this->get_logger(), "arm up");
+            //     robot_msg.cmd = 6;
+            //     robot_msg.pose = {0.34,0.0,0.168,0.0,1.45,0.0};
+            //     pub_robot_->publish(robot_msg);
+            //     m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
 
-                sfc = 4730;
-                break;
+            //     sfc = 4730;
+            //     break;
             
-            case 4730: // waitting for robot to go up from golf hole
-                if(robot_status == 1){
-                    robot_status = 0;
-                    robot_attempts = 0;
-                    sfc = 4731;
-                }
-                m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
-                    RCLCPP_INFO(this->get_logger(), "timed out");
-                    robot_attempts ++;
+            // case 4730: // waitting for robot to go up from golf hole
+            //     if(robot_status == 1){
+            //         robot_status = 0;
+            //         robot_attempts = 0;
+            //         sfc = 4731;
+            //     }
+            //     m_lastTime2 = m_clock->now().seconds(); // get time now
+            //     if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
+            //         RCLCPP_INFO(this->get_logger(), "timed out");
+            //         robot_attempts ++;
                     
-                    sfc = 4720; // go back and resend the robot cmd
-                    if(robot_attempts == 5){
-                       // sfc = 6030;
-                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+            //         sfc = 4720; // go back and resend the robot cmd
+            //         if(robot_attempts == 5){
+            //            // sfc = 6030;
+            //            RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
 
-                    }
+            //         }
                     
-                }
-                break;
+            //     }
+            //     break;
             case 4731: // robot cmd 8 pack up inden kørsel
                 RCLCPP_INFO(this->get_logger(), "pack down before driving");
                 robot_msg.cmd = 8;
@@ -1659,7 +1661,7 @@ class MainProgram : public rclcpp::Node
                 break;
             
             case 4750:
-                if(golfball_counter == 4)
+                if(golfball_counter == 1)
                 {
                     RCLCPP_INFO(this->get_logger(), "four balls");
                     sfc = 4999;
