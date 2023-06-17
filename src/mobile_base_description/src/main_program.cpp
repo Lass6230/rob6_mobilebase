@@ -837,8 +837,31 @@ class MainProgram : public rclcpp::Node
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
             case 4000:
-                sfc = 4010;
+            
+                sfc = 4001;
                 break;
+
+
+            case 4001:
+                RCLCPP_INFO(this->get_logger(), "nav to golf search");
+                pub_mobile_->publish(golfball_sheach_pose); 
+                m_lastTime1 = m_clock->now().seconds();
+                sfc = 4002;
+                break;
+
+            case 4002:
+                if(status_mobile == 1){
+                    sfc = 4010;
+                }    
+
+                m_lastTime2 = m_clock->now().seconds(); 
+                if((m_lastTime2-m_lastTime1) >20.0){ 
+                    RCLCPP_INFO(this->get_logger(), "timer done");
+                    status_mobile = 0;
+                    sfc = 4001; 
+                }
+                break;
+
 
             case 4010: // open gripper
                 RCLCPP_INFO(this->get_logger(), "open gripper, camera off");
@@ -1631,7 +1654,7 @@ class MainProgram : public rclcpp::Node
                 break;
 
             case 4740:
-                //golfball_counter ++; //disable timeout of ball finding
+                golfball_counter ++; //disable timeout of ball finding
                 sfc = 4750;
                 break;
             
@@ -1669,8 +1692,8 @@ class MainProgram : public rclcpp::Node
                 break;
 
             case 4999:
-                //sfc = 5000;
-                sfc = 2113;
+                sfc = 5000;
+                
                 break;
 
             //////////////////END TASK 12 from case 4000-4999 /////////////////////////////////////////////////////////////////
