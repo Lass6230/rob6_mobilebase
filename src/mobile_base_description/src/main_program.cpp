@@ -2098,7 +2098,7 @@ class MainProgram : public rclcpp::Node
                     RCLCPP_INFO(this->get_logger(), "timed out, No golfball found");
                     
                     //sfc = 6190;
-                    sfc = 6311;
+                    sfc = 6332;
                     
                     
                 }
@@ -2305,7 +2305,7 @@ class MainProgram : public rclcpp::Node
                 if(robot_status == 1){
                     robot_status = 0;
                     robot_attempts = 0;
-                    sfc = 6320;
+                    sfc = 6336;
                 }
 
                 break;
@@ -2344,22 +2344,40 @@ class MainProgram : public rclcpp::Node
             //     }
             //     break;
 
-
-
-            case 6332: // aruco or ball not found
-                pub_mobile_->publish(golf_hole_pose);
+             case 6332:
+                RCLCPP_INFO(this->get_logger(), "pack down before driving");
+                robot_msg.cmd = 8;
+                robot_msg.pose = {0.0,-0.785398163,1.57,1.57};
+                pub_robot_->publish(robot_msg);
+                
                 sfc = 6333;
                 break;
             
             case 6333:
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 6334;
+                }
+
+                break;
+
+
+
+            case 6334: // aruco or ball not found
+                pub_mobile_->publish(golf_hole_pose);
+                sfc = 6335;
+                break;
+            
+            case 6335:
                 if(status_mobile == 1){
                     status_mobile = 0;
-                    sfc = 6335;
+                    sfc = 6336;
                 }
 
                 break;
             
-            case 6335: // add one to packages count
+            case 6336: // add one to packages count
                 package_count ++;
                 sfc = 6340;
                 break;
