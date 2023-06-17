@@ -56,7 +56,7 @@ class MainProgram : public rclcpp::Node
             auto sub2_opt = rclcpp::SubscriptionOptions();
             sub2_opt.callback_group = callback_group_subscriber2_;
             
-            timer_ = this->create_wall_timer(1000ms, std::bind(&MainProgram::timer_callback, this),callback_group_subscriber2_ );
+            timer_ = this->create_wall_timer(100ms, std::bind(&MainProgram::timer_callback, this),callback_group_subscriber2_ );
             //sub_vac_ = this->create_subscription<std_msgs::msg::Int8>("vaccumControl", 10, std::bind(&MainProgram::vacCallback, this, _1), sub1_opt);
             pub_vac_ = this->create_publisher<std_msgs::msg::Int8>("vaccumControl",10);
 
@@ -1730,7 +1730,7 @@ class MainProgram : public rclcpp::Node
                     sfc = 5030;
                 }
                 m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                if((m_lastTime2-m_lastTime1) >15.0){ // if timeout 
                     RCLCPP_INFO(this->get_logger(), "timed out");
                     
                     sfc = 5010; // go back and resend the robot cmd
