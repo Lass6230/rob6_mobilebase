@@ -134,7 +134,7 @@ class MainProgram : public rclcpp::Node
             
 
             // INIT poseStamped values for
-            tf2::Quaternion quat_trolly[3];
+            //tf2::Quaternion quat_trolly[3];
 
             //lefmost
             //quat_trolly[0].setRPY(0.0, 0.0, 0.0);
@@ -164,7 +164,7 @@ class MainProgram : public rclcpp::Node
 
 
             
-            tf2::Quaternion quat_house[3];
+            //tf2::Quaternion quat_house[3];
 
             house_pose[0].pose.position.x = 2.8;
             house_pose[0].pose.position.y = 0.45;
@@ -2098,7 +2098,7 @@ class MainProgram : public rclcpp::Node
                     RCLCPP_INFO(this->get_logger(), "timed out, No golfball found");
                     
                     //sfc = 6190;
-                    sfc = 6332;
+                    sfc = 6311;
                     
                     
                 }
@@ -2287,44 +2287,65 @@ class MainProgram : public rclcpp::Node
                  if(robot_status == 1){ // check if robot is done
                     robot_status = 0;
                     robot_attempts = 0;
+                    sfc = 6311;
+                }
+
+                break;
+
+            case 6311:
+                RCLCPP_INFO(this->get_logger(), "pack down before driving");
+                robot_msg.cmd = 8;
+                robot_msg.pose = {0.0,-0.785398163,1.57,1.57};
+                pub_robot_->publish(robot_msg);
+                
+                sfc = 6312;
+                break;
+            
+            case 6312:
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
                     sfc = 6320;
                 }
 
                 break;
-            
-            case 6320: // move robot to search pose
-                robot_msg.cmd = 6;
-                robot_msg.pose = {0.34,0.0,0.13129,0.0,1.4,0.0};
-                pub_robot_->publish(robot_msg);
-                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
 
-                sfc = 6330;
-                break;
             
-            case 6330: // waitiing for robot to go to pose
-                if(robot_status == 1){
-                    robot_status = 0;
-                    robot_attempts = 0;
-                    sfc = 6335;
-                }
-                m_lastTime2 = m_clock->now().seconds(); // get time now
-                if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
-                    RCLCPP_INFO(this->get_logger(), "timed out");
-                    
-                    robot_attempts ++;
-                    
-                    
-                    if(robot_attempts == 5){
-                       // sfc = 6030;
-                       RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+            // case 6320: // move robot to search pose
+            //     robot_msg.cmd = 6;
+            //     robot_msg.pose = {0.34,0.0,0.13129,0.0,1.4,0.0};
+            //     pub_robot_->publish(robot_msg);
+            //     m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
 
-                    }
-                    
-                    sfc = 6320; // go back and resend the robot cmd
-                    
-                }
-                break;
+            //     sfc = 6330;
+            //     break;
             
+            // case 6330: // waitiing for robot to go to pose
+            //     if(robot_status == 1){
+            //         robot_status = 0;
+            //         robot_attempts = 0;
+            //         sfc = 6335;
+            //     }
+            //     m_lastTime2 = m_clock->now().seconds(); // get time now
+            //     if((m_lastTime2-m_lastTime1) >50.0){ // if timeout 
+            //         RCLCPP_INFO(this->get_logger(), "timed out");
+                    
+            //         robot_attempts ++;
+                    
+                    
+            //         if(robot_attempts == 5){
+            //            // sfc = 6030;
+            //            RCLCPP_INFO(this->get_logger(), "timed out, robot can't go to position");
+
+            //         }
+                    
+            //         sfc = 6320; // go back and resend the robot cmd
+                    
+            //     }
+            //     break;
+
+
+
             case 6332: // aruco or ball not found
                 pub_mobile_->publish(golf_hole_pose);
                 sfc = 6333;
