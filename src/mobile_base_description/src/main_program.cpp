@@ -496,9 +496,27 @@ class MainProgram : public rclcpp::Node
                 linefollow_msg.data = 0;
                 pub_linefollow_->publish(linefollow_msg);
                 //m_lastTime1 = m_clock->now().seconds();
-                sfc= 4000;
+                sfc= 2062;
                 break;
             
+            
+            case 2062: // robot cmd 8 pack up inden kørsel
+                RCLCPP_INFO(this->get_logger(), "pack down before driving");
+                robot_msg.cmd = 8;
+                robot_msg.pose = {0.0,-0.785398163,1.57,1.57};
+                pub_robot_->publish(robot_msg);
+                
+                sfc = 2063;
+                break;
+            
+            case 2063:
+                if(robot_status == 1){
+                    robot_status = 0;
+                    robot_attempts = 0;
+                    sfc = 4000;
+                }
+
+                break;
 
             // case 2062:
             //     RCLCPP_INFO(this->get_logger(), "nav one meter");
@@ -1703,11 +1721,11 @@ class MainProgram : public rclcpp::Node
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
             case 5000:
-                sfc = 5010;
+                sfc = 5030;
                 break;
             
             case 5010:
-                robot_msg.cmd = 6;
+                robot_msg.cmd = 8;
                 // robot_msg.pose = {0.34,0.0,0.168,0.0,1.45,0.0};
                 robot_msg.pose = {0.0,-0.785398163,1.57,1.57};
                 pub_robot_->publish(robot_msg);
