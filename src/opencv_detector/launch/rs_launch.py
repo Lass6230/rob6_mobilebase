@@ -144,8 +144,18 @@ def generate_launch_description():
         output='screen'
     )
 
+    camera = launch_ros.actions.Node(
+        package='opencv_detector',
+        executable='camera',
+        #name='golfball_publisher',
+        output='screen'
+    )
+
+    
+
     return LaunchDescription(declare_configurable_parameters(configurable_parameters) + [
         OpaqueFunction(function=launch_setup),
-        aruco_detector,
-        golfball_detector,
+        #aruco_detector,
+        #golfball_detector,
+        camera,
     ])
