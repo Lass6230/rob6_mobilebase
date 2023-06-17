@@ -258,10 +258,16 @@ class MainProgram : public rclcpp::Node
 
         
             //quat_trolly[0].setRPY(0.0, 0.0, 0.0);
-            test_pose0.pose.position.x = 0.01;
-            test_pose0.pose.position.y = 0.0;
-            test_pose0.pose.orientation.z = 0.0;
-            test_pose0.pose.orientation.w = 1.0;
+            // test_pose0.pose.position.x = 0.01;
+            // test_pose0.pose.position.y = 0.0;
+            // test_pose0.pose.orientation.z = 0.0;
+            // test_pose0.pose.orientation.w = 1.0;
+
+
+            test_pose0.pose.position.x = 5.2697;
+            test_pose0.pose.position.y = 0.02;
+            test_pose0.pose.orientation.z = 1.0;
+            test_pose0.pose.orientation.w = 0.002;
 
             //quat_trolly[1].setRPY(0.0, 0.0, 1.5708);
             test_pose1.pose.position.x = 2.0;
