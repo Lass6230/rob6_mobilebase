@@ -137,32 +137,30 @@ class MainProgram : public rclcpp::Node
             tf2::Quaternion quat_trolly[3];
 
             //lefmost
-            quat_trolly[0].setRPY(0.0, 0.0, 0.0);
-            trolly_pose[0].pose.position.x = 4.944066047668457;
-            trolly_pose[0].pose.position.y = -3.817056179046631;
-            trolly_pose[0].pose.orientation.z = -0.8025089359591148;
-            trolly_pose[0].pose.orientation.w = 0.5966400989757304; //tf2::toMsg(quat_trolly[0]);
+            //quat_trolly[0].setRPY(0.0, 0.0, 0.0);
+            trolly_pose[0].pose.position.x = 1.9;
+            trolly_pose[0].pose.position.y = 0.2;
+            trolly_pose[0].pose.orientation.z = 0.707;
+            trolly_pose[0].pose.orientation.w = 0.707;
 
-            //gobal pose for the wall diretly outside group room in maps/0_04res/map.pgm
+
 
 
 //middle
-            quat_trolly[1].setRPY(0.0, 0.0, 0.0);
-            trolly_pose[1].pose.position.x = 4.800691604614258;
-            trolly_pose[1].pose.position.y = -3.6708920001983643;
-            //trolly_pose[1].pose.orientation = tf2::toMsg(quat_trolly[1]);
-            trolly_pose[1].pose.orientation.z = -0.8393374777152148;
-            trolly_pose[1].pose.orientation.w = 0.5436107049191188;
+            //quat_trolly[1].setRPY(0.0, 0.0, 0.0);
+            trolly_pose[1].pose.position.x = 2.0;
+            trolly_pose[1].pose.position.y = 0.2;
+            trolly_pose[1].pose.orientation.z = 0.707;
+            trolly_pose[1].pose.orientation.w = 0.707;
 
 
 
 //right
-            quat_trolly[2].setRPY(0.0, 0.0, 0.0);
-            trolly_pose[2].pose.position.x = 4.596542835235596;
-            trolly_pose[2].pose.position.y = -3.7831780910491943;
-            //trolly_pose[2].pose.orientation = tf2::toMsg(quat_trolly[2]);
-            trolly_pose[2].pose.orientation.z = -0.7448676148565601;
-            trolly_pose[2].pose.orientation.w = 0.6672122873103427;
+            //quat_trolly[2].setRPY(0.0, 0.0, 0.0);
+            trolly_pose[2].pose.position.x = 2.1;
+            trolly_pose[2].pose.position.y = 0.2;
+            trolly_pose[2].pose.orientation.z = 0.707;
+            trolly_pose[2].pose.orientation.w = 0.707;
 
 
             
