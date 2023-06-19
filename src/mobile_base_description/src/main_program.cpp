@@ -2439,7 +2439,7 @@ class MainProgram : public rclcpp::Node
                 //robot_msg.cmd = 3;
                 //robot_msg.pose = {0.34,0.0,0.168,0.0,1.45,0.0};
                 //pub_robot_->publish(robot_msg);
-                //m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+                m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
 
                 sfc = 7020;
                 
@@ -2554,11 +2554,35 @@ class MainProgram : public rclcpp::Node
                 RCLCPP_INFO(this->get_logger(), "Publishing: '%i'", status_linefollow);
                 if (status_linefollow == 90){ // vent på at robotten mister linjen
                     status_linefollow = 0;
-                    // sfc = 8040;
+                    m_lastTime1 = m_clock->now().seconds(); // start timer for timeout
+                    sfc = 8021;
+                }
+                break;
+
+    
+            
+            case 8021:
+                m_lastTime2 = m_clock->now().seconds(); // get time now
+                if((m_lastTime2-m_lastTime1) >5.0){ // if timeout 
+                    RCLCPP_INFO(this->get_logger(), "timed out");
                     linefollow_msg.data = 0; // Start line following hvor den forsætter efter den mister linje
                     pub_linefollow_->publish(linefollow_msg);
-                    sfc = 7030;
+                    
+                    sfc = 8022; // go back and resend the robot cmd
+                }
+                break;  
 
+
+            case 8022: // ved ikke om armen er ned på dette tidspunkt har efterladt denne case i det tilfælde
+
+                pub_mobile_->publish(test_pose0);
+                sfc = 8023;
+                break;
+            
+            case 8023:
+                if(status_mobile == 1){
+                    status_mobile = 0;
+                    //sfc = 9020;
                 }
                 break;
             

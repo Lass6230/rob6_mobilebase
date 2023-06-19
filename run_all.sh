@@ -11,7 +11,7 @@ sleep 10
 
 ros2 launch sick_safetyscanners2 sick_safetyscanners2_launch.py &
 
-ros2 launch mobile_base_description headless_navigation_launch.py slam:=True &
+ros2 launch mobile_base_description headless_navigation_launch.py &
 
 ros2 launch opencv_detector rs_launch.py &
 
