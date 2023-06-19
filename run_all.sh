@@ -17,8 +17,8 @@ ros2 launch opencv_detector rs_launch.py &
 
 ros2 launch crust_arm_moveit_config real_base_gripper.launch.py headless:=true &
 
-sleep 35
-ros2 run mobile_base_description main_program &
+# sleep 35
+# ros2 run mobile_base_description main_program &
 
 
 

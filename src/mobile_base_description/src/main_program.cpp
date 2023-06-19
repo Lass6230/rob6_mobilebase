@@ -493,7 +493,7 @@ class MainProgram : public rclcpp::Node
                     RCLCPP_INFO(this->get_logger(),"timed out");
                     linefollow_msg.data = 0;
                     pub_linefollow_->publish(linefollow_msg);
-                    sfc = 2064;
+                    sfc = 2061;
                 }
                 break;
             
